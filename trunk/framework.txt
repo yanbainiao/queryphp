@@ -83,3 +83,13 @@ $beian->colupdate('tplid');
 
 生成模型后可以马上可以使用
 print_r($booktype=M("booktype")->getAll());
+
+
+更新J()跳函数
+可以支持各个路由之间跳转和传递参数
+参数为array
+J("show") 为转到本路由方法show
+J("show",array("id"=>555)) 为转到本路由方法show 并传递参数ID过去
+J(R("member"),"list") 将跳转到member路由上面并调用list方法 如果没有list那么默认为index方法，具体框架中设置的默认方法。
+J("member")
+J("member","list",array("userid"=>999))
