@@ -11,10 +11,12 @@ class defaultRouter extends controller{
 	print_r($booktype->data);
 	echo $booktype->classname;
 	*/
-	J($this,"saybye");
+	J("saybye",array("bbee"=>6666,"ccdd"=>888));
   }
   function saybye()
   {
+	$a=func_get_args();
+	print_r($a);
     echo "bye";
 	//$supply=M("supply");
 	//print_r($supply->getAll());

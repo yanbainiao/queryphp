@@ -93,10 +93,39 @@ function INI($name)
   return $config[$name];
 }
 //J路由跳转
-function J($m,$a)
+function J()
 {
-   $m->render($a);
-   $m->$a();
+   $arg = func_get_args();
+   if(is_object($arg[0]))
+	{
+	  $controller=get_class($arg[0]);
+	  $controller=substr($controller,0,-6);
+	  C("router")->controller=$controller;	  
+	  if($arg[1]=='') $arg[1]=ROUTER_DEFAULT_ACTION;      
+	  C("router")->action=$arg[1];
+	  array_shift($arg);
+	  array_shift($arg);
+	}else if(is_string($arg[0]))
+	{
+	  if($arg[1]=='')
+	  {
+	    C("router")->action=$arg[0];
+		array_shift($arg);
+	  }else if(is_array($arg[1])){
+	    C("router")->action=$arg[0];
+		array_shift($arg);
+	  }else{
+		C("router")->controller=$arg[0];
+	    C("router")->action=$arg[1];
+		array_shift($arg);
+		array_shift($arg);
+	  }
+	}
+	$router=R(C("router")->controller);
+	if(method_exists($router,C("router")->action)) {
+		$router->render(C("router")->action);
+		call_user_func(array($router,C("router")->action),$arg);
+	}
 }
 //C创建类
 function C($class=null)
