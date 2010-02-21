@@ -9,6 +9,6 @@ $view=C("view");
 $router=R($dispaths->controller);
 if (method_exists($router,$dispaths->action)) {
      call_user_func(array($router,$dispaths->action));
-	 $view->display($router->view($dispaths->action));
+	 $view->display(R($dispaths->controller)->view($dispaths->action));
 }
 ?>
