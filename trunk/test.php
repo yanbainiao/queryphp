@@ -15,6 +15,7 @@ $booktype=M("booktype");
 echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
 print_r($booktype->data);
 echo $booktype->classname;
+$booktype->User->name;
 //$booktype->save();
 //$beian->userid=2;
 //$beian->language=1;
@@ -28,4 +29,5 @@ echo $booktype->classname;
 //initModelclass(FIX."confweb");
 //echo $beian->confid;
 //$beian->colupdate('tplid');
+
 ?>

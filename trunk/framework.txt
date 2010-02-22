@@ -93,3 +93,19 @@ J("show",array("id"=>555)) 为转到本路由方法show 并传递参数ID过去
 J(R("member"),"list") 将跳转到member路由上面并调用list方法 如果没有list那么默认为index方法，具体框架中设置的默认方法。
 J("member")
 J("member","list",array("userid"=>999))
+
+
+hasOne hasMany ManyhasMany ORM(Object-Relational Mapper) 对象关系影射有三种可以在"map"=>"hasOne"这里更改
+<?php 
+class supplyModel extends supplyBase{ 
+  var $mapper=array("Books"=>array("map"=>"hasOne","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
+  var $maps;
+}
+
+	$supply=M("supply");
+	$supply->get(3,4)->up();
+	echo ($supply->Books->classname);//自动取得Books中内容
+	print_r($supply->record);	
+        echo $supply->Books->Supply->title; //反过来取supply中的内容
+        print_r(M("booktype")->record);	//booktype中已有对像关系了
+?>

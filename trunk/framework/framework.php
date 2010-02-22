@@ -1,6 +1,6 @@
 <?php
 include("model.php");
-include("model.function.php");
+include("function.php");
 include("router.php");
 include("view.php");
 $config["rootpath"]=dirname(__FILE__)."/";

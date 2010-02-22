@@ -1,7 +1,6 @@
 <?php 
  class supplyBase extends model{ 
- 
- var $tablename='supply';
+   var $tablename='supply';
  var $PRI='supplyid';
  var $autoid=true;
  var $fields=array (
@@ -53,5 +52,6 @@
   'press' => 'varchar(120)',
   'adddate' => 'date',
   'content' => 'text',
-);} 
- ?>
+);
+}
+?>

@@ -5,8 +5,9 @@ class defaultRouter extends controller{
     echo "hello world!";
 	$this->assign("ssss","aa");
 	$this->hhh="88";
-	/*
+	
 	$booktype=M("booktype");
+	/*
 	echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
 	print_r($booktype->data);
 	echo $booktype->classname;
@@ -18,8 +19,12 @@ class defaultRouter extends controller{
 	$a=func_get_args();
 	print_r($a);
     echo "bye";
-	//$supply=M("supply");
-	//print_r($supply->getAll());
+	$supply=M("supply");
+	$supply->get(3,4)->up();
+	$supply->getDataBaseName();
+
+	echo "===".$supply->Books->Supply->title;
+	print_r(M("booktype")->record);	
   }
 }
 ?>
