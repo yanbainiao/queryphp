@@ -120,3 +120,11 @@ M("booktype")->orderby("desc");
 M("booktype")->groupby("username");
 M("booktype")->limit(10)
 M("booktype")->limit(10,20);
+
+取得行总数
+M("booktype")->Totalnum();
+M("booktype")->where('name',5555)->Totalnum();
+
+更新clicknum字段++数量
+M("booktype")->colupdate("clicknum");
+M("booktype")->where('name',5555)->colupdate("clicknum");
