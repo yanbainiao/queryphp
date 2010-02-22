@@ -20,11 +20,18 @@ class defaultRouter extends controller{
 	print_r($a);
     echo "bye";
 	$supply=M("supply");
-	$supply->get(3,4)->up();
-	$supply->getDataBaseName();
+	$supply->get(3,4);
+	//print_r($supply->record);
+	//echo $supply->title;
+	$supply->up();
+	print_r($supply->getData());
+	$supply->up();
+	print_r($supply->getData());
 
+	$supply->getDataBaseName();
+    
 	echo "===".$supply->Books->Supply->title;
-	print_r(M("booktype")->record);	
+	//print_r(M("booktype")->record);	
   }
 }
 ?>

@@ -101,17 +101,51 @@ class supplyModel extends supplyBase{
   var $mapper=array("Books"=>array("map"=>"hasOne","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
   var $maps;
 }
+?>
 
+index.php/default/index 
+<?php
+class defaultRouter extends controller{
+  function index()
+  {
+    echo "hello world!";
+	$this->assign("ssss","aa");
+	$this->hhh="88";
+	
+	$booktype=M("booktype");
+	/*
+	echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
+	print_r($booktype->data);
+	echo $booktype->classname;
+	*/
+	J("saybye",array("bbee"=>6666,"ccdd"=>888));
+  }
+  function saybye()
+  {
+	$a=func_get_args();
+	print_r($a);
+    echo "bye";
 	$supply=M("supply");
 	$supply->get(3,4)->up();
-	echo ($supply->Books->classname);//自动取得Books中内容
-	print_r($supply->record);	
-        echo $supply->Books->Supply->title; //反过来取supply中的内容
-        print_r(M("booktype")->record);	//booktype中已有对像关系了
+	$supply->getDataBaseName();
+
+	echo "===".$supply->Books->Supply->title;
+	print_r(M("booktype")->record);	
+  }
+}
 ?>
+
+$supply=M("supply");
+$supply->get(3,4)->up();
+echo ($supply->Books->classname);//自动取得Books中内容
+print_r($supply->record);	
+echo $supply->Books->Supply->title; //反过来取supply中的内容
+print_r(M("booktype")->record);	//booktype中已有对像关系了
 
 其它使用方法
 可以使用
+
+
 M("booktype")->where('name',5555);
 M("booktype")->whereAnd('name',88);
 M("booktype")->whereUserAndLanguage('myname','8');
@@ -126,5 +160,21 @@ M("booktype")->Totalnum();
 M("booktype")->where('name',5555)->Totalnum();
 
 更新clicknum字段++数量
-M("booktype")->colupdate("clicknum");
+M("booktype")->colupdate("clicknum");//UPDATE table set clicknum=clicknum+1(num) where pkid=M("booktype")->pkik
 M("booktype")->where('name',5555)->colupdate("clicknum");
+
+$books->where("userid>1")->whereAnd("language <5")->fetch();
+print_r($books->record); 
+
+<form>
+<input name="name" id="name" />
+<input name="sex" id="sex" />
+<input name="age" id="age" />
+......
+</form>
+
+自动处理post方法
+提交后处理
+$form=M("表名或模型名")->autoField('name','sex','age')->save();
+或处理后数组传入
+$form=M("表名或模型名")->autoField($insertArray,'name','sex','age')->save(); 
