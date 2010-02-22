@@ -97,6 +97,13 @@ class Model
 	  }
 	  return $this->maps[$mapper]=M($this->mapper[$name]['TargetModel']);
 	}else{ 
+	  if(count($this->record)>0)
+	  {
+		$this->objpoint=0;
+	    $this->up(0);
+        if(isset($this->data[strtolower($name)]))
+			return $this->data[strtolower($name)];
+	  }
 	  return null;
 	}
   }
@@ -383,6 +390,14 @@ class Model
      $this->sql['where']=" where ".$name." like ('".$value."')";
 	else
 	 $this->sql['where'].=" and ".$name." like ('".$value."')";
+	return $this;
+  }
+  function whereOr($name,$value='')
+  {
+    if($this->sql['where']=='') $this->sql['where']=" where ";
+	else $this->sql['where'].=" OR ";
+	if($value!='') $this->sql['where'].=$name."='".$value."'";
+	else $this->sql['where'].=$name;
 	return $this;
   }
   function whereAnd($name,$value='')
