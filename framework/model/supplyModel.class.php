@@ -1,5 +1,6 @@
 <?php 
- class supplyModel extends supplyBase{ 
-  
- } 
- ?>
+class supplyModel extends supplyBase{ 
+  var $mapper=array("Books"=>array("map"=>"ManyhasMany","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
+  var $maps;
+} 
+?>

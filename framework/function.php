@@ -189,7 +189,7 @@ function initModelclass($modelname)
 	   $newmodelstr="<?php \n class ".$modelname."Base extends model{ \n ";
 	   $fields=array();
        $types=array();
-	   $newmodelstr.="\n var \$tablename='".$modelname."';";
+	   $newmodelstr.="  var \$tablename='".$modelname."';";
 	   foreach($mate as $key=>$value)
 	   {
 		  $value['Field']=strtolower($value['Field']);
@@ -208,7 +208,7 @@ function initModelclass($modelname)
 	   }
 	   $newmodelstr.="\n var \$fields=".var_export($fields,true).";";
 	   $newmodelstr.="\n var \$types=".var_export($types,true).";";
-	   $newmodelstr.="} \n ?>";
+	   $newmodelstr.="\n}\n?>";
 	 }
 	 file_put_contents(dirname(__FILE__)."/model/".$modelname.'Base.class.php',$newmodelstr);
 }
@@ -220,8 +220,10 @@ function __autoload($class_name) {
 		{
 		   require_once dirname(__FILE__)."/model/".$class_name.".class.php";
 		}else{		   
-           $newmodelstr="<?php \n class ".$newc."Model extends ".$newc."Base{ \n ";
-           $newmodelstr.=" \n } \n ?>";
+           $newmodelstr="<?php \nclass ".$newc."Model extends ".$newc."Base{ \n ";
+		   $newmodelstr.=" var \$mapper=array();\n";
+		   $newmodelstr.=" var \$maps;";
+           $newmodelstr.=" \n} \n?>";
 		   file_put_contents(dirname(__FILE__)."/model/".$newc.'Model.class.php',$newmodelstr);
 		   require_once dirname(__FILE__)."/model/".$newc.'Model.class.php';
 		}

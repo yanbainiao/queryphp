@@ -15,8 +15,11 @@ class Model
    var $record=array();
    var $conn=0;
    var $objpoint=0;
+   var $modelname;
+   var $databasename;
    function __construct() {
-	   $this->DB=getConnect($this->tablename,substr(get_class($this),0,-5),$this->conn);
+	   $this->modelname=substr(get_class($this),0,-5);
+	   $this->DB=getConnect($this->tablename,$this->modelname,$this->conn);
 	   if(is_array($this->DB))
 	   {
 	     
@@ -88,8 +91,14 @@ class Model
     if(isset($this->data[strtolower($name)]))
 	{
 	  return $this->data[strtolower($name)];
-	}else 
+	}elseif(isset($this->mapper[$name])){	  
+	  if(method_exists($this,$this->mapper[$name]['map'])) {
+		call_user_func(array($this,$this->mapper[$name]['map']),$name);
+	  }
+	  return $this->maps[$mapper]=M($this->mapper[$name]['TargetModel']);
+	}else{ 
 	  return null;
+	}
   }
 
   function __set($name,$value)
@@ -316,17 +325,26 @@ class Model
     $this->sql['fields'].=$name;
 	return $this;
   }
-  function from($name)
+  function from($name='')
   {
-    $this->sql['from']=$this->tablename.",".$name;
+    if($name==''){ 
+	   $this->sql['from']=$this->tablename;
+	}else{		
+		if(M($name)->tablename!=$this->tablename)
+		{	      
+		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename.",".M($name)->getDataBaseName().".".M($name)->tablename;
+		}else
+		  $this->sql['from']=$this->tablename;
+	}
 	return $this;
   }
   function leftjoin($name,$one=null)
   {
 	if($one==null)
-     $this->sql['from']=$this->tablename." leftjoin ".$name;
-	else{
-	 $this->sql['from'].=" leftjoin ".$name;
+	{
+     $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
+	}else{
+	 $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}
 	return $this;
   }
@@ -345,9 +363,10 @@ class Model
     $this->sql['groupby']=" group by ".$name;
 	return $this;
   }
-  function where($name)
+  function where($name,$value='')
   {
-	$this->sql['where']=" where ".$name;
+	if($value!='') $this->sql['where']=" where ".$name."='".$value."'";
+	else $this->sql['where']=" where ".$name;
 	return $this;
   }
   function whereIn($name,$value)
@@ -358,9 +377,20 @@ class Model
 	 $this->sql['where'].=" and ".$name." IN (".$value.")";
 	return $this;
   }
-  function whereAnd($name)
+  function whereLike($name,$value)
   {
-    $this->sql['where'].=" and ".$name;
+	if($this->sql['where']=='')
+     $this->sql['where']=" where ".$name." like ('".$value."')";
+	else
+	 $this->sql['where'].=" and ".$name." like ('".$value."')";
+	return $this;
+  }
+  function whereAnd($name,$value='')
+  {
+    if($this->sql['where']=='') $this->sql['where']=" where ";
+	else $this->sql['where'].=" and ";
+	if($value!='') $this->sql['where'].=$name."='".$value."'";
+	else $this->sql['where'].=$name;
 	return $this;
   }
   function limit($start,$end=null)
@@ -536,10 +566,153 @@ class Model
            echo $e->getMessage();
         }    
   }
+  function getDataBaseName()
+  {
+	  if($this->databasename) return $this->databasename;
+	  $this->string="SELECT DATABASE() AS name";
+	  $res=$this->DB['slaves']->query($this->string);
+      $database=$res->fetch(PDO::FETCH_ASSOC);  
+	  $this->databasename=$database['name'];
+	  return $database['name'];
+  }
+  function getTableName()
+  {
+     return $this->tablename;
+  }
+  function mapsFileds()
+  {
+     $numargs = func_num_args();
+	 $fileds=func_get_args();
+	 $selectfiled='';
+	 for ($i = 0; $i < $numargs; $i++) {
+        $selectfiled.=$this->modelname.".".$fileds[$i]." as".$this->modelname.$fileds[$i]. ",";
+     }
+	 if($selectfiled!='')
+	   $selectfiled=substr($selectfiled, 0, -1);
+	 else
+	   $selectfiled=$this->modelname.".*";
+	 $this->sql['mapsfiled']=$selectfiled;
+	 return $this;
+  }
+  /*
+  *数据关联$m->Books->bookname;
+  *多对多
+  */
+  function ManyhasMany($mapper,$relation=array())
+  {
+	 $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
+	 if(count($relation)>0)
+	  {
+	    $fileds=implode(",",$relation);		
+	  }
+     if(is_array($this->record)&&isset($this->record[0]))
+	 { 
+		 $n=count($this->record);
+		 for($i=0;$i<$n;$i++)
+		 {
+			 $this->maps[$mapper]->select($fileds);
+			 $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$i][$this->mapper[$mapper]['localFiled']]."'");
+				try{
+					$this->maps[$mapper]->fetch();	
+					$this->maps[$mapper]->up();
+					$this->sql=array();
+					$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+				}catch (PDOException $e) 
+					{
+					   echo $e->getMessage();
+					}
+		 }
+	 }elseif(is_array($this->record))
+	 {
+	    $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$this->mapper[$mapper]['localFiled']]."'");
+				try{
+					$this->maps[$mapper]->fetch();	
+					$this->maps[$mapper]->up();
+					$this->sql=array();
+					$this->record[$mapper]=$this->maps[$mapper]->record; 
+				}catch (PDOException $e) 
+					{
+					   echo $e->getMessage();
+					}
+	 }
+	 return $this;
+  }
+  /*
+  *数据关联$m->Books->bookname;
+  *一对多
+  */
+  function hasMany($mapper,$relation=array())
+  {
+	 $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
+	 if(count($relation)>0)
+	 {
+	    $fileds=implode(",",$relation);
+		$this->maps[$mapper]->select($fileds);
+	 }
+     $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'");
+		try{
+			$this->maps[$mapper]->fetch();	
+			$this->maps[$mapper]->up();
+			$this->sql=array();
+			if(is_array($this->record)&&isset($this->record[0]))
+			{
+			  $n=count($this->record);
+			  for($i=0;$i<$n;$i++)
+			  {
+			   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+			  }
+			}elseif(is_array($this->record)){
+			  $this->record[$mapper]=$this->maps[$mapper]->record;
+			}
+			return $this;
+		}catch (PDOException $e) 
+			{
+			   echo $e->getMessage();
+			}
+  }
+  /*
+  *数据关联$m->Books->bookname;
+  *一对一
+  */
+  function hasOne($mapper,$relation=array())
+  {
+	  $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
+	  if(count($relation)>0)
+	  {
+	    $fileds=implode(",",$relation);
+		$this->maps[$mapper]->select($fileds);
+	  }
+     $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'")->limit(1);
+		try{
+			$this->maps[$mapper]->fetch();	
+			$this->maps[$mapper]->up();
+			$this->sql=array();
+			if(is_array($this->record)&&isset($this->record[0]))
+			{
+			  $n=count($this->record);
+			  for($i=0;$i<$n;$i++)
+			  {
+			   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+			  }
+			}elseif(is_array($this->record)){
+			  $this->record[$mapper]=$this->maps[$mapper]->record;
+			}
+			return $this;
+		}catch (PDOException $e) 
+			{
+			   echo $e->getMessage();
+			}
+  }
   function __call($name,$Args)
   {
 	if($name=='get') return $this->getArray($Args);
 	if($name=='getAll') return $this->getAllArray($Args);
+	if(isset($this->mapper[$name])){	  
+	  if(method_exists($this,$this->mapper[$name]['map'])) {
+		call_user_func(array($this,$this->mapper[$name]['map']),$name,$Args);
+	  }
+	  return $this->maps[$mapper]=M($this->mapper[$name]['TargetModel']);
+	}
 	if(strtolower(substr($name,0,3))=='set')
 	{
 	  $str=substr($name,3);
