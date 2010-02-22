@@ -432,6 +432,22 @@ class Model
         }
 	return 0;
   }
+  function getData($obj='')
+  {
+	if(count($this->data)>0)
+	{
+	   if($obj='Object') return new ArrayObject($this->data);
+       else return $this->data;
+	}
+	$this->up(0);
+	if(count($this->data)>0)
+	{
+	  if($obj='Object') return new ArrayObject($this->data);
+       else return $this->data;
+	}else{
+	  return $this;
+	}
+  }
   function setData($caseArray)
   {
 	if(is_array($caseArray))
