@@ -519,8 +519,48 @@ class Model
 	  }
 	}
   }
+  /*
+  *重新把指针设置为record开头
+  */
+  function reset()
+  {
+     $this->objpoint=0;
+	 $this->recordend=false;
+	 unset($this->recordend);
+	 return $this;
+  }
+  function next()
+  {
+    if(count($this->record)>=$this->objpoint){
+	  $this->objpoint=count($this->record);
+	  return $this;
+	}else{
+	  $this->objpoint++;
+	  return $this;
+	}
+  }
+  function isEmpty()
+  {
+    if(count($this->record)==0) return true;
+  }
+  /*
+  *判断是否up完record数组
+  */
+  function isEnd()
+  {
+	 if(count($this->record)==$this->objpoint){
+	   $this->recordend=true;
+	   return true;
+	 }else{
+	   return false;
+	 }
+  }
   function up($id=null)
   {
+	if($this->recordend==true){
+	  unset($this->data);
+	  return $this;
+	}
     if(is_array($this->record))
 	{
 	  if($id!=null) $this->objpoint=$id;
@@ -544,7 +584,6 @@ class Model
 		  }
 		}
 	  }
-     $this->objpoint++;
 	}else if(is_object($this->record)){
 		$temp=get_object_vars($this->record);
 	    foreach($temp as $k=>$v)
