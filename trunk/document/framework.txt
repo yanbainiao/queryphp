@@ -109,3 +109,14 @@ class supplyModel extends supplyBase{
         echo $supply->Books->Supply->title; //反过来取supply中的内容
         print_r(M("booktype")->record);	//booktype中已有对像关系了
 ?>
+
+其它使用方法
+可以使用
+M("booktype")->where('name',5555);
+M("booktype")->whereAnd('name',88);
+M("booktype")->whereUserAndLanguage('myname','8');
+M("booktype")->orderby("id desc");
+M("booktype")->orderby("desc");
+M("booktype")->groupby("username");
+M("booktype")->limit(10)
+M("booktype")->limit(10,20);
