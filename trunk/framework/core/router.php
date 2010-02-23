@@ -1,7 +1,4 @@
 <?php
-define('ROUTER_DEFAULT_CONTROLLER', 'default');
-define('ROUTER_DEFAULT_ACTION', 'index');
- 
 class Router {
   public $request_uri;
   public $routes;
@@ -10,16 +7,20 @@ class Router {
   public $params;
   public $route_found = false;
   public $rules=array();
- 
+  public $urlcontroller;
   public function __construct() {
 	self::getPathInfo();
     $this->request_uri = $_SERVER['PATH_INFO'];
     $this->routes = array();
+	//if(file_exists($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php"))
+	//{
+	//  $this->rules=include($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php"); 
+	//}
   }
  
-  public function map($rule, $target=array(), $conditions=array()) {
-    $this->routes[$rule] = new Route($rule, $this->request_uri, $target, $conditions);
-	if($this->routes[$rule]->is_matched) $this->set_route($this->routes[$rule]);
+  public function map($controller,$rule, $target=array(), $conditions=array()) {
+    $this->routes[$controller] = new Route($rule, $this->request_uri, $target, $conditions);
+	if($this->routes[$controller]->is_matched) $this->set_route($this->routes[$controller]);
 	return $this;
   }
   public function RuleCheck($controller)
@@ -31,25 +32,31 @@ class Router {
 	 $paths = explode("/",trim($_SERVER['PATH_INFO'],'/'));
      $controller=array_shift($paths);
      if(!empty($controller)){
+	   $this->urlcontroller=$controller;
 	   $rule=$this->RuleCheck($controller);	   
 	 }else{
-	   if(isset($_GET['controller']))
+	   if(isset($_GET['router']))
 	   {
-		 $controller=$_GET['controller'];
-	     $this->controller =$_GET['controller']; 
-		 unset($_GET['controller']);		 
+		 $controller=$_GET['router'];
+	     $this->controller =$_GET['router']; 
+		 unset($_GET['router']);		 
+		 $this->urlcontroller=$controller;
 	   }
 	   if(isset($_GET['action']))
 	   {
 	     $this->action =$_GET['action']; 
 		 unset($_GET['action']);
 	   }else{
-	     $this->action = ROUTER_DEFAULT_ACTION;
+	     $this->action = $GLOBALS['config']['defaultindex'];
 	   }
 	 }
+	//if($GLOBALS['projectenv']=='product'&&!file_exists($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php"))
+	//{
+	 // $this->cacheruleMaps();
+	//}
 	 if($rule){
-	     $this->map($rule['rule'],$rule['target'],$rule['conditions']);
-		 if(!$this->routes[$rule]->is_matched){
+	     $this->map($controller,$rule['rule'],$rule['target'],$rule['conditions']);
+		 if(!$this->routes[$controller]->is_matched){
 			 $this->controller=$controller;
 		     $this->action=array_shift($paths);
 		 }else{
@@ -58,8 +65,8 @@ class Router {
 	 }else{
 		 if(empty($controller))
 		 {
-			 $this->controller = ROUTER_DEFAULT_CONTROLLER;
-			 $this->action = ROUTER_DEFAULT_ACTION;
+			 $this->controller = $GLOBALS['config']['defaultrouter'];
+			 $this->action = $GLOBALS['config']['defaultindex'];
 			 $this->id = null;	   
 		 }else{
 		   	 $this->controller=$controller;
@@ -73,7 +80,14 @@ class Router {
   }
   public function setMaps($rules)
   {
-    $this->rules=$rules;
+	   if(is_array($this->rules)&&is_array($rules)) {
+            $this->rules  =  array_merge($this->rules,$rules);
+        }elseif(is_object($rules)){
+            foreach($rules as $key =>$val)
+                $this->rules[$key] = $val;
+        }elseif(is_array($rules)){
+            $this->rules=$rules;
+        }
 	return $this;	
   }
   public function ruleMaps($rulename,$rule=null, $target=array(), $conditions=array())
@@ -89,9 +103,22 @@ class Router {
 	}else{
 	  $this->rules[$rulename]=array("rule"=>$rule,
 		                            "target"=>$target,
-		                            "conditions"=>$conditions=array());
+		                            "conditions"=>$conditions);
 	}
 	return $this;
+  }
+  public function clearruleMaps()
+  {
+	if(!file_exists($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php"))
+	{
+	  @unlink($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php");
+	}
+	 return $this;
+  }
+  public function cacheruleMaps()
+  {
+	 file_put_contents($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php","<?php return ".var_export($this->rules,TRUE)."; ?>");
+	 return $this;
   }
   private function set_route($route) {
     $this->route_found = true;
@@ -111,8 +138,8 @@ class Router {
 	} 
     $this->params = array_merge($params, $_GET);
     $_GET=$this->params;
-    if (empty($this->controller)) $this->controller = ROUTER_DEFAULT_CONTROLLER;
-    if (empty($this->action)) $this->action = ROUTER_DEFAULT_ACTION;
+    if (empty($this->controller)) $this->controller = $GLOBALS['config']['defaultrouter'];
+    if (empty($this->action)) $this->action = $GLOBALS['config']['defaultindex'];
     if (empty($this->id)) $this->id = null;
  
     $w = explode('_', $this->controller);

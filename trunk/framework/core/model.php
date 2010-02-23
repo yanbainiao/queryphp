@@ -106,14 +106,16 @@ class Model
 	  }
 	  return null;
 	}
-  }
-
+  } 
   function __set($name,$value)
   {
     if(isset($this->types[strtolower($name)]))
 	{
 	  return $this->data[strtolower($name)]=$value;
-	}else{
+	}elseif(isset($this->mapper[$name])){
+		$this->promaparray($name,$value);
+		return $this;
+	 }else{
 	  return null;
 	}
   }
@@ -221,25 +223,72 @@ class Model
            echo $e->getMessage();
         }
   }
-
+  function pkidv()
+  {
+    if(strtolower(substr($this->types[$this->PRI],0,3))=='int')
+	{
+	   return intval($this->data[$this->PRI]);
+	}
+  }
   function save($id=null)
   {
 	 $pkey='';
-	 if(is_numeric($this->data[$this->PRI]))
+	 $mapper='';
+	 $saveafter=false;
+	 if($id=='add'||$id=='new')
 	 {
-	   $pkey=$this->PRI."='".intval($this->data[$this->PRI])."'";
-	   unset($this->data[$this->PRI]);
+	   //处理不是自动增长，但是唯一的字段
 	 }else if(is_numeric($id))
 	 {
 	   $pkey=$this->PRI."='".intval($id)."'";
-	   unset($this->data[$this->PRI]);	   
+	   unset($this->data[$this->PRI]);	
 	 }else if($id=='all')
 	 {
 	    $pkey='1';
 		unset($this->data[$this->PRI]);
+	 }elseif(is_array($id)){
+	    $this->setData($id);
+		if(isset($this->data[$this->PRI])) $pkey=$this->PRI."='".$this->pkidv()."'";
+	 }elseif(is_object($id)){
+		 if($id->modelname!=$this->modelname&&count($this->mapper)>0)
+	     {
+			foreach($this->mapper as $k=>$v)
+			{
+			  if($id->modelname==$v['TargetModel'])
+			  {
+			    $mapper=$k;
+				$this->maps[$mapper]=M($v['TargetModel']);
+				if(isset($this->data[$v['localFiled']])&&$this->data[$v['localFiled']]!='')
+				{
+				   M($v['TargetModel'])->$v['targetFiled']=$this->data[$v['localFiled']];
+				   $saveafter=true;
+				}
+				if(isset($v['localFiled2'])&&isset($this->data[$v['localFiled2']])&&$this->data[$v['localFiled2']]!='')
+				{
+				   M($v['TargetModel'])->$v['targetFiled2']=$this->data[$v['localFiled2']];		
+				   $saveafter=true;
+				}
+				if(isset($v['localFiled3'])&&isset($this->data[$v['localFiled3']])&&$this->data[$v['localFiled3']]!='')
+				{
+				   M($v['TargetModel'])->$v['targetFiled3']=$this->data[$v['localFiled3']];
+				   $saveafter=true;
+				}
+				if($saveafter)
+				{
+				  M($v['TargetModel'])->save();
+				}
+			    break;
+			  }
+			}
+	     }
+	 }elseif(is_numeric($this->data[$this->PRI]))
+	 {
+	   $pkey=$this->PRI."='".$this->pkidv()."'";
+	   //unset($this->data[$this->PRI]);
 	 }
 	 if($pkey=='')
 	  {
+		//如果是自动增长，那么不用赋值，但要更改id使用update就可以了
 	    if($this->autoid) unset($this->data[$this->PRI]);
         
 		foreach($this->fields as $k=>$v)
@@ -315,6 +364,65 @@ class Model
 			$this->string.=" where ".$pkey;
 			$this->sql=array();
 			$this->effactrow=$this->DB['master']->exec($this->string);
+	  }
+
+	  if($mapper!=''&&!$saveafter)
+	  {
+		  $afterkey=array();
+		  if(isset($this->data[$this->mapper[$mapper]['localFiled']])&&$this->data[$this->mapper[$mapper]['localFiled']]!='')
+			{
+			   $t=$this->mapper[$mapper]['targetFiled'];
+			   M($this->mapper[$mapper]['TargetModel'])->{$t}=$this->data[$this->mapper[$mapper]['localFiled']];
+			   $saveafter=true;
+			}elseif(isset($this->data[$this->mapper[$mapper]['localFiled']]))
+		    {
+			  $afterkey[$this->mapper[$mapper]['targetFiled']]=$this->mapper[$mapper]['localFiled'];
+			}
+			if(isset($this->mapper[$mapper]['localFiled2'])&&isset($this->data[$this->mapper[$mapper]['localFiled2']])&&$this->data[$this->mapper[$mapper]['localFiled2']]!='')
+			{
+			   $t=$this->mapper[$mapper]['targetFiled2'];
+			   M($this->mapper[$mapper]['TargetModel'])->{$t}=$this->data[$this->mapper[$mapper]['localFiled2']];		
+			   $saveafter=true;
+			}elseif(isset($this->data[$this->mapper[$mapper]['localFiled2']]))
+		    {
+			  $afterkey[$this->mapper[$mapper]['targetFiled2']]=$this->mapper[$mapper]['localFiled2'];
+			}
+			if(isset($this->mapper[$mapper]['localFiled3'])&&isset($this->data[$this->mapper[$mapper]['localFiled3']])&&$this->data[$this->mapper[$mapper]['localFiled3']]!='')
+			{
+			   $t=$this->mapper[$mapper]['targetFiled3'];
+			   M($v['TargetModel'])->{$t}=$this->data[$this->mapper[$mapper]['localFiled3']];
+			   $saveafter=true;
+			}elseif(isset($this->data[$this->mapper[$mapper]['localFiled3']]))
+		    {
+			  $afterkey[$this->mapper[$mapper]['targetFiled3']]=$this->mapper[$mapper]['localFiled3'];
+			}		
+		$this->maps[$mapper]->save();
+        if(count($afterkey)>0)
+		{
+		  $i=0;
+		  $data=array();
+		  foreach($afterkey as $k=>$v)
+		  {
+		     if(isset($this->types[$v])&&isset($this->maps[$mapper]->types[$k]))
+			 {
+			  $data[$v]=$this->maps[$mapper]->data[$v];
+			  $i++;
+			 }
+		  }
+		  if($i>0)
+		  {
+		    $this->tdata=$this->data;
+			$this->data=$data;
+			$this->data[$this->PRI]=$this->tdata[$this->PRI];
+			$this->save();
+			$this->data=$this->tdata;
+			unset($this->tdata);
+		  }
+		}
+		 unset($pkey);
+	     unset($mapper);
+	     unset($saveafter);
+		 unset($afterkey);
 	  }
 	  return $this;
   }
@@ -682,6 +790,14 @@ class Model
 		 {
 			 $this->maps[$mapper]->select($fileds);
 			 $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$i][$this->mapper[$mapper]['localFiled']]."'");
+			 if(isset($this->mapper[$mapper]['targetFiled2']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
+			 }
+			 if(isset($this->mapper[$mapper]['targetFiled3']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
+			 }
 				try{
 					$this->maps[$mapper]->fetch();	
 					$this->maps[$mapper]->up();
@@ -695,6 +811,14 @@ class Model
 	 }elseif(is_array($this->record))
 	 {
 	    $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$this->mapper[$mapper]['localFiled']]."'");
+			if(isset($this->mapper[$mapper]['targetFiled2']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
+			 }
+			 if(isset($this->mapper[$mapper]['targetFiled3']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
+			 }
 				try{
 					$this->maps[$mapper]->fetch();	
 					$this->maps[$mapper]->up();
@@ -720,6 +844,14 @@ class Model
 		$this->maps[$mapper]->select($fileds);
 	 }
      $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'");
+			 if(isset($this->mapper[$mapper]['targetFiled2']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
+			 }
+			 if(isset($this->mapper[$mapper]['targetFiled3']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
+			 }
 		try{
 			$this->maps[$mapper]->fetch();	
 			$this->maps[$mapper]->up();
@@ -753,6 +885,15 @@ class Model
 		$this->maps[$mapper]->select($fileds);
 	  }
      $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'")->limit(1);
+	        if(isset($this->mapper[$mapper]['targetFiled2']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
+			 }
+			 if(isset($this->mapper[$mapper]['targetFiled3']))
+			 {
+			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
+			 }
+	 
 		try{
 			$this->maps[$mapper]->fetch();	
 			$this->maps[$mapper]->up();
@@ -772,6 +913,39 @@ class Model
 			{
 			   echo $e->getMessage();
 			}
+  }
+  function getArrayFormField($data='')
+  {
+    if($data=='') $data=$this->data;
+	$t=array();
+	foreach($this->types as $k=>$v)
+	{
+	  if(isset($data[$k])) $t[$k]=$data[$k];
+	}
+	return $t;
+  }
+  /*
+  *处理影像数组
+  */
+  function promaparray($mapper,$maparray)
+  {
+    $mapmodel=$this->mapper[$mapper]['TargetModel'];
+	$mpi=count($this->maparray);
+	if($mpi>0) $mpi=$mpi-1;
+	foreach($maparray as $k=>$v)
+	{
+	  if(isset(M($mapmodel)->types[$k]))
+	  {
+	    $this->maparray[$mpi][$k]=$v;
+	  }elseif(is_array($v))
+	  {
+	    $this->maparray[]=M($mapmodel)->getArrayFormField($v);
+	  }elseif(is_object($v))
+	  {
+	    $this->maparray[]=M($mapmodel)->getArrayFormField(get_object_vars($v));
+	  }
+	}
+	if(count($maparray)>0&&$maparray[])
   }
   function __call($name,$Args)
   {

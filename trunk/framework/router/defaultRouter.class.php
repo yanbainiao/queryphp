@@ -28,10 +28,17 @@ class defaultRouter extends controller{
 	$supply->up();
 	print_r($supply->getData());
 
-	$supply->getDataBaseName();
+	//$supply->getDataBaseName();
     
-	echo "===".$supply->Books->Supply->title;
-	//print_r(M("booktype")->record);	
+	//echo "===".$supply->Books->Supply->title;
+	$supply->get(3,4);
+	$supply->up();//edit 3
+	M("booktype")->classname="星际解霸2";
+
+    $supply->save(M("booktype"));
+    $supply->Books=array("classname"=>"星际解霸4");
+	$supply->save();
+	//print_r(M("booktype")->record);
   }
 }
 ?>

@@ -14,7 +14,7 @@ $time_start = microtime_float();
 /////////////////////////////////////////////////////////////////
 
 $config["webprojectpath"]=dirname(__FILE__)."/";
-$config["webprojectname"]="mysitedomain";
+$config["webprojectname"]=strlen($_SERVER['SCRIPT_FILENAME'])."projectname"; //根据项目来缓存,所以最好一个网站不要一样
 //处理project目录
 $projectdir=array("model","router","view","config","class","lib");
 foreach($projectdir as $k)
@@ -24,7 +24,7 @@ if(!is_dir($k))
   chmod($k,0777);
 }
 
-include("framework/framework.php");
+include("../framework/framework.php");
 
 
 /////////////////////////////////////////////////////////////////
