@@ -219,6 +219,36 @@ inc.ini.php
 	或处理后数组传入
 	$form=M("表名或模型名")->autoField($insertArray,'name','sex','age')->save(); 
 
+
+	$supply=M("supply");
+	$supply->get(3,4);
+	$supply->up();//edit 3
+	//M("booktype")->classname="星际解霸2";
+
+        $supply->copyRecord()->save(M("booktype")); //自动会从$supply中取得关联值赋给M("booktype");
+
+	$supply->Books=array("classname"=>"星际解霸5"); //支持两个表两个主键之间互联
+	print_r($supply->save());                       //支持三个字段关系影射
+
+	//$supply->where($supply->PRI.">12")->delete();
+	//$supply->save();
+	$books=M("booktype");
+	//M("booktype")->where($books->PRI.">12")->delete();
+        $supply->Books=array("classname"=>"星际解霸21");//各种插入数据方式
+	$supply->Books=array("classname"=>"星际解霸22");
+	$supply->Books=array("0"=>array("classname"=>"星际解霸88"),2=>array("classname"=>"星际解霸98"));
+	print_r($supply->data);
+	$supply->copyRecord()->save();
+
+        模型文件配置 可以看到新关联，使用新的sql文件重新创建数据库
+	<?php 
+	class supplyModel extends supplyBase{ 
+	  var $mapper=array("Books"=>array("map"=>"ManyhasMany","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid","localFiled2"=>"bookid","targetFiled2"=>"bookid","localFiled3"=>"supplyid","targetFiled3"=>"supplyid"));
+	  var $maps;
+	  var $maparray=array();
+	} 
+	?>
+
 config/inc.ini.php文件说明
 	在本文件可以设置数据库链接
 	/*
