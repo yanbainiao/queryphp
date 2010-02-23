@@ -95,6 +95,7 @@ class Model
 	  if(method_exists($this,$this->mapper[$name]['map'])) {
 		call_user_func(array($this,$this->mapper[$name]['map']),$name);
 	  }
+	  $this->ismapper=true;
 	  return $this->maps[$mapper]=M($this->mapper[$name]['TargetModel']);
 	}else{ 
 	  if(count($this->record)>0)
@@ -114,6 +115,7 @@ class Model
 	  return $this->data[strtolower($name)]=$value;
 	}elseif(isset($this->mapper[$name])){
 		$this->promaparray($name,$value);
+        $this->ismapper=true;
 		return $this;
 	 }else{
 	  return null;
@@ -296,7 +298,9 @@ class Model
 		  M($mname)->save();
 	   }
 	}
-	$this->maparray=array();
+	$this->maparray=array();//恢复
+	$this->ismapper=false;
+	unset($this->ismapper);
     return $this;	
   }
   function update()
@@ -379,7 +383,7 @@ class Model
 	   else $pkey=$this->PRI."='".$this->pkidv()."'";
 	   //unset($this->data[$this->PRI]);
 	 }
-     if($id==null&&count($this->maparray)>0)
+     if($this->ismapper&&count($this->maparray)>0)
 	 {
 	   if(count($this->maparray)>0) $this->updatemaper();
 	 }
@@ -488,7 +492,7 @@ class Model
 	     unset($saveafter);
 		 unset($afterkey);
 	  }
-	 if($id==null)
+	 if($this->ismapper)
 	 {
       if(count($this->maparray)>0)
 	   {
