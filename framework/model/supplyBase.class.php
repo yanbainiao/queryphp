@@ -6,6 +6,7 @@
  var $fields=array (
   'supplyid' => NULL,
   'typeid' => '',
+  'bookid' => '',
   'userid' => '',
   'total' => '',
   'isview' => 'Y',
@@ -31,6 +32,7 @@
  var $types=array (
   'supplyid' => 'int(8)',
   'typeid' => 'int(6)',
+  'bookid' => 'int(8)',
   'userid' => 'int(8)',
   'total' => 'int(6)',
   'isview' => 'enum(\'Y\',\'N\')',
