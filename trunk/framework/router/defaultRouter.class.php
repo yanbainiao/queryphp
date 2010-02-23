@@ -20,24 +20,36 @@ class defaultRouter extends controller{
 	print_r($a);
     echo "bye";
 	$supply=M("supply");
-	$supply->get(3,4);
+	//$supply->get(3,4);
 	//print_r($supply->record);
 	//echo $supply->title;
-	$supply->up();
-	print_r($supply->getData());
-	$supply->up();
-	print_r($supply->getData());
+	//$supply->up();
+	//print_r($supply->getData());
+	//$supply->up();
+	//print_r($supply->getData());
 
 	//$supply->getDataBaseName();
     
 	//echo "===".$supply->Books->Supply->title;
 	$supply->get(3,4);
 	$supply->up();//edit 3
-	M("booktype")->classname="星际解霸2";
+	//M("booktype")->classname="星际解霸2";
 
-    $supply->save(M("booktype"));
-    $supply->Books=array("classname"=>"星际解霸4");
-	$supply->save();
+    $supply->copyRecord()->save(M("booktype"));
+
+	$supply->Books=array("classname"=>"星际解霸5");
+	print_r($supply->save());
+
+	//$supply->where($supply->PRI.">12")->delete();
+	//$supply->save();
+	$books=M("booktype");
+	//M("booktype")->where($books->PRI.">12")->delete();
+    $supply->Books=array("classname"=>"星际解霸21");
+	$supply->Books=array("classname"=>"星际解霸22");
+	$supply->Books=array("0"=>array("classname"=>"星际解霸88"),2=>array("classname"=>"星际解霸98"));
+	print_r($supply->data);
+	$supply->copyRecord()->save();
+	//print_r($supply);
 	//print_r(M("booktype")->record);
   }
 }
