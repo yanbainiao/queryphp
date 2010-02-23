@@ -1,5 +1,17 @@
 这个一个微型框架
-可以实现MVC方式
+可以实现MVC方式 
+也可以单独使用数据库模型，当作数据类使用就可以了。
+也方便嵌入你现有的项目中。本数据库操作强大
+单独使用本内核文中后面有具体介绍。
+整个内核也是30多KB
+$supply=M("supply"); //new 数据库中的表名，目前是模型名，
+                     //可以在supplyBase.class.php中修改表名
+$books=M("books");
+echo $supply->Books->classname;//自动取得Books中内容
+echo $supply->Books->Supply->title; //反过来取supply中的内容
+echo $supply->title;
+echo $books->classname; 
+
 
 支持path_info方式
 
@@ -10,171 +22,255 @@
 J()是index方法跳转
 R()是由控制
 C()是生成类
-M()是数据库类模型 数据库链接在model.function.php里面设置
+M()是数据库类模型 
+P()是加载路径函数
+
+inc.ini.php
+里面设置数据库链接和缺省方法，支持多库链接和多个链接，分布式数据库 主/从链接
 
 只包括framework.php文件就可以了。
+在项目中文件包含下面代码就可以了
+	<?php
+	//产品环境使用(Product)
+	//$projectenv="product"; $projectenv="test";
+	$projectenv="product";
+	$config["webprojectpath"]=dirname(__FILE__)."/";
+	include("framework/framework.php");
+	?>
 
-path_info方式
-testframework.php?controller=default&action=index
-testframework.php/default/index
+路由说明
+	path_info方式
+	testframework.php?router=default&action=index
+	testframework.php/default/index
 
-可以使用apache重写 去掉testframework.php文件
+	可以使用apache重写 去掉testframework.php文件
 
-可以自己设置路由规则
-C("router")->ruleMaps("login",'/login/:id', array('controller' => 'auth', 'action' => 'login'));
-那么会配匹testframework.php/login/5555
-这样可以使用$_GET['id']得到5555;
-'controller' => 'auth', 'action' => 'login'
-是控制器和方法
+	可以自己设置路由规则
+	C("router")->ruleMaps("login",'/login/:id', array('controller' => 'auth', 'action' => 'login'));
+	那么会配匹testframework.php/login/5555
+	这样可以使用$_GET['id']得到5555;
+	'controller' => 'auth', 'action' => 'login'
+	是控制器和方法
 
-其它设置
-C("router")->ruleMaps('logout','/logout', array('controller' => 'auth', 'action' => 'logout'));
-C("router")->ruleMaps('signup','/signup', array('controller' => 'auth', 'action' => 'signup'));
-C("router")->ruleMaps('profile','/profile/:action', array('controller' => 'profile')); // will call controller "Profile" with dynamic method ":action()"
-C("router")->ruleMaps('users','/users/:id', array('controller' => 'users'), array('id' => '[\d]{1,8}')); // define filters for the url parameters
+	其它设置 可以添加自己定义的路由规则
+	C("router")->ruleMaps('logout','/logout', array('controller' => 'auth', 'action' => 'logout'));
+	C("router")->ruleMaps('signup','/signup', array('controller' => 'auth', 'action' => 'signup'));
+	C("router")->ruleMaps('profile','/profile/:action', array('controller' => 'profile')); // will call controller "Profile" with dynamic method ":action()"
+	C("router")->ruleMaps('users','/users/:id', array('controller' => 'users'), array('id' => '[\d]{1,8}')); // define filters for the url parameters
 
 
 数据库数据模型
 使用方法
 
-构造一个数据库表模型
-$beian=M('beian');
+	构造一个数据库表模型
+	$beian=M('beian');
 
-自动填充aaa bbb字段 $_POST中也要有这两个字段
-//$beian->autoField(array("aaa","bbbb"));
-$data中填充
-$beian->autoField($data,array("aaa","bbbb"));
-取两个主键值，排序为升序
-//print_r($beian->get(53,54,'asc'));
+	自动填充aaa bbb字段 $_POST中也要有这两个字段
+	//$beian->autoField(array("aaa","bbbb"));
+	$data中填充
+	$beian->autoField($data,array("aaa","bbbb"));
+	取两个主键值，排序为升序
+	//print_r($beian->get(53,54,'asc'));
 
-赋值给字段。
-$beian->userid=2;
-$beian->language=1;
-
-
-打印已经赋值字段
-//print_r($beian->data);
-
-保存，再显示刚才插入的ID
-//echo $beian->save()->pkid();
-
-设置主键然后删除
-//echo($beian->pkid(69)->delete());
-
-取得表的行数
-//echo $beian->Totalnum();
-
-select显示两个字段，Arraylist为数组
-//print_r($beian->getAll("userid,language")->record); //改为record了
-
-查询两个userid和language为1和5，fetch为取值
-print_r($beian->whereUseridAndLanguage('1','5')->fetch()->record);
-
-取得两个主键，显示三个字段，升序
-//print_r($beian->get('confid,userid,language',53,54,'asc')->record);
-
-输出主键值
-//echo $beian->confid;
-
-更新某个表的字段累加1
-$beian->colupdate('tplid');
-
-可以在model目录下，*****Model.class.php文件里面添加方法。
-
-生成模型后可以马上可以使用
-print_r($booktype=M("booktype")->getAll());
+	赋值给字段。
+	$beian->userid=2;
+	$beian->language=1;
 
 
-更新J()跳函数
-可以支持各个路由之间跳转和传递参数
-参数为array
-J("show") 为转到本路由方法show
-J("show",array("id"=>555)) 为转到本路由方法show 并传递参数ID过去
-J(R("member"),"list") 将跳转到member路由上面并调用list方法 如果没有list那么默认为index方法，具体框架中设置的默认方法。
-J("member")
-J("member","list",array("userid"=>999))
+	打印已经赋值字段
+	//print_r($beian->data);
 
+	保存，再显示刚才插入的ID
+	//echo $beian->save()->pkid();
 
-hasOne hasMany ManyhasMany ORM(Object-Relational Mapper) 对象关系影射有三种可以在"map"=>"hasOne"这里更改
-<?php 
-class supplyModel extends supplyBase{ 
-  var $mapper=array("Books"=>array("map"=>"hasOne","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
-  var $maps;
-}
-?>
+	设置主键然后删除
+	//echo($beian->pkid(69)->delete());
 
-index.php/default/index 
-<?php
-class defaultRouter extends controller{
-  function index()
-  {
-    echo "hello world!";
-	$this->assign("ssss","aa");
-	$this->hhh="88";
-	
-	$booktype=M("booktype");
-	/*
-	echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
-	print_r($booktype->data);
-	echo $booktype->classname;
-	*/
-	J("saybye",array("bbee"=>6666,"ccdd"=>888));
-  }
-  function saybye()
-  {
-	$a=func_get_args();
-	print_r($a);
-    echo "bye";
+	取得表的行数
+	//echo $beian->Totalnum();
+
+	select显示两个字段，Arraylist为数组
+	//print_r($beian->getAll("userid,language")->record); //改为record了
+
+	查询两个userid和language为1和5，fetch为取值
+	print_r($beian->whereUseridAndLanguage('1','5')->fetch()->record);
+
+	取得两个主键，显示三个字段，升序
+	//print_r($beian->get('confid,userid,language',53,54,'asc')->record);
+
+	输出主键值
+	//echo $beian->confid;
+
+	更新某个表的字段累加1
+	$beian->colupdate('tplid');
+
+	可以在model目录下，*****Model.class.php文件里面添加方法。
+
+	生成模型后可以马上可以使用
+	print_r($booktype=M("booktype")->getAll());
+
+	关联保存，使用mapper设置，详见supplyModel.class.php文件中
+	 var $mapper=array("Books"=>array("map"=>"ManyhasMany","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
+        
+	可以看到是typeid关联，那么M("booktype")会自动得到$supply中typeid的值，如果没有先保存$supply 再次取值
+	$supply->get(3,4);
+	$supply->up();//edit 3
+	M("booktype")->classname="星际解霸2";//设置booktype 类名
+
+        $supply->save(M("booktype"));
+
+常用函数说明
+
+	更新J()跳函数
+	可以支持各个路由之间跳转和传递参数
+	参数为array
+	J("show") 为转到本路由方法show
+	J("show",array("id"=>555)) 为转到本路由方法show 并传递参数ID过去
+	J(R("member"),"list") 将跳转到member路由上面并调用list方法 如果没有list那么默认为index方法，具体框架中设置的默认方法。
+	J("member")
+	J("member","list",array("userid"=>999))
+
+	M("模型"); new一个新的模型
+	C("类");   new一个正常的php类
+模型说明文件
+    hasOne hasMany ManyhasMany ORM(Object-Relational Mapper) 对象关系影射有三种可以在"map"=>"hasOne"这里更改
+	<?php 
+	class supplyModel extends supplyBase{ 
+	  var $mapper=array("Books"=>array("map"=>"hasOne","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
+	  var $maps;
+	}
+	?>
+控制器文件
+	index.php/default/index 
+	<?php
+	class defaultRouter extends controller{
+	  function index()
+	  {
+	    echo "hello world!";
+		$this->assign("ssss","aa");
+		$this->hhh="88";
+		
+		$booktype=M("booktype");
+		/*
+		echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
+		print_r($booktype->data);
+		echo $booktype->classname;
+		*/
+		J("saybye",array("bbee"=>6666,"ccdd"=>888));
+	  }
+	  function saybye()
+	  {
+		$a=func_get_args();
+		print_r($a);
+	    echo "bye";
+		$supply=M("supply");
+		$supply->get(3,4)->up();
+		$supply->getDataBaseName();
+
+		echo "===".$supply->Books->Supply->title;
+		print_r(M("booktype")->record);	
+	  }
+	}
+	?>
+三 数据库表操作
+
 	$supply=M("supply");
 	$supply->get(3,4)->up();
-	$supply->getDataBaseName();
+	echo ($supply->Books->classname);//自动取得Books中内容
+	print_r($supply->record);	
+	echo $supply->Books->Supply->title; //反过来取supply中的内容
+	print_r(M("booktype")->record);	//booktype中已有对像关系了
 
-	echo "===".$supply->Books->Supply->title;
-	print_r(M("booktype")->record);	
-  }
-}
-?>
-
-$supply=M("supply");
-$supply->get(3,4)->up();
-echo ($supply->Books->classname);//自动取得Books中内容
-print_r($supply->record);	
-echo $supply->Books->Supply->title; //反过来取supply中的内容
-print_r(M("booktype")->record);	//booktype中已有对像关系了
-
-其它使用方法
-可以使用
+	其它使用方法
+	可以使用
 
 
-M("booktype")->where('name',5555);
-M("booktype")->whereAnd('name',88);
-M("booktype")->whereUserAndLanguage('myname','8');
-M("booktype")->orderby("id desc");
-M("booktype")->orderby("desc");
-M("booktype")->groupby("username");
-M("booktype")->limit(10)
-M("booktype")->limit(10,20);
+	M("booktype")->where('name',5555);
+	M("booktype")->whereAnd('name',88);
+	M("booktype")->whereUserAndLanguage('myname','8')->orderby("id desc")->limit(10)->fetch();
+	M("booktype")->orderby("id desc");
+	M("booktype")->orderby("desc");
+	M("booktype")->groupby("username");
+	M("booktype")->limit(10)->fetch();
+	M("booktype")->limit(10,20)->fetch();
 
-取得行总数
-M("booktype")->Totalnum();
-M("booktype")->where('name',5555)->Totalnum();
+	取得行总数
+	M("booktype")->Totalnum();
+	M("booktype")->where('name',5555)->Totalnum();
 
-更新clicknum字段++数量
-M("booktype")->colupdate("clicknum");//UPDATE table set clicknum=clicknum+1(num) where pkid=M("booktype")->pkik
-M("booktype")->where('name',5555)->colupdate("clicknum");
+	更新clicknum字段++数量
+	M("booktype")->colupdate("clicknum");//UPDATE table set clicknum=clicknum+1(num) where pkid=M("booktype")->pkik
+	M("booktype")->where('name',5555)->colupdate("clicknum");
 
-$books->where("userid>1")->whereAnd("language <5")->fetch();
-print_r($books->record); 
+	取得userid>1 and language<5
+	$books->where("userid>1")->whereAnd("language <5")->orderby("desc")->limit(10,20)->fetch();
+	print_r($books->record); 
 
-<form>
-<input name="name" id="name" />
-<input name="sex" id="sex" />
-<input name="age" id="age" />
-......
-</form>
+	<form>
+	<input name="name" id="name" />
+	<input name="sex" id="sex" />
+	<input name="age" id="age" />
+	......
+	</form>
 
-自动处理post方法
-提交后处理
-$form=M("表名或模型名")->autoField('name','sex','age')->save();
-或处理后数组传入
-$form=M("表名或模型名")->autoField($insertArray,'name','sex','age')->save(); 
+	自动处理post方法
+	提交后处理
+	$form=M("表名或模型名")->autoField('name','sex','age')->save();
+	或处理后数组传入
+	$form=M("表名或模型名")->autoField($insertArray,'name','sex','age')->save(); 
+
+config/inc.ini.php文件说明
+	在本文件可以设置数据库链接
+	/*
+	*pdo链接 多少自己填,主从可以一样
+	* key 为正则表达式 ^web_开头的表，使用的链接 master为主链接 插入 修改等 slaves为select等操作
+	*/
+	$pdoconn=array(
+	  'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
+					   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")),
+			   "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"))
+		);
+	//视图设置,默认为空使用自带php模板
+	/*
+	*  php自带模板意思是在模板中使用php代码foreach(): endforeach if(): else: endif这几种标签当然也可以使用php代码
+	*  未来版本视图将将全部是php标签
+	*  foreach($row as $key=>$value):
+	*  在这里放html代码或做类似Smarty赋值
+	*  endforeach;
+	*  结束标签 endif;，endwhile; endfor; endforeach; 以及 endswitch;。 
+	*/
+	//$config['view']="Smarty"; //可以使用Smarty作为视图
+	//$config['plugin']=$config["frameworkpath"]."lib";     //插件所在目录，可能会自动搜寻目录
+	//$config['frameworklib']=array("Smarty"=>$config["frameworkpath"]."lib/Smarty/Smarty.class.php",
+	//                    "SendMail"=>$config["frameworkpath"]."lib/Mail/SendMail.php");//类所在的文件 这具配置可以另外放一个地方
+	//配置路由规则login为路由模型 rule为规则 成功后target设置 conditions rule自定义规则对应为:id
+	//$config["routermaps"]=array("login",array("rule"=>'/login/:id',
+	//		                                    "target"=>array('controller' => 'auth', 'action' => 'login'),
+	//		                                    "conditions"=>array('id' => '[\d]{1,8}')));
+	//每个project可以配置 内核加前文件precore.ini.php  内核加后文件 aftercore.ini.php 其中precore.ini.php文件是在inc.ini.php(也是本文件)后面加的，这样可以冲抵这个文件设置
+	//
+单独使用数据库类，有时候你不想使用框架,这样可以把本内核加你的现在现有的项目中了
+framework.php
+        /*only user modelclass
+	*$dispaths=C("router")->setMaps($config["routermaps"])->start();
+	*$view=C("view");
+	*$router=R($dispaths->controller);
+	*if (method_exists($router,$dispaths->action)) {
+	*     call_user_func(array($router,$dispaths->action));
+	*	 $view->display(R($dispaths->controller)->view($dispaths->action));
+	*}
+	*/
+本内核会自动缓存起来
+	缓存文件存放在
+	cache/core.cache.php文件就是缓存文件
+
+testproject是项目目录
+	本目录是www根
+	每个项目都有自己的 
+	 config 配置文件目录 precore.ini.php  aftercore.ini.php
+	 model  本项目模型文件
+	 router 本项目路由文件
+	 view   视图文件可以按路由目录存放
+	 class  本项目使用的普通类文件
+	 lib    存放类库文件或插件
+	等目录

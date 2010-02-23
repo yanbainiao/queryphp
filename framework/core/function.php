@@ -1,57 +1,42 @@
 <?php
-
-//pdo链接 多少自己填,主从可以一样
-$conn=array(
-  'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")),
-             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-			                 "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-							 "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"))
-			 ),
-  '^web'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "3"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "4"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "5"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-								   "6"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")),
-             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-			                 "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
-							 "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"))
-			 )
-);
+/*
+*数据库链接生成
+*/
 function pdoconnects($dsn,$connmodel)
 {    
    try {
-	     $GLOBALS['pdoconn'][$connmodel]=new PDO($dsn['dsn'],$dsn['username'],$dsn['password']);
-	     $GLOBALS['pdoconn'][$connmodel]->exec('SET CHARACTER SET '.$dsn['CHARACTER']);
-	    return $GLOBALS['pdoconn'][$connmodel];
+	    $GLOBALS['pdolinks'][$connmodel]=new PDO($dsn['dsn'],$dsn['username'],$dsn['password']);
+	    $GLOBALS['pdolinks'][$connmodel]->exec('SET CHARACTER SET '.$dsn['CHARACTER']);
+	    return $GLOBALS['pdolinks'][$connmodel];
 	  } catch (PDOException $e) {
        print "connects Error!: " . $e->getMessage() . "<br/>";
     }
 }
+/*
+*数据库链接处理
+*/
 function getConnect($table,$model=null,$connper=0)
 {
-     global $conn;
+	 $conn=$GLOBALS['config']['pdoconn'];
 	 $tconn=array();
 	 if(is_array($conn))
 	 {
         foreach($conn as $k=>$v)
 		{
-		  if(preg_match("|".$k."|i",$table)||preg_match("|".$k."|i",$model))
+		  if($k==$model||preg_match("|".$k."|i",$table)||preg_match("|".$k."|i",$model))
 		  {
 			 $prand=rand(0,count($v["master"])-1);
 			 $connmodel=md5(json_encode($v["master"][$prand]));
-			 if($GLOBALS['pdoconn'][$connmodel]!='')
-			   $tconn['master']=$GLOBALS['pdoconn'][$connmodel];
+			 if($GLOBALS['pdolinks'][$connmodel]!='')
+			   $tconn['master']=$GLOBALS['pdolinks'][$connmodel];
 			 else
 			 {
 			   $tconn['master']=pdoconnects($v["master"][$prand],$connmodel);
 			 }
 			$prand=rand(0,count($v["slaves"])-1);
 			$connmodel=md5(json_encode($v["slaves"][$prand]));
-			 if($GLOBALS['pdoconn'][$connmodel]!='')
-			   $tconn['slaves']=$GLOBALS['pdoconn'][$connmodel];
+			 if($GLOBALS['pdolinks'][$connmodel]!='')
+			   $tconn['slaves']=$GLOBALS['pdolinks'][$connmodel];
 			 else
 			 {
 			   $tconn['slaves']=pdoconnects($v["slaves"][$prand],$connmodel);
@@ -63,16 +48,16 @@ function getConnect($table,$model=null,$connper=0)
 	 {
 		$prand=rand(0,count($conn['default']["master"])-1);
 	    $connmodel=md5(json_encode($conn['default']["master"][$prand]));
-		 if($GLOBALS['pdoconn'][$connmodel]!='')
+		 if($GLOBALS['pdolinks'][$connmodel]!='')
 		 {
-			$tconn['master']=$GLOBALS['pdoconn'][$connmodel];
+			$tconn['master']=$GLOBALS['pdolinks'][$connmodel];
 		 }else{
 			$tconn['master']=pdoconnects($conn['default']["master"][$prand],$connmodel);
 		 }
         $prand=rand(0,count($conn['default']["slaves"])-1);
 		$connmodel=md5(json_encode($conn['default']["slaves"][$prand]));
-		 if($GLOBALS['pdoconn'][$connmodel]!='')
-		   $tconn['slaves']=$GLOBALS['pdoconn'][$connmodel];
+		 if($GLOBALS['pdolinks'][$connmodel]!='')
+		   $tconn['slaves']=$GLOBALS['pdolinks'][$connmodel];
 		 else
 		 {
 		   $tconn['slaves']=pdoconnects($conn['default']["slaves"][$prand],$connmodel);
@@ -87,10 +72,20 @@ function getConnect($table,$model=null,$connper=0)
 	 }
      
 }
-function INI($name)
+/*
+*P()取路径函数，比如lib plugin model view class
+*/
+function P($name)
 {
-  global $config;
-  return $config[$name];
+ if(isset($GLOBALS['config'][$name])) return $GLOBALS['config'][$name];
+ else return $GLOBALS['config']["frameworkpath"];
+}
+/*
+*$config['key']值存取;
+*/
+function I($name)
+{
+  return $GLOBALS['config'][$name];
 }
 //J路由跳转
 function J()
@@ -101,7 +96,7 @@ function J()
 	  $controller=get_class($arg[0]);
 	  $controller=substr($controller,0,-6);
 	  C("router")->controller=$controller;	  
-	  if($arg[1]=='') $arg[1]=ROUTER_DEFAULT_ACTION;      
+	  if($arg[1]=='') $arg[1]=$GLOBALS['config']['defaultindex'];      
 	  C("router")->action=$arg[1];
 	  array_shift($arg);
 	  array_shift($arg);
@@ -198,7 +193,7 @@ function initModelclass($modelname)
              $newmodelstr.="\n var \$PRI='".$value['Field']."';";
 	         if($value['Extra']=='auto_increment')
 			   {
-			    $newmodelstr.="\n var \$autoid=true;";
+			     $newmodelstr.="\n var \$autoid=true;";
 			   }else{
 			     $newmodelstr.="\n var \$autoid=false;";
 			   }
@@ -210,51 +205,98 @@ function initModelclass($modelname)
 	   $newmodelstr.="\n var \$types=".var_export($types,true).";";
 	   $newmodelstr.="\n}\n?>";
 	 }
-	 file_put_contents(dirname(__FILE__)."/model/".$modelname.'Base.class.php',$newmodelstr);
+	 file_put_contents(P("modelpath")."model/".$modelname.'Base.class.php',$newmodelstr);
 }
+/*
+* 自动加载类
+*/
 function __autoload($class_name) {
     $fix=substr($class_name,-5);
-	if($fix=='Model'){
+	if($fix=='Model'){ //模型类后辍，主要是为了new到非model类
 		$newc=substr($class_name,0,-5);		
-		if(file_exists(dirname(__FILE__)."/model/".$class_name.".class.php"))
+		if(file_exists(P("webprojectpath")."model/".$class_name.".class.php"))
 		{
-		   require_once dirname(__FILE__)."/model/".$class_name.".class.php";
+		   require_once P("webprojectpath")."model/".$class_name.".class.php";
+		   return;
+		}elseif(file_exists(P("modelpath")."model/".$class_name.".class.php")){
+		   require_once P("modelpath")."model/".$class_name.".class.php";	
+		   return;
 		}else{		   
            $newmodelstr="<?php \nclass ".$newc."Model extends ".$newc."Base{ \n ";
 		   $newmodelstr.=" var \$mapper=array();\n";
 		   $newmodelstr.=" var \$maps;";
            $newmodelstr.=" \n} \n?>";
-		   file_put_contents(dirname(__FILE__)."/model/".$newc.'Model.class.php',$newmodelstr);
-		   require_once dirname(__FILE__)."/model/".$newc.'Model.class.php';
+		   file_put_contents(P("modelpath")."model/".$newc.'Model.class.php',$newmodelstr);
+		   require_once P("modelpath")."model/".$newc.'Model.class.php';
+		   return;//加返回自动退出这个函数
 		}
-	}
+	}	
 	$fix=substr($class_name,-4);
-	if($fix=='Base'){
+	if($fix=='Base'){ //模型基本类
 		$newc=substr($class_name,0,-4);
-		if(!file_exists(dirname(__FILE__)."/model/".$newc.'Base.class.php'))
+		if(!file_exists(P("modelpath")."model/".$newc.'Base.class.php')&&!file_exists(P("webprojectpath")."model/".$newc.'Base.class.php'))
 		{		   
-		   initModelclass($newc);		   
+		   initModelclass($newc);		
+		   return;
 		}
-		if(file_exists(dirname(__FILE__)."/model/".$newc.'Base.class.php'))
+		if(file_exists(P("webprojectpath")."model/".$newc.'Base.class.php'))
 		{		   
-		   require_once dirname(__FILE__)."/model/".$newc.'Base.class.php';		   
+		   require_once P("webprojectpath")."model/".$newc.'Base.class.php';		
+		   return;
+		}elseif(file_exists(P("modelpath")."model/".$newc.'Base.class.php')){
+		   require_once P("modelpath")."model/".$newc.'Base.class.php';	
+		   return;
 		}
 	}
 	$fix=substr($class_name,-6);
-	if($fix=='Router'){
+	if($fix=='Router'){ //路由文件
 		$newc=substr($class_name,0,-6);
-		if(file_exists(dirname(__FILE__)."/router/".$newc."Router.class.php"))
+		if(file_exists(P("webprojectpath")."router/".$newc."Router.class.php"))
 		{
-		   require_once dirname(__FILE__)."/router/".$newc."Router.class.php";
+		   require_once P("webprojectpath")."router/".$newc."Router.class.php";
+		   return;
+		}elseif(file_exists(P("routerpath")."router/".$newc."Router.class.php")){
+		   require_once P("routerpath")."router/".$newc."Router.class.php";	
+		   return;
 		}
 	}
-	if(file_exists(dirname(__FILE__)."/".$class_name.'.class.php'))
-	{		   
-	  require_once dirname(__FILE__)."/".$class_name.'.class.php';		   
+	if(isset($GLOBALS['config']['frameworklib'][$class_name])){
+		require_once $GLOBALS['config']['frameworklib'][$class_name];
+	    return;
 	}
-	if(file_exists(dirname(__FILE__)."/".$class_name.'.php'))
+	if(file_exists(P("webprojectpath")."class/".$class_name.'.class.php'))
 	{		   
-	  require_once dirname(__FILE__)."/".$class_name.'.php';		   
+	  require_once P("webprojectpath")."class/".$class_name.'.class.php';	
+	  return;
 	}
+	if(file_exists(P("frameworkpath")."class/".$class_name.'.class.php'))
+	{		   
+	  require_once P("frameworkpath")."class/".$class_name.'.class.php';
+	  return;
+	}
+	if(file_exists(P("frameworkpath").$class_name.'.php'))
+	{		   
+	  require_once P("frameworkpath").$class_name.'.php';
+	  return;
+	}
+	if(is_array($GLOBALS['config']['frameworklib']))
+	{
+	  foreach($GLOBALS['config']['frameworklib'] as $k=>$v)
+	  {
+		if(is_numeric($k))
+		{
+		   if(preg_match("@".$class_name."\.(class\.)?php$@i",$v)){ require_once $v; return; }
+		}
+	  }
+	}
+}
+/*
+* URL函数，可能要考虑到ruleMaps设置的 因为地址显示是别名
+* 读取ruleMaps 和初始传入的$controller
+*/
+function url_for()
+{
+  $arg_list = func_get_args();
+  return $arg_list[0];
 }
 ?>

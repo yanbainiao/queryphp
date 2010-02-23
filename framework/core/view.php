@@ -24,18 +24,22 @@ class view{
     public function fetch($viewfile='',$display=false)
     {
 	    $content ="";
-		if(INI("view")=='')
+		if(I("view")=='')
 		{
-			if(file_exists(INI("rootpath")."view/".$viewfile.".php"))
-			   $viewfile=INI("rootpath")."view/".$viewfile.".php";
-			if(file_exists(INI("rootpath")."view/".C("router")->controller."/".$viewfile.".php"))
-			   $viewfile=INI("rootpath")."view/".C("router")->controller."/".$viewfile.".php";
+			if(file_exists(P("webprojectpath")."view/".$viewfile.".php"))
+			   $viewfile=P("webprojectpath")."view/".$viewfile.".php";
+			elseif(file_exists(P("webprojectpath")."view/".C("router")->controller."/".$viewfile.".php"))
+			   $viewfile=P("webprojectpath")."view/".C("router")->controller."/".$viewfile.".php";
+			elseif(file_exists(P("viewpath")."view/".$viewfile.".php"))
+			   $viewfile=P("viewpath")."view/".$viewfile.".php";
+			elseif(file_exists(P("viewpath")."view/".C("router")->controller."/".$viewfile.".php"))
+			   $viewfile=P("viewpath")."view/".C("router")->controller."/".$viewfile.".php";
 			ob_start();
 			ob_implicit_flush(0);
 			extract($this->vvar, EXTR_OVERWRITE);
 			include $viewfile;
 			$content = ob_get_clean();
-		}elseif(INI("view")=="Smarty")
+		}elseif(I("view")=="Smarty")
 		{
 		  $Smarty=C("Smarty");
 		  $Smarty->assign($this->vvar);

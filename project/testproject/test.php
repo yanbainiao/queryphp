@@ -23,8 +23,7 @@ if(!is_dir($k))
   mkdir($k,0777);
   chmod($k,0777);
 }
-
-include("framework/framework.php");
+include("../../framework/framework.php");
 
 
 /////////////////////////////////////////////////////////////////

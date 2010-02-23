@@ -3,6 +3,6 @@
 //$projectenv="product";
 $projectenv="product";
 $config["webprojectpath"]=dirname(__FILE__)."/";
-$config["webprojectname"]=basename($_SERVER['SCRIPT_FILENAME']);
-include("framework/framework.php");
+$config["webprojectname"]="mysitedomain";
+include("../../framework/framework.php");
 ?>
