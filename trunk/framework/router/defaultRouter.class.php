@@ -31,6 +31,7 @@ class defaultRouter extends controller{
 	//$supply->getDataBaseName();
     
 	//echo "===".$supply->Books->Supply->title;
+	$supply=M("supply");
 	$supply->get(3,4);
 	$supply->up();//edit 3
 	//M("booktype")->classname="星际解霸2";
