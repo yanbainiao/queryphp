@@ -224,7 +224,8 @@ function __autoload($class_name) {
 		}else{		   
            $newmodelstr="<?php \nclass ".$newc."Model extends ".$newc."Base{ \n ";
 		   $newmodelstr.=" var \$mapper=array();\n";
-		   $newmodelstr.=" var \$maps;";
+		   $newmodelstr.=" var \$maps;\n";
+		   $newmodelstr.=" var \$maparray=array();\n";
            $newmodelstr.=" \n} \n?>";
 		   file_put_contents(P("modelpath")."model/".$newc.'Model.class.php',$newmodelstr);
 		   require_once P("modelpath")."model/".$newc.'Model.class.php';
