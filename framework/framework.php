@@ -19,6 +19,7 @@ if($projectenv=='product'&&file_exists($config["frameworkpath"]."cache/core.cach
 }else{
  if($projectenv=='product')
  {
+	//$corecontent=substr(php_strip_whitespace($config["frameworkpath"]."core/base.class.php"),0,-2);
 	$corecontent=substr(php_strip_whitespace($config["frameworkpath"]."core/model.php"),0,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/function.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/router.php"),5,-2);
@@ -28,6 +29,7 @@ if($projectenv=='product'&&file_exists($config["frameworkpath"]."cache/core.cach
 	unset($corecontent);
 	require_once $config["frameworkpath"]."cache/core.cache.php";
  }else{
+	//include($config["frameworkpath"]."core/base.class.php");
 	include($config["frameworkpath"]."core/model.php");
 	include($config["frameworkpath"]."core/function.php");
 	include($config["frameworkpath"]."core/router.php");

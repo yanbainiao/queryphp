@@ -5,8 +5,8 @@
 *  queryphp ORM 
 *
 *  文使用时候直接含本文件就可以了，这样可以把queryorm导入到你的框架中。
-*  使用方法见文档。
-*
+*  使用方法见文档。操作借鉴了jquery doctrine操作方式 努力模拟doctrine ORM行为
+*  $books=M("booktype");取得模型
 */
 $config["frameworkpath"]=dirname(__FILE__)."/";
 include($config["frameworkpath"]."config/inc.ini.php");
