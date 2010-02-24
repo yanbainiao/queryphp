@@ -352,6 +352,7 @@ class Model
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
 			$this->sql=array();
+			echo $this->string."889977";
 			$this->effactrow=$this->DB['master']->exec($this->string);
 		   }
 		  if(!isset($arglist[2]))
