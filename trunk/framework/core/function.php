@@ -237,9 +237,9 @@ function __autoload($class_name) {
 		$newc=substr($class_name,0,-4);
 		if(!file_exists(P("modelpath")."model/".$newc.'Base.class.php')&&!file_exists(P("webprojectpath")."model/".$newc.'Base.class.php'))
 		{		   
-		   initModelclass($newc);		
-		   return;
-		}
+		   initModelclass($newc);	
+		   clearstatcache();
+		}		
 		if(file_exists(P("webprojectpath")."model/".$newc.'Base.class.php'))
 		{		   
 		   require_once P("webprojectpath")."model/".$newc.'Base.class.php';		
