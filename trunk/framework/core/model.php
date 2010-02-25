@@ -18,7 +18,8 @@ class Model
    var $modelname;
    var $databasename;
    var $ismapper;
-   function __construct() {
+   var $isjoinleft;
+   public function __construct() {
 	   $this->modelname=substr(get_class($this),0,-5);
 	   $this->DB=getConnect($this->tablename,$this->modelname,$this->conn);
 	   if(is_array($this->DB))
@@ -27,7 +28,7 @@ class Model
 	   }
 	   return $this;
    }
-  function getMate()
+  public function getMate()
   {
     $this->string="DESCRIBE ".$this->tablename;	
 	try{	
@@ -41,7 +42,7 @@ class Model
 	return $result;
   }
 
-  function analyseTable()
+  public function analyseTable()
   {
      $mate=$this->getMate();
 	 if(is_array($mate))
@@ -60,6 +61,13 @@ class Model
 	   }
 	 }
   }
+  /*
+  * 自动填充字段
+  * autoField(array("field"=>"aabbcc","field2"=>"112233"));
+  * autoField(array("field"=>"aabbcc","field2"=>"112233"),'field,field2');
+  * autoField(array("field"=>"aabbcc","field2"=>"112233"),'field','field2');
+  * autoField($_POST,'field','field2');
+  */
   function autoField()
   {
     $numargs = func_num_args();
@@ -76,17 +84,26 @@ class Model
 	if(is_array(func_get_arg(0)))
 	{
 		$arg_list = func_get_args();
+		  if(!isset($arg_list[2]))
+		  {
+             $filedarray=explode(",",$arglist[1]);
+		  }
 		$arg0=func_get_arg(0);
 		for ($i = 1; $i < $numargs; $i++) {
-		  if(isset($this->fields[$arg_list[$i]]))
+		  if(isset($arg_list[2]))
 		  {
+		   if(isset($this->fields[$arg_list[$i]]))
+		   {
 		     $this->data[$v]=$arg0[$arg_list[$i]];
+		   }
+		  }else{
+		    $this->data[$v]=$arg0[$filedarray[--$i]];
 		  }
 		}
 	}
 	return $this;
   }
-
+  
   function __get($name)
   {
     if(isset($this->data[strtolower($name)]))
@@ -94,7 +111,6 @@ class Model
 	  return $this->data[strtolower($name)];
 	}elseif(isset($this->mapper[$name])){	  
 	  if(method_exists($this,$this->mapper[$name]['map'])) {
-		  echo $this->mapper[$name]['map'];
 		call_user_func(array($this,$this->mapper[$name]['map']),$name);
 	  }
 	  $this->ismapper=true;
@@ -132,7 +148,11 @@ class Model
   {
     unset($this->data[strtolower($name)]);
   }
-
+  /*
+  * 到得一个ID record(一行)
+  * $book->get(1,6);
+  *
+  */
   function getArray()
   {
 	$arg_list = func_get_args();
@@ -257,20 +277,11 @@ class Model
 		  $tm=M($mname);
 		  foreach($v as $key=>$value)
 		  {
-			  $tm->setData($value);
-			  $tm->save();
-			  $this->maparray[$m][$key][$tm->PRI]=$tm->pkid();
-			  if($tm->PRI==$this->mapper[$m]['targetFiled']&&isset($this->mapper[$m]['localFiled']))
-			  {
-				 $this->data[$this->mapper[$m]['localFiled']]=$tm->pkid();
-			  }
-			  if(M($mname)->PRI==$this->mapper[$m]['targetFiled2']&&isset($this->mapper[$m]['localFiled2']))
-			  {
-				 $this->data[$this->mapper[$m]['localFiled2']]=$tm->pkid();
-			  }
-			  if(M($mname)->PRI==$this->mapper[$m]['targetFiled3']&&isset($this->mapper[$m]['localFiled3']))
-			  {
-				 $this->data[$this->mapper[$m]['localFiled3']]=$tm->pkid();
+              $fields=$this->getlocalPRIFields($m,$tm->PRI);
+			  if($fields!=''&&isset($this->maparray[$m][$key][$tm->PRI])&&$this->maparray[$m][$key][$tm->PRI]!=NULL)
+			  {  
+			    $this->setMapperToData($m);
+				$this->data[$fields]=$this->maparray[$m][$key][$tm->PRI];
 			  }
 		  }
 	  }
@@ -284,25 +295,26 @@ class Model
   {
     foreach($this->maparray as $m=>$v)
 	{
-	  foreach($v as $key=>$value)
-		{
-		  $mname=$this->mapper[$m]['TargetModel'];
-		  M($mname)->setData($value);
-		  if($this->PRI==$this->mapper[$m]['localFiled']&&isset($this->mapper[$m]['targetFiled']))
-		  {
-			 M($mname)->data[$this->mapper[$m]['targetFiled']]=$this->pkid();
-		  }
-		  if($this->PRI==$this->mapper[$m]['localFiled2']&&isset($this->mapper[$m]['targetFiled2']))
-		  {
-			 M($mname)->data[$this->mapper[$m]['targetFiled2']]=$this->pkid();
-		  }
-		  if($this->PRI==$this->mapper[$m]['localFiled3']&&isset($this->mapper[$m]['targetFiled3']))
-		  {
-			 M($mname)->data[$this->mapper[$m]['targetFiled3']]=$this->pkid();
-		  }
-		  M($mname)->save();
+	    $mapperid='';
+		$mname=$this->mapper[$m]['TargetModel'];
+		foreach($v as $key=>$value)
+		{ 
+		  $value=M($mname)->getDefaultFormField($value);
+		  $fields=$this->gettargetPRIFields($m,$this->PRI);
+		  $this->maparray[$m][$key][$fields]=$this->pkid();
+		  $value[$fields]=$this->pkid();
+          M($mname)->clearData($value);
+		  M($mname)->save();          
+		  $mapperid=M($mname)->pkid();
+          $this->maparray[$m][$key][M($mname)->PRI]=M($mname)->pkid();
+	   }
+       $fields=$this->getlocalPRIFields($m,M($mname)->PRI);
+       if($fields!=''&&$mapperid!=''){
+		   $this->data[$fields]=$mapperid;
+		   $this->update($fields);
 	   }
 	}
+    M($mname)->record=$this->maparray;//给原来record记录
 	$this->maparray=array();//恢复
 	$this->ismapper=false;
 	unset($this->ismapper);
@@ -352,7 +364,6 @@ class Model
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
 			$this->sql=array();
-			echo $this->string."889977";
 			$this->effactrow=$this->DB['master']->exec($this->string);
 		   }
 		  if(!isset($arglist[2]))
@@ -406,21 +417,25 @@ class Model
 		//关联更新
 		if(count($this->mapper)>0&&$objectname!='')
 		{
+		  $localfields='';
 		  foreach($this->mapper as $k=>$v)
 		  {
 		    if($v['TargetModel']==$objectname)
 			{
 			  $mapper=$k;
-			  break;
+              $this->objsaveper($mapper);
+			  $k=$this->setMapperToData($mapper)->getlocalPRIFields($mapper,M($objectname)->PRI);
+			  if($k!='')
+			    $localfields.=$k.",";
 			}
 		  }
           if($mapper!='')
 		  {
-		     $this->setDataToMapper($mapper);
-			 M($objectname)->save();
-			 //加入关联更新
-			 $localfields=$this->setMapperToData($mapper)->getMapperlocalFields($mapper);
-			 if($localfields!='') $this->update($localfields);
+			 if($localfields!='')
+			 {	 
+			   $localfields=substr($localfields,0,-1);
+			   $this->update($localfields);
+			 }
 		  }
 		}
 		//if(in_array())
@@ -451,6 +466,10 @@ class Model
 	 }
 	 return $this;
   }
+  /*
+  * 取得关联模型字段
+  * 返回字段 field,field
+  */
   public function getMappertargetFields($mapper)
   {
     $fileds='';
@@ -461,6 +480,10 @@ class Model
     $fileds=substr($fileds,0,-1);
 	return $fileds;
   }
+  /*
+  * 取得本模型关联模型字段
+  * 返回字段 field,field
+  */
   public function getMapperlocalFields($mapper)
   {
     $fileds='';
@@ -470,6 +493,28 @@ class Model
 	if($fileds!='')
     $fileds=substr($fileds,0,-1);
 	return $fileds;
+  }
+  /*
+  * 取得本模型关联模型字段
+  * 返回字段 field,field
+  */
+  public function gettargetPRIFields($mapper,$PRI)
+  {
+	if(isset($this->mapper[$mapper]['targetFiled'])&&$this->mapper[$mapper]['localFiled']==$PRI) return $this->mapper[$mapper]['targetFiled'];
+	if(isset($this->mapper[$mapper]['targetFiled2'])&&$this->mapper[$mapper]['localFiled2']==$PRI) return $this->mapper[$mapper]['targetFiled2'];
+	if(isset($this->mapper[$mapper]['targetFiled3'])&&$this->mapper[$mapper]['localFiled3']==$PRI) return $this->mapper[$mapper]['targetFiled3'];
+    return '';
+  }
+  /*
+  * 取得本模型关联模型字段
+  * 返回字段 field,field
+  */
+  public function getlocalPRIFields($mapper,$PRI)
+  {
+	if(isset($this->mapper[$mapper]['localFiled'])&&$this->mapper[$mapper]['targetFiled']==$PRI) return $this->mapper[$mapper]['localFiled'];
+	if(isset($this->mapper[$mapper]['localFiled2'])&&$this->mapper[$mapper]['targetFiled2']==$PRI) return $this->mapper[$mapper]['localFiled2'];
+	if(isset($this->mapper[$mapper]['localFiled3'])&&$this->mapper[$mapper]['targetFiled3']==$PRI) return $this->mapper[$mapper]['localFiled3'];
+    return '';
   }
   /*
   *关联mapper更新,本模块更新到关联mapper
@@ -511,11 +556,24 @@ class Model
 	   $this->setData($args);
 	 return $this;     
   }
+  /*
+  *关联更新object;
+  */
+  function objsaveper($mapper)
+  {
+		$this->maps[$mapper]=M($v['TargetModel']);
+		$this->setDataToMapper($mapper);
+		$this->maps[$mapper]->save();
+		$localfields=$this->setMapperToData($mapper)->getlocalPRIFields($mapper,$this->maps[$mapper]->PRI);
+		if($localfields!='')
+		  $this->data[$localfields]=$this->maps[$mapper]->pkid();
+        return $this;
+  }
   function save($id=null)
   {
 	 $pkey='';
 	 $mapper='';
-	// $saveafter=false;
+	 $saveafter=array();
 	 if($id=='add'||$id=='new')
 	 {
 	   //处理不是自动增长，但是唯一的字段
@@ -537,56 +595,20 @@ class Model
 			{
 			  if($id->modelname==$v['TargetModel'])
 			  {
-			    $mapper=$k;
-				$prearray='';
-				$this->maps[$mapper]=M($v['TargetModel']);
-				if(isset($this->data[$v['localFiled']])&&$this->data[$v['localFiled']]!='')
-				{
-				   if(M($v['TargetModel'])->PRI==$v['targetFiled']&&$this->data[$v['localFiled']]==0)
-				   {
-				      $prearray=$v['targetFiled'];
-				   }else{
-					   M($v['TargetModel'])->$v['targetFiled']=$this->data[$v['localFiled']];
-					   $saveafter=true;
-				   }
-				}
-				if(isset($v['localFiled2'])&&isset($this->data[$v['localFiled2']])&&$this->data[$v['localFiled2']]!='')
-				{
-				   if(M($v['TargetModel'])->PRI==$v['targetFiled2']&&$this->data[$v['localFiled2']]==0)
-				   {
-				      $prearray=$v['targetFiled2'];
-				   }else{
-					   M($v['TargetModel'])->$v['targetFiled2']=$this->data[$v['localFiled2']];	
-					   $saveafter=true;
-				   }				   	
-				}
-				if(isset($v['localFiled3'])&&isset($this->data[$v['localFiled3']])&&$this->data[$v['localFiled3']]!='')
-				{
-				   if(M($v['TargetModel'])->PRI==$v['targetFiled3']&&$this->data[$v['localFiled3']]==0)
-				   {
-				      $prearray=$v['targetFiled3'];
-				   }else{
-					   M($v['TargetModel'])->$v['targetFiled3']=$this->data[$v['localFiled3']];	
-					   $saveafter=true;
-				   }
-				}
-				if($saveafter)
-				{
-				  M($v['TargetModel'])->save();
-                  if($prearray!='')
-				   $this->data[$prearray]=M($v['TargetModel'])->pkid();
-				  unset($saveafter);
-				}
-			    break;
+                   $this->objsaveper($k);
+			       array_push($saveafter,$k);
 			  }
 			}
 	     }
+	   if($this->data[$this->PRI]==0) unset($this->data[$this->PRI]);
+	   else $pkey=$this->PRI."='".$this->pkidv()."'";
+
 	 }elseif(is_numeric($this->data[$this->PRI]))
 	 {
 	   if($this->data[$this->PRI]==0) unset($this->data[$this->PRI]);
 	   else $pkey=$this->PRI."='".$this->pkidv()."'";
-	   //unset($this->data[$this->PRI]);
 	 }
+
      if($this->ismapper&&count($this->maparray)>0)
 	 {
 	    $this->updatemaper();
@@ -602,7 +624,7 @@ class Model
 		     if($this->types[$k]=='date')
 			 {
 			   $this->data[$k]=date("Y-m-d");
-			 }else if($this->types[$k]=='datetime')
+			 }elseif($this->types[$k]=='datetime')
 			 {
 			   $this->data[$k]=date("Y-m-d H:i:s");
 			 }else{
@@ -645,56 +667,40 @@ class Model
 		{
 		  $this->data[$this->PRI]=$this->DB['master']->lastInsertId();
 		}
-	  }else{
-	        $this->string="UPDATE ".$this->tablename." set ";
-			$i=0;
-			foreach($this->data as $key=>$value)
-			{
-			  if($i==0)
-			  {
-				$this->string.=$key."='".$value."'";	
-			  }else
-			  {
-				$this->string.=",".$key."='".$value."'";	
-			  }
-			  $i++;
-			}
-			if($this->sql['where']!='')
-			 {
-			   $pkey.=" and ".substr($this->sql['where'],6,-1);
-			 }
-			$this->string.=" where ".$pkey;
-			$this->sql=array();
-			$this->effactrow=$this->DB['master']->exec($this->string);
-	  }
-	  if($mapper!='')
+		$pkey=true;
+	  }else
 	  {
-		  $afterkey='';
-		  if(isset($this->data[$this->mapper[$mapper]['localFiled']])&&$this->data[$this->mapper[$mapper]['localFiled']]!='')
-			{
-			   if($this->PRI==$this->mapper[$mapper]['localFiled'])
-                 $afterkey=$this->mapper[$mapper]['targetFiled'];
-			}
-		
-			if(isset($this->mapper[$mapper]['localFiled2'])&&isset($this->data[$this->mapper[$mapper]['localFiled2']])&&$this->data[$this->mapper[$mapper]['localFiled2']]!='')
-			{
-			   if($this->PRI==$this->mapper[$mapper]['localFiled2'])
-               $afterkey=$this->mapper[$mapper]['targetFiled2'];
-			}
-			if(isset($this->mapper[$mapper]['localFiled3'])&&isset($this->data[$this->mapper[$mapper]['localFiled3']])&&$this->data[$this->mapper[$mapper]['localFiled3']]!='')
-			{
-			   if($this->PRI==$this->mapper[$mapper]['localFiled3'])
-               $afterkey=$this->mapper[$mapper]['targetFiled3'];
-			}
-		if($afterkey!='')
+		$this->string="UPDATE ".$this->tablename." set ";
+		$i=0;
+		foreach($this->data as $key=>$value)
+		{
+		  if($i==0)
 		  {
-			$this->maps[$mapper]->data[$afterkey]=$this->pkidv();	
-			$this->maps[$mapper]->save();
+			$this->string.=$key."='".$value."'";	
+		  }else
+		  {
+			$this->string.=",".$key."='".$value."'";	
 		  }
-		 unset($pkey);
-	     unset($mapper);
-	     unset($saveafter);
-		 unset($afterkey);
+		  $i++;
+		}
+		if($this->sql['where']!='')
+		 {
+		   $pkey.=" and ".substr($this->sql['where'],6,-1);
+		 }
+		$this->string.=" where ".$pkey;
+		$this->sql=array();
+		$this->effactrow=$this->DB['master']->exec($this->string);
+		$pkey=false;
+	  }
+	  if($pkey===true)
+	  {//插入后操作
+         if(!Empty($saveafter))
+	     {
+			foreach($this->mapper as $v)
+			{
+	          $this->objsaveafter($v);
+			}
+	     }
 	  }
      if($this->ismapper&&count($this->maparray)>0)
 	 {
@@ -702,18 +708,24 @@ class Model
 	 }
 	  return $this;
   }
-  function pkid($id=null)
+  function objsaveafter($mapper)
   {
-	if($id!=null)
-	{
-	  $this->data[$this->PRI]=intval($id);
-	  return $this;
-	}
+     $fields=$this->gettargetPRIFields($mapper,$PRI);
+     M($this->mapper[$mapper]['TargetModel'])->setData(array($fields=>$this->pkidv()));
+     M($this->mapper[$mapper]['TargetModel'])->update($fields);
+  }
+  function clearData($data='')
+  {
+    $this->data=array();
+	$this->setData($data);
+  }
+  function pkid()
+  {
 	if(isset($this->data[$this->PRI])) return $this->data[$this->PRI]; else null;
   }
   function select($name)
   {
-    $this->sql['fields'].=$name;
+    $this->sql['fields']=$name;
 	return $this;
   }
   function from($name='')
@@ -722,7 +734,10 @@ class Model
 	   $this->sql['from']=$this->tablename;
 	}else{		
 		if(M($name)->tablename!=$this->tablename)
-		{	      
+		{
+		  $this->sql['isjoinleft']=true;
+		  $this->sql[$this->modelname.'.']=$this->tablename.".";
+	      $this->sql[M($name)->modelname."."]=M($name)->tablename.".";
 		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename.",".M($name)->getDataBaseName().".".M($name)->tablename;
 		}else
 		  $this->sql['from']=$this->tablename;
@@ -731,11 +746,17 @@ class Model
   }
   function leftjoin($name,$one=null)
   {
-	if($one==null)
+	if(isset($this->sql['isjoinleft']))
 	{
-     $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
+	  $this->sql['isjoinleft']=true;
+	  $this->sql[$this->modelname.'.']=$this->tablename.".";
+	  $this->sql[M($name)->modelname."."]=M($name)->tablename.".";
+	  $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}else{
-	 $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
+	 $this->sql['isjoinleft']=true;
+	 $this->sql[$this->modelname.'.']=$this->tablename.".";
+	 $this->sql[M($name)->modelname."."]=M($name)->tablename.".";
+     $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}
 	return $this;
   }
@@ -771,9 +792,9 @@ class Model
   function whereLike($name,$value)
   {
 	if($this->sql['where']=='')
-     $this->sql['where']=" where ".$name." like ('".$value."')";
+     $this->sql['where']=" where ".$name." like '".$value."'";
 	else
-	 $this->sql['where'].=" and ".$name." like ('".$value."')";
+	 $this->sql['where'].=" and ".$name." like '".$value."'";
 	return $this;
   }
   function whereOr($name,$value='')
@@ -831,6 +852,22 @@ class Model
         }
 	return 0;
   }
+  function getObjRecord()
+  {
+	if(count($this->record)>0)
+	{
+      return new ArrayObject($this->record);
+	}
+	return null;    
+  }
+  function getRecord($obj='')
+  {
+	if(count($this->record)>0)
+	{
+      return $this->record;
+	}
+	return null;
+  }
   function getData($obj='')
   {
 	if(count($this->data)>0)
@@ -838,13 +875,16 @@ class Model
 	   if($obj='Object') return new ArrayObject($this->data);
        else return $this->data;
 	}
-	$this->up(0);
+	if(count($this->record)>0)
+	{
+       $this->up(0);
+	}	
 	if(count($this->data)>0)
 	{
 	  if($obj='Object') return new ArrayObject($this->data);
        else return $this->data;
 	}else{
-	  return $this;
+	  return null;
 	}
   }
   function setData($caseArray)
@@ -937,9 +977,10 @@ class Model
   function up($id=null)
   {
 	if($this->recordend==true){
-	  unset($this->data);
+	  $this->data=array();
 	  return $this;
 	}
+	$this->data=array();
     if(is_array($this->record))
 	{
 	  if($id!=null) $this->objpoint=$id;
@@ -976,6 +1017,7 @@ class Model
 	return $this;
   }
   /*
+  *自定义sql，手工使用sql操作 $ms为指定是master还slaves数据库链接
   *自己手动支持sql,目前还不清楚是返回数组好还是返回pdo对像好
   */
   function query($string,$ms='')
@@ -1034,19 +1076,21 @@ class Model
   {
      return $this->tablename;
   }
-  function mapsFileds()
+  function selectFileds($fields,$modelname)
   {
-     $numargs = func_num_args();
-	 $fileds=func_get_args();
+     $tablename=M($modelname)->getTableName();
+	 $modelname=M($modelname)->modelname;
+	 $fields=explode(",",$fields);
 	 $selectfiled='';
+     $numargs=count($fields);
 	 for ($i = 0; $i < $numargs; $i++) {
-        $selectfiled.=$this->modelname.".".$fileds[$i]." as".$this->modelname.$fileds[$i]. ",";
+        $selectfiled.=$tablename.".".$fileds[$i]." as ".$modelname.$fileds[$i].",";
      }
 	 if($selectfiled!='')
 	   $selectfiled=substr($selectfiled, 0, -1);
 	 else
-	   $selectfiled=$this->modelname.".*";
-	 $this->sql['mapsfiled']=$selectfiled;
+	   $selectfiled=$modelname.".*";
+	 $this->select($selectfiled);
 	 return $this;
   }
   /*
@@ -1075,36 +1119,36 @@ class Model
 			 {
 			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
 			 }
-				try{
-					$this->maps[$mapper]->fetch();	
-					$this->maps[$mapper]->up();
-					$this->sql=array();
-					$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
-				}catch (PDOException $e) 
-					{
-					   echo $e->getMessage();
-					}
+			try{
+				$this->maps[$mapper]->fetch();	
+				$this->maps[$mapper]->up();
+				$this->sql=array();
+				$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+			}catch (PDOException $e) 
+				{
+				   echo $e->getMessage();
+				}
 		 }
 	 }elseif(is_array($this->record))
 	 {
-	    $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$this->mapper[$mapper]['localFiled']]."'");
-			if(isset($this->mapper[$mapper]['targetFiled2']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
-			 }
-			 if(isset($this->mapper[$mapper]['targetFiled3']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
-			 }
-				try{
-					$this->maps[$mapper]->fetch();	
-					$this->maps[$mapper]->up();
-					$this->sql=array();
-					$this->record[$mapper]=$this->maps[$mapper]->record; 
-				}catch (PDOException $e) 
-					{
-					   echo $e->getMessage();
-					}
+		$this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$this->mapper[$mapper]['localFiled']]."'");
+		if(isset($this->mapper[$mapper]['targetFiled2']))
+		 {
+		   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
+		 }
+		 if(isset($this->mapper[$mapper]['targetFiled3']))
+		 {
+		   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
+		 }
+		try{
+			$this->maps[$mapper]->fetch();	
+			$this->maps[$mapper]->up();
+			$this->sql=array();
+			$this->record[$mapper]=$this->maps[$mapper]->record; 
+		}catch (PDOException $e) 
+			{
+			   echo $e->getMessage();
+			}
 	 }
 	 return $this;
   }
@@ -1120,34 +1164,34 @@ class Model
 	    $fileds=implode(",",$relation);
 		$this->maps[$mapper]->select($fileds);
 	 }
-             $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'");
-			 if(isset($this->mapper[$mapper]['targetFiled2']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->data[$this->mapper[$mapper]['localFiled2']]."'");
-			 }
-			 if(isset($this->mapper[$mapper]['targetFiled3']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->data[$this->mapper[$mapper]['localFiled3']]."'");
-			 }
-		try{
-			$this->maps[$mapper]->fetch();	
-			$this->maps[$mapper]->up();
-			$this->sql=array();
-			if(is_array($this->record)&&isset($this->record[0]))
-			{
-			  $n=count($this->record);
-			  for($i=0;$i<$n;$i++)
-			  {
-			   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
-			  }
-			}elseif(is_array($this->record)){
-			  $this->record[$mapper]=$this->maps[$mapper]->record;
-			}
-			return $this;
-		}catch (PDOException $e) 
-			{
-			   echo $e->getMessage();
-			}
+	 $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'");
+	 if(isset($this->mapper[$mapper]['targetFiled2']))
+	 {
+	   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->data[$this->mapper[$mapper]['localFiled2']]."'");
+	 }
+	 if(isset($this->mapper[$mapper]['targetFiled3']))
+	 {
+	   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->data[$this->mapper[$mapper]['localFiled3']]."'");
+	 }
+	try{
+		$this->maps[$mapper]->fetch();	
+		$this->maps[$mapper]->up(0);
+		$this->sql=array();
+		if(is_array($this->record)&&is_array($this->record[0]))
+		{
+		  $n=count($this->record);
+		  for($i=0;$i<$n;$i++)
+		  {
+		   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+		  }
+		}elseif(is_array($this->record)){
+		  $this->record[$mapper]=$this->maps[$mapper]->record;
+		}
+		return $this;
+	}catch (PDOException $e) 
+	{
+	   echo $e->getMessage();
+	}
   }
   /*
   *数据关联$m->Books->bookname;
@@ -1155,41 +1199,59 @@ class Model
   */
   function hasOne($mapper,$relation=array())
   {
-	  $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
-	  if(count($relation)>0)
-	  {
-	    $fileds=implode(",",$relation);
+	$this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
+	if(count($relation)>0)
+	{
+		$fileds=implode(",",$relation);
 		$this->maps[$mapper]->select($fileds);
-	  }
-     $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'")->limit(1);
-	        if(isset($this->mapper[$mapper]['targetFiled2']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
-			 }
-			 if(isset($this->mapper[$mapper]['targetFiled3']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
-			 }
-	 
-		try{
-			$this->maps[$mapper]->fetch();	
-			$this->maps[$mapper]->up();
-			$this->sql=array();
-			if(is_array($this->record)&&isset($this->record[0]))
-			{
-			  $n=count($this->record);
-			  for($i=0;$i<$n;$i++)
-			  {
-			   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
-			  }
-			}elseif(is_array($this->record)){
-			  $this->record[$mapper]=$this->maps[$mapper]->record;
-			}
-			return $this;
-		}catch (PDOException $e) 
-			{
-			   echo $e->getMessage();
-			}
+	}
+	$this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'")->limit(1);
+	if(isset($this->mapper[$mapper]['targetFiled2']))
+	{
+		$this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
+	}
+	if(isset($this->mapper[$mapper]['targetFiled3']))
+	{
+		$this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
+	}
+
+	try{
+		$this->maps[$mapper]->fetch();	
+		$this->maps[$mapper]->up();
+		$this->sql=array();
+		if(is_array($this->record)&&is_array($this->record[0]))
+		{
+		  $n=count($this->record);
+		  for($i=0;$i<$n;$i++)
+		  {
+		   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+		  }
+		}elseif(is_array($this->record)){
+		  $this->record[$mapper]=$this->maps[$mapper]->record;
+		}
+		return $this;
+	}catch (PDOException $e) 
+		{
+		   echo $e->getMessage();
+		}
+  }
+  /*
+  * 返回一个record空对像
+  *
+  */
+  function getObjFields()
+  {
+    return new ArrayObject($this->fields);
+  }
+  function getDefaultFormField($data=array())
+  {
+     $t=array();
+	 foreach($this->fields as $key=>$value)
+	 {
+	   if(isset($data[$key])) $t[$key]=$data[$key];
+	   else $t[$key]=$value;
+	 }
+	 return $t;
   }
   function getArrayFormField($data='')
   {
@@ -1206,7 +1268,7 @@ class Model
   */
   function promaparray($mapper,$maparray)
   {
-	if(empty($maparray)) return $this; //清空mapper关系
+	if(empty($maparray)){ $this->maparray[$mapper]=array(); return $this; } //清空mapper关系
     $mapmodel=$this->mapper[$mapper]['TargetModel'];
 	$mpi=count($this->maparray[$mapper]);
 	foreach($maparray as $k=>$v)
@@ -1226,17 +1288,20 @@ class Model
 	//处理关联模型
     foreach($this->maparray[$mapper] as $k=>$v)
 	{
-	  if(isset(M($mapmodel)->types[$this->mapper[$mapper]['targetFiled']])&&!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled']]))
+	  if(isset($this->mapper[$mapper]['targetFiled'])&&M($mapmodel)->PRI!=$this->mapper[$mapper]['targetFiled'])
 	  {
-		 $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled']]=$this->data[$this->mapper[$mapper]['localFiled']];
+		 if(!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled']]))
+		   $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled']]=$this->data[$this->mapper[$mapper]['localFiled']];
 	  }
-	  if(isset(M($mapmodel)->types[$this->mapper[$mapper]['targetFiled2']])&&!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled2']]))
+	  if(isset($this->mapper[$mapper]['targetFiled2'])&&M($mapmodel)->PRI!=$this->mapper[$mapper]['targetFiled2'])
 	  {
-		 $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled2']]=$this->data[$this->mapper[$mapper]['localFiled2']];
+		 if(!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled2']]))
+		  $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled2']]=$this->data[$this->mapper[$mapper]['localFiled2']];
 	  }
-	  if(isset(M($mapmodel)->types[$this->mapper[$mapper]['targetFiled3']])&&!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled3']]))
+	  if(isset($this->mapper[$mapper]['targetFiled3'])&&M($mapmodel)->PRI!=$this->mapper[$mapper]['targetFiled3'])
 	  {
-		 $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled3']]=$this->data[$this->mapper[$mapper]['localFiled3']];
+		 if(!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled3']])) 
+		  $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled3']]=$this->data[$this->mapper[$mapper]['localFiled3']];
 	  }
 	}
 	return $this;
@@ -1282,6 +1347,115 @@ class Model
 	   $this->maps[$mapper]->setData($args);
 	 return $this;
   }
+  /*
+  *处理sql语句方法
+  *支持whereuserANDlanguageORbooksLIKE
+  *
+  */
+  public function whereSQL($sub)
+  {		
+		preg_match_all("/(([a-z0-9_]+)([AND|OR|LIKE|DY|DD|XY|XD|BD|ISNULL|NOTNULL|IN|NOTIN|NOTEQ|EQ]+)?)/",$sub,$substr);
+		if(count($substr[2])>0)
+	    {
+			$temp='';
+			$after=true;
+			if(is_array($Args[0]))
+			{
+			  $Args=explode(",",$Args[0][0]);
+			}else if(count($Args)<2){
+			  $Args=explode(",",$Args[0]);
+			}
+           foreach($substr[2] as $key=>$value)
+			{
+			  $value=strtolower($value);
+			  if(isset($this->types[$value]))
+	          {			  
+				  switch($substr[3][$key])
+				  {
+				    case 'AND':
+					case 'EQ':
+                        $temp.=$value."='".$Args[$i]."' AND ";
+						break;
+				    case 'OR':
+                        $temp.=$value."='".$Args[$i]."' OR  ";
+						break;
+				    case 'LIKE':
+                        $temp.=$value." LIKE '".$Args[$i]."' AND ";
+						break;
+				    case 'DY':
+                        $temp.=$value.">'".$Args[$i]."' AND ";
+						break;
+				    case 'DYOR':
+                        $temp.=$value.">'".$Args[$i]."' OR  ";
+						break;
+				    case 'DYOR':
+					case 'EQOR':
+                        $temp.=$value."='".$Args[$i]."' OR  ";
+						break;
+				    case 'DD':
+                        $temp.=$value.">='".$Args[$i]."' AND ";
+						break;
+				    case 'XY':
+                        $temp.=$value."<'".$Args[$i]."' AND ";
+						break;
+				    case 'DDOR':
+                        $temp.=$value.">='".$Args[$i]."' OR  ";
+						break;
+				    case 'XYOR':
+                        $temp.=$value."<'".$Args[$i]."' OR  ";
+						break;
+				    case 'XD':
+                        $temp.=$value."<='".$Args[$i]."' AND ";
+						break;
+				    case 'BD':
+					case 'NOTEQ':
+                        $temp.=$value."!='".$Args[$i]."' AND ";
+						break;
+				    case 'XDOR':
+                        $temp.=$value."<='".$Args[$i]."' OR  ";
+						break;
+				    case 'BDOR':
+					case 'NOTEQOR':
+                        $temp.=$value."!='".$Args[$i]."' OR  ";
+						break;
+				    case 'NOTIN':
+						if(is_array($Args[$i]))
+                         $temp.=$value." NOTIN (".implode($Args[$i]).") AND ";
+					    else
+						 $temp.=$value." NOTIN (".$Args[$i].") AND "; 
+						break;
+				    case 'IN':
+						if(is_array($Args[$i]))
+                         $temp.=$value." IN (".implode($Args[$i]).") AND ";
+					    else
+						 $temp.=$value." IN (".$Args[$i].") AND "; 
+						break;
+				    case 'ISNULL':
+                        $temp.=$value."  IS NULL AND ";
+						break;
+				    case 'NOTNULL':
+                        $temp.=$value." NOTNULL  AND ";
+						break;
+					default:
+						if($substr[3][$key]=='')
+					    {
+					      $temp.=$value."='".$Args[$i]."'     ";
+						  $after=false;
+					    }
+				  }
+			  }//TYPES
+			}	
+			if($temp!='')
+			{
+              if($after)
+			  {
+			    $temp=substr($temp,0,-4);
+			  }
+			  $this->where($temp);
+			}
+		}
+		return $this;
+  }
   function __call($name,$Args)
   {
 	if($name=='get') return $this->getArray($Args);
@@ -1318,36 +1492,11 @@ class Model
       $sub=substr($name,5);	  
 	  if(isset($this->types[strtolower($sub)]))
 	  {
-	    return $this->where($sub."='".$Args['0']."'");
+	    $this->where($sub."='".$Args['0']."'");
+		return $this;
 	  }else{
-	    $substr=explode("And",$sub);
-		if(isset($this->types[strtolower($substr[0])]))
-	    {
-		    $temp='';
-			$i=0;			
-			if(is_array($Args[0]))
-			{
-			  $Args=explode(",",$Args[0][0]);
-			}else if(count($Args)<2){
-			  $Args=explode(",",$Args[0]);
-			}
-			foreach($substr as $key=>$value)
-			{
-			  if(isset($this->types[strtolower($value)]))
-	          {			  
-				  if($i==0)
-				  {
-					$temp.=$value."='".$Args[$i]."'";	
-				  }else
-				  {
-					$temp.=" and ".$value."='".$Args[$i]."'";	
-				  }
-				  $i++;
-			  }
-			}
-			if($temp!='')
-              return $this->where($temp);
-		}
+        $this->whereSQL($sub);
+		return $this;
 	  }
 	}	
   }
