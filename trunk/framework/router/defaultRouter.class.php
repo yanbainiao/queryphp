@@ -6,13 +6,19 @@ class defaultRouter extends controller{
 	$this->assign("ssss","aa");
 	$this->hhh="88";
 	
-	$booktype=M("booktype");
+	//$booktype=M("booktype");
 	/*
 	echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
 	print_r($booktype->data);
 	echo $booktype->classname;
 	*/
-	J("saybye",array("bbee"=>6666,"ccdd"=>888));
+
+	   $booktype=M("booktype");
+	   //$booktype->selectSupply("address,title");
+       $booktype->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
+       print_r($booktype->getObjRecord());
+
+	//J("saybye",array("bbee"=>6666,"ccdd"=>888));
   }
   function saybye()
   {

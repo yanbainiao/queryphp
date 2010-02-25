@@ -725,7 +725,9 @@ class Model
   }
   function select($name)
   {
-    $this->sql['fields']=$name;
+    if($this->sql['fields']=='') $this->sql['fields'].=$name;
+	else $this->sql['fields'].=",".$name;
+	echo "sfsdfsf";
 	return $this;
   }
   function from($name='')
@@ -737,71 +739,86 @@ class Model
 		{
 		  $this->sql['isjoinleft']=true;
 		  $this->sql[$this->modelname.'.']=$this->tablename.".";
-	      $this->sql[M($name)->modelname."."]=M($name)->tablename.".";
-		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename.",".M($name)->getDataBaseName().".".M($name)->tablename;
+		  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
+		  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
+		  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
+		  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
+		  $this->sql['joinmodel']=M($name)->modelname.".";
+		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname.",".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 		}else
 		  $this->sql['from']=$this->tablename;
 	}
 	return $this;
   }
+
   function leftjoin($name,$one=null)
   {
 	if(isset($this->sql['isjoinleft']))
 	{
 	  $this->sql['isjoinleft']=true;
 	  $this->sql[$this->modelname.'.']=$this->tablename.".";
-	  $this->sql[M($name)->modelname."."]=M($name)->tablename.".";
+	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
+	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
+	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
+	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
+	  $this->sql['joinmodel']=M($name)->modelname.".";
 	  $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}else{
-	 $this->sql['isjoinleft']=true;
-	 $this->sql[$this->modelname.'.']=$this->tablename.".";
-	 $this->sql[M($name)->modelname."."]=M($name)->tablename.".";
+	  $this->sql['isjoinleft']=true;
+	  $this->sql[$this->modelname.'.']=$this->tablename.".";
+	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
+	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
+	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
+	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
+	  $this->sql['joinmodel']=M($name)->modelname.".";
      $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}
 	return $this;
   }
-  function joinon($name)
+  function joinon($name,$modelname='')
   {
-    $this->sql['from']=$this->sql['from']." ON ".$name;
+    $this->sql['joinon']=$name;
+
+	$this->sql['from']=$this->sql['from']." ON ".$name;
 	return $this;
   }
   function orderby($name)
   {
-    $this->sql['orderby']=" order by ".$name;
+	$this->sql['orderby']=" order by ".$this->getFixSQL($name).$name;
 	return $this;
   }
   function groupby($name)
   {
-    $this->sql['groupby']=" group by ".$name;
+    $this->sql['groupby']=" group by ".$this->getFixSQL($name).$name;
 	return $this;
   }
   function where($name,$value='')
   {
-	if($value!='') $this->sql['where']=" where ".$name."='".$value."'";
+	if($value!='') $this->sql['where']=" where ".$this->getFixSQL($name).$name."='".$value."'";
 	else $this->sql['where']=" where ".$name;
 	return $this;
   }
   function whereIn($name,$value)
   {
 	if($this->sql['where']=='')
-     $this->sql['where']=" where ".$name." IN (".$value.")";
+     $this->sql['where']=" where ".$this->getFixSQL($name).$name." IN (".$value.")";
 	else
-	 $this->sql['where'].=" and ".$name." IN (".$value.")";
+	 $this->sql['where'].=" and ".$this->getFixSQL($name).$name." IN (".$value.")";
 	return $this;
   }
   function whereLike($name,$value)
   {
 	if($this->sql['where']=='')
-     $this->sql['where']=" where ".$name." like '".$value."'";
+     $this->sql['where']=" where ".$this->getFixSQL($name).$name." like '".$value."'";
 	else
-	 $this->sql['where'].=" and ".$name." like '".$value."'";
+	 $this->sql['where'].=" and ".$this->getFixSQL($name).$name." like '".$value."'";
 	return $this;
   }
   function whereOr($name,$value='')
   {
     if($this->sql['where']=='') $this->sql['where']=" where ";
 	else $this->sql['where'].=" OR ";
-	if($value!='') $this->sql['where'].=$name."='".$value."'";
+	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
 	else $this->sql['where'].=$name;
 	return $this;
   }
@@ -809,7 +826,7 @@ class Model
   {
     if($this->sql['where']=='') $this->sql['where']=" where ";
 	else $this->sql['where'].=" and ";
-	if($value!='') $this->sql['where'].=$name."='".$value."'";
+	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
 	else $this->sql['where'].=$name;
 	return $this;
   }
@@ -818,6 +835,18 @@ class Model
     $this->sql['limit']=" limit ".intval($start);
 	if($end!=null) $this->sql['limit'].=",".intval($end);
     return $this;
+  }
+  function getFixSQL($fields,$modelname='')
+  {
+    if($modelname=='') $modelname=$this->modelname;
+	$fix='';
+	if($this->sql['isjoinleft'])
+	{
+	   $fix=$this->sql["fix".$modelname.'.'];	   
+	   if(preg_match ("/".$fix."/i",$fields))
+		   $fix='';
+	}
+	return $fix;
   }
   function colupdate($colname,$num=1)
   {	
@@ -860,11 +889,16 @@ class Model
 	}
 	return null;    
   }
-  function getRecord($obj='')
+  function getRecord($i='')
   {
 	if(count($this->record)>0)
 	{
-      return $this->record;
+      if($i!='')
+	  {	    
+	   if(!is_numeric($i)) $i=intval($i);
+        return $this->record[$i];
+	  }else
+	    return $this->record;
 	}
 	return null;
   }
@@ -1076,6 +1110,10 @@ class Model
   {
      return $this->tablename;
   }
+  /*
+  *链接leftjoin 时候使用
+  *->selectbooks("bookname,bookid")这样子
+  */
   function selectFileds($fields,$modelname)
   {
      $tablename=M($modelname)->getTableName();
@@ -1084,7 +1122,7 @@ class Model
 	 $selectfiled='';
      $numargs=count($fields);
 	 for ($i = 0; $i < $numargs; $i++) {
-        $selectfiled.=$tablename.".".$fileds[$i]." as ".$modelname.$fileds[$i].",";
+        $selectfiled.=$modelname.".".$fields[$i].",";
      }
 	 if($selectfiled!='')
 	   $selectfiled=substr($selectfiled, 0, -1);
@@ -1374,72 +1412,72 @@ class Model
 				  {
 				    case 'AND':
 					case 'EQ':
-                        $temp.=$value."='".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."' AND ";
 						break;
 				    case 'OR':
-                        $temp.=$value."='".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."' OR  ";
 						break;
 				    case 'LIKE':
-                        $temp.=$value." LIKE '".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value." LIKE '".$Args[$i]."' AND ";
 						break;
 				    case 'DY':
-                        $temp.=$value.">'".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">'".$Args[$i]."' AND ";
 						break;
 				    case 'DYOR':
-                        $temp.=$value.">'".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">'".$Args[$i]."' OR  ";
 						break;
 				    case 'DYOR':
 					case 'EQOR':
-                        $temp.=$value."='".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."' OR  ";
 						break;
 				    case 'DD':
-                        $temp.=$value.">='".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">='".$Args[$i]."' AND ";
 						break;
 				    case 'XY':
-                        $temp.=$value."<'".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<'".$Args[$i]."' AND ";
 						break;
 				    case 'DDOR':
-                        $temp.=$value.">='".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">='".$Args[$i]."' OR  ";
 						break;
 				    case 'XYOR':
-                        $temp.=$value."<'".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<'".$Args[$i]."' OR  ";
 						break;
 				    case 'XD':
-                        $temp.=$value."<='".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<='".$Args[$i]."' AND ";
 						break;
 				    case 'BD':
 					case 'NOTEQ':
-                        $temp.=$value."!='".$Args[$i]."' AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."!='".$Args[$i]."' AND ";
 						break;
 				    case 'XDOR':
-                        $temp.=$value."<='".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<='".$Args[$i]."' OR  ";
 						break;
 				    case 'BDOR':
 					case 'NOTEQOR':
-                        $temp.=$value."!='".$Args[$i]."' OR  ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."!='".$Args[$i]."' OR  ";
 						break;
 				    case 'NOTIN':
 						if(is_array($Args[$i]))
-                         $temp.=$value." NOTIN (".implode($Args[$i]).") AND ";
+                         $temp.=$this->sql["fix".$this->modelname.'.'].$value." NOTIN (".implode($Args[$i]).") AND ";
 					    else
-						 $temp.=$value." NOTIN (".$Args[$i].") AND "; 
+						 $temp.=$this->sql["fix".$this->modelname.'.'].$value." NOTIN (".$Args[$i].") AND "; 
 						break;
 				    case 'IN':
 						if(is_array($Args[$i]))
-                         $temp.=$value." IN (".implode($Args[$i]).") AND ";
+                         $temp.=$this->sql["fix".$this->modelname.'.'].$value." IN (".implode($Args[$i]).") AND ";
 					    else
-						 $temp.=$value." IN (".$Args[$i].") AND "; 
+						 $temp.=$this->sql["fix".$this->modelname.'.'].$value." IN (".$Args[$i].") AND "; 
 						break;
 				    case 'ISNULL':
-                        $temp.=$value."  IS NULL AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."  IS NULL AND ";
 						break;
 				    case 'NOTNULL':
-                        $temp.=$value." NOTNULL  AND ";
+                        $temp.=$this->sql["fix".$this->modelname.'.'].$value." NOTNULL  AND ";
 						break;
 					default:
 						if($substr[3][$key]=='')
 					    {
-					      $temp.=$value."='".$Args[$i]."'     ";
+					      $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."'     ";
 						  $after=false;
 					    }
 				  }
@@ -1470,6 +1508,12 @@ class Model
 	  }
 	  return $this->maps[$mapper];
 	}
+	if(substr($name,0,6)=='select')
+	{
+      $sub=substr($name,6);	  
+	  $this->selectFileds($Args['0'],strtolower($sub));
+	  return $this;
+	}	
 	if(strtolower(substr($name,0,3))=='set')
 	{
 	  $str=substr($name,3);
@@ -1498,7 +1542,7 @@ class Model
         $this->whereSQL($sub);
 		return $this;
 	  }
-	}	
+	}
   }
 }
 
