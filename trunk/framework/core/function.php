@@ -153,25 +153,32 @@ function R($router=null)
    }
 }
 //M为调用类库模型，第一次就开始生成文件了
-function M($table=null)
+function M($modelname=null,$tablename=null)
 {
-   if($table==null) return null;
-   $table=$table."Model";
+   if($modelname==null) return null;
+   $table=$modelname."Model";
    if(isset($GLOBALS[$table]))
    {
      return $GLOBALS[$table];
    }else{
+	 if(!empty($tablename))
+	   {
+		 initModelclass($modelname."Base",$tablename);
+	   }
      $GLOBALS[$table]=new $table();
+
 	 return $GLOBALS[$table];
    }
 }
 //初始化基本类文件，文件格式根据mysql数据库自动把结构写进去
-function initModelclass($modelname)
+function initModelclass($modelname,$tablename=null)
 {
    $fix=substr($modelname,-4);
+   if($tablename==null) $tablename=$modelname;
    if($fix=="Base") $modelname=substr($modelname,0,-4);
-   $string="DESCRIBE ".$modelname;	
-   $DB=getConnect($modelname);
+   $string="DESCRIBE ".$tablename;	
+   
+   $DB=getConnect($tablename,$modelname);
 	try{
 	    $res=$DB['master']->query($string);
         $mate =$res->fetchAll(PDO::FETCH_ASSOC);  
@@ -184,7 +191,7 @@ function initModelclass($modelname)
 	   $newmodelstr="<?php \n class ".$modelname."Base extends model{ \n ";
 	   $fields=array();
        $types=array();
-	   $newmodelstr.="  var \$tablename='".$modelname."';";
+	   $newmodelstr.="  var \$tablename='".$tablename."';";
 	   foreach($mate as $key=>$value)
 	   {
 		  $value['Field']=strtolower($value['Field']);
