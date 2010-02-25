@@ -8,3 +8,7 @@ testproject是项目目录
  class  本项目使用的普通类文件
  lib    存放类库文件或插件
 等目录
+
+ormtest.php是独立使用ORM数据库对像设计的
+可以把本ORM类在你的现有项目中使用
+ORM使用方式见文档
