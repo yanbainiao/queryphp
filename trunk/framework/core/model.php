@@ -19,13 +19,17 @@ class Model
    var $databasename;
    var $ismapper;
    var $isjoinleft;
+   var $after;
+   var $before;
    public function __construct() {
 	   $this->modelname=substr(get_class($this),0,-5);
 	   $this->DB=getConnect($this->tablename,$this->modelname,$this->conn);
+	   /*
 	   if(is_array($this->DB))
 	   {
 	     
 	   }
+	   */
 	   return $this;
    }
   public function getMate()
@@ -114,6 +118,10 @@ class Model
 		call_user_func(array($this,$this->mapper[$name]['map']),$name);
 	  }
 	  $this->ismapper=true;
+	  $this->after=$name;
+	  $this->aftermodel=$this->mapper[$name]['TargetModel'];
+	  $this->before=$name;
+	  $this->beforemodel=$this->modelname;
 	  return $this->maps[$mapper]=M($this->mapper[$name]['TargetModel']);
 	}else{ 
 	  if(count($this->record)>0)
@@ -133,6 +141,10 @@ class Model
 	  return $this->data[strtolower($name)]=$value;
 	}elseif(isset($this->mapper[$name])){
         $this->ismapper=true;
+	    $this->after=$name;
+	    $this->aftermodel=$this->mapper[$name]['TargetModel'];
+	    $this->before=$name;
+	    $this->beforemodel=$this->modelname;
 		$this->promaparray($name,$value);       
 		return $this;
 	 }else{
@@ -151,7 +163,7 @@ class Model
   /*
   * 到得一个ID record(一行)
   * $book->get(1,6);
-  *
+  * $book->find(1,6)
   */
   function getArray()
   {
@@ -247,21 +259,34 @@ class Model
            echo $e->getMessage();
         }
   }
-  function pkidv()
+  function pkidkey()
   {
-    if(strtolower(substr($this->types[$this->PRI],0,3))=='int')
-	{
-	   return intval($this->data[$this->PRI]);
-	}
+	return $this->PRI;
   }
-  function newRecord()
-  {
-    if($this->autoid) unset($this->data[$this->PRI]);
+  /*
+  *生成一个空的data
+  *也可以返回一个空的小对像 
+  *$this->getObjFields 返回一个空的数组对象
+  */
+  function newRecord($data=array())
+  {    
+	$this->data=array();
+	$this->getDefaultFormField($data);
+	if($this->autoid) unset($this->data[$this->PRI]);
 	return $this;
   }
-  function copyRecord()
+  function copyRecord($id='')
   {
-    if($this->autoid) unset($this->data[$this->PRI]);
+    if($id!='')
+	{
+	   if(isset($this->record[$id])){ 
+		   $this->up($id);
+		}else{
+		   $this->getArray(intval($id));
+		   $this->up();
+		}
+	}
+	if($this->autoid) unset($this->data[$this->PRI]);
 	return $this;
   }
   /*
@@ -587,7 +612,7 @@ class Model
 		unset($this->data[$this->PRI]);
 	 }elseif(is_array($id)){
 	    $this->setData($id);
-		if(isset($this->data[$this->PRI])) $pkey=$this->PRI."='".$this->pkidv()."'";
+		if(isset($this->data[$this->PRI])) $pkey=$this->PRI."='".$this->pkid()."'";
 	 }elseif(is_object($id)){
 		 if($id->modelname!=$this->modelname&&count($this->mapper)>0)
 	     {
@@ -601,12 +626,12 @@ class Model
 			}
 	     }
 	   if($this->data[$this->PRI]==0) unset($this->data[$this->PRI]);
-	   else $pkey=$this->PRI."='".$this->pkidv()."'";
+	   else $pkey=$this->PRI."='".$this->pkid()."'";
 
 	 }elseif(is_numeric($this->data[$this->PRI]))
 	 {
 	   if($this->data[$this->PRI]==0) unset($this->data[$this->PRI]);
-	   else $pkey=$this->PRI."='".$this->pkidv()."'";
+	   else $pkey=$this->PRI."='".$this->pkid()."'";
 	 }
 
      if($this->ismapper&&count($this->maparray)>0)
@@ -711,7 +736,7 @@ class Model
   function objsaveafter($mapper)
   {
      $fields=$this->gettargetPRIFields($mapper,$PRI);
-     M($this->mapper[$mapper]['TargetModel'])->setData(array($fields=>$this->pkidv()));
+     M($this->mapper[$mapper]['TargetModel'])->setData(array($fields=>$this->pkid()));
      M($this->mapper[$mapper]['TargetModel'])->update($fields);
   }
   function clearData($data='')
@@ -727,7 +752,6 @@ class Model
   {
     if($this->sql['fields']=='') $this->sql['fields'].=$name;
 	else $this->sql['fields'].=",".$name;
-	echo "sfsdfsf";
 	return $this;
   }
   function from($name='')
@@ -1390,96 +1414,93 @@ class Model
   *支持whereuserANDlanguageORbooksLIKE
   *
   */
-  public function whereSQL($sub)
+  public function whereSQL($sub,$Args)
   {		
-		preg_match_all("/(([a-z0-9_]+)([AND|OR|LIKE|DY|DD|XY|XD|BD|ISNULL|NOTNULL|IN|NOTIN|NOTEQ|EQ]+)?)/",$sub,$substr);
-		if(count($substr[2])>0)
+		$substr=preg_split("/(AND|OR|LIKE|DY|DD|XY|XD|BD|ISNULL|NOTNULL|IN|NOTIN|NOTEQ|EQ)/",$sub,-1,PREG_SPLIT_DELIM_CAPTURE);
+		$numsub=count($substr);
+		if($numsub>0)
 	    {
 			$temp='';
 			$after=true;
-			if(is_array($Args[0]))
+           for($i=0,$j=0;$i<$numsub;$i++,$j++)
 			{
-			  $Args=explode(",",$Args[0][0]);
-			}else if(count($Args)<2){
-			  $Args=explode(",",$Args[0]);
-			}
-           foreach($substr[2] as $key=>$value)
-			{
-			  $value=strtolower($value);
+			  $value=strtolower($substr[$i]);
 			  if(isset($this->types[$value]))
 	          {			  
-				  switch($substr[3][$key])
+				  $key=++$i;
+				  switch($substr[$key])
 				  {
 				    case 'AND':
 					case 'EQ':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value."='".$Args[$j]."' AND ";
 						break;
 				    case 'OR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value."='".$Args[$j]."' OR  ";
 						break;
 				    case 'LIKE':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value." LIKE '".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value." LIKE '".$Args[$j]."' AND ";
 						break;
 				    case 'DY':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">'".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value.">'".$Args[$j]."' AND ";
 						break;
 				    case 'DYOR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">'".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value.">'".$Args[$j]."' OR  ";
 						break;
 				    case 'DYOR':
 					case 'EQOR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value."='".$Args[$j]."' OR  ";
 						break;
 				    case 'DD':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">='".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value.">='".$Args[$j]."' AND ";
 						break;
 				    case 'XY':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<'".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value."<'".$Args[$j]."' AND ";
 						break;
 				    case 'DDOR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value.">='".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value.">='".$Args[$j]."' OR  ";
 						break;
 				    case 'XYOR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<'".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value."<'".$Args[$j]."' OR  ";
 						break;
 				    case 'XD':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<='".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value."<='".$Args[$j]."' AND ";
 						break;
 				    case 'BD':
 					case 'NOTEQ':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."!='".$Args[$i]."' AND ";
+                        $temp.=$this->getFixSQL($name).$value."!='".$Args[$j]."' AND ";
 						break;
 				    case 'XDOR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."<='".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value."<='".$Args[$j]."' OR  ";
 						break;
 				    case 'BDOR':
 					case 'NOTEQOR':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."!='".$Args[$i]."' OR  ";
+                        $temp.=$this->getFixSQL($name).$value."!='".$Args[$j]."' OR  ";
 						break;
 				    case 'NOTIN':
-						if(is_array($Args[$i]))
-                         $temp.=$this->sql["fix".$this->modelname.'.'].$value." NOTIN (".implode($Args[$i]).") AND ";
+						if(is_array($Args[$j]))
+                         $temp.=$this->getFixSQL($name).$value." NOTIN (".implode($Args[$j]).") AND ";
 					    else
-						 $temp.=$this->sql["fix".$this->modelname.'.'].$value." NOTIN (".$Args[$i].") AND "; 
+						 $temp.=$this->getFixSQL($name).$value." NOTIN (".$Args[$j].") AND "; 
 						break;
 				    case 'IN':
-						if(is_array($Args[$i]))
-                         $temp.=$this->sql["fix".$this->modelname.'.'].$value." IN (".implode($Args[$i]).") AND ";
-					    else
-						 $temp.=$this->sql["fix".$this->modelname.'.'].$value." IN (".$Args[$i].") AND "; 
+						if(is_array($Args[$j]))
+						  $temp.=$this->getFixSQL($name).$value." IN (".implode(",",$Args[$j]).") AND ";                          
+					    else{
+                           $temp.=$this->getFixSQL($name).$value." IN (".$Args[$j].") AND ";
+						}
 						break;
 				    case 'ISNULL':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value."  IS NULL AND ";
+                        $temp.=$this->getFixSQL($name).$value."  IS NULL AND ";
 						break;
 				    case 'NOTNULL':
-                        $temp.=$this->sql["fix".$this->modelname.'.'].$value." NOTNULL  AND ";
+                        $temp.=$this->getFixSQL($name).$value." NOTNULL  AND ";
 						break;
 					default:
-						if($substr[3][$key]=='')
-					    {
-					      $temp.=$this->sql["fix".$this->modelname.'.'].$value."='".$Args[$i]."'     ";
-						  $after=false;
-					    }
+						  if($key==$numsub)
+					      {
+							  $temp.=$this->getFixSQL($name).$value."='".$Args[$j]."'     ";
+							  $after=false;
+						  }
 				  }
 			  }//TYPES
 			}	
@@ -1494,18 +1515,44 @@ class Model
 		}
 		return $this;
   }
+  function wheremapper($mapper)
+  {
+	$this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
+    
+	if(isset($this->mapper[$mapper]['targetFiled'])&&isset($this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled']]))
+	{
+	  $this->whereAnd($this->mapper[$mapper]['localFiled'],$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled']]);	  
+	}
+	if(isset($this->mapper[$mapper]['targetFiled2'])&&isset($this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled2']]))
+	{
+	  $this->whereAnd($this->mapper[$mapper]['localFiled2'],$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled2']]);	  
+	}
+	if(isset($this->mapper[$mapper]['targetFiled3'])&&isset($this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled3']]))
+	{
+	  $this->whereAnd($this->mapper[$mapper]['localFiled3'],$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled3']]);	  
+	}
+	return $this;
+  }
   function __call($name,$Args)
   {
 	if($name=='get') return $this->getArray($Args);
+	if($name=='find') return $this->getArray($Args);
 	if($name=='getAll') return $this->getAllArray($Args);
-	if(isset($this->mapper[$name])){	
+	if(isset($this->mapper[$name])){
 	  $this->maps[$name]=M($this->mapper[$name]['TargetModel']);
 	  if(is_array($Args[0]))
 	  {
 		$this->setDataToMapper($name,$Args[0]);
+	  }elseif(is_object($Args[0])||empty($Args[0])){
+		$this->wheremapper($name);
+		return $this;
 	  }elseif(method_exists($this,$this->mapper[$name]['map'])) {
 		call_user_func(array($this,$this->mapper[$name]['map']),$name,$Args);
-	  }
+	  }	  
+	  $this->after=$name;
+	  $this->aftermodel=$this->mapper[$name]['TargetModel'];
+	  $this->before=$name;
+	  $this->beforemodel=$this->modelname;
 	  return $this->maps[$mapper];
 	}
 	if(substr($name,0,6)=='select')
@@ -1539,7 +1586,19 @@ class Model
 	    $this->where($sub."='".$Args['0']."'");
 		return $this;
 	  }else{
-        $this->whereSQL($sub);
+        $this->whereSQL($sub,$Args);
+		return $this;
+	  }
+	}
+	if(substr($name,0,6)=='findBy')
+	{
+      $sub=substr($name,6);	
+	  if(isset($this->types[strtolower($sub)]))
+	  {
+	    $this->where($sub."='".$Args['0']."'");
+		return $this;
+	  }else{
+        $this->whereSQL($sub,$Args);
 		return $this;
 	  }
 	}
