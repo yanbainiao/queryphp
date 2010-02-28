@@ -333,3 +333,158 @@ testproject是项目目录
 	 //然后再改回来$channel=M("channel");
 	 //正式发布时候我们model目录下已有所有数据库表模型文件了所以我们不会再使用$channel=M("channel","www_channel");加表名了
 	 //有点哆嗦，意思是model下面有文件了就不要加表名了
+
+LEFTJOIN 查询方式
+
+	   $booktype=M("booktype");
+	   //$booktype->selectSupply("address,title");
+       $booktype->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
+       print_r($booktype->getObjRecord());
+
+
+
+下载后
+把data目录下testmysql.sql文件导入数据库做测试
+把数据库 用户名和密码和数据库名称
+framework/config/inc.ini.php 里面修改
+
+PHP code
+
+    /* *pdo链接 多少自己填,主从可以一样 * key 为正则表达式 ^web_开头的表，使用的链接 */ $config['pdoconn']=array( 'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")), "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")) ) );
+
+
+设置好链接后
+可以访问ormtest.php了
+http://localhost/queryphp/ormtest.php
+
+看到输出数据库内容了
+
+
+看看ormtest.php
+有什么内容
+
+PHP code
+
+    //产品环境使用(Product) //$projectenv="product"; $projectenv="product"; $config["webprojectpath"]=dirname(__FILE__)."/"; $config["webprojectname"]=strlen($_SERVER['SCRIPT_FILENAME'])."projectname"; //根据项目来缓存,所以最好一个网站不要一样 include($config["webprojectpath"]."framework/queryorm.php");
+
+
+
+原来只包含一个queryorm.php文件就可以了
+我们可以在我们现在的项目或程序中包含这个文件就可以了
+
+PHP code
+
+    $supply=M("supply"); //表示生成一个数据库模型 $supply->get(3,4); //表示取得两条主键为3 4的两条记录 print_r($supply->record); array ( 0 => array ( 'supplyid' => '3', 'typeid' => '1', 'bookid' => '410', 'userid' => '0', 'total' => '0', 'isView' => 'Y', 'author' => '', 'linkname' => '', 'phone' => '', 'isPic' => 'N', 'mobile' => '13800138000', 'address' => '上地站', 'email' => '', 'msn' => '', 'qq' => '', 'title' => 'ssssssss', 'dest' => '', 'picurl' => '', 'srcpri' => '0.00', 'outpri' => '0.00', 'per' => '0.0', 'press' => '', 'adddate' => '2007-10-06', 'content' => 'ssssssssssss', ), 1 => array ( 'supplyid' => '4', 'typeid' => '2', 'bookid' => '0', 'userid' => '0', 'total' => '0', 'isView' => 'Y', 'author' => '', 'linkname' => '', 'phone' => '', 'isPic' => '', 'mobile' => '', 'address' => '天津河东', 'email' => '', 'msn' => '', 'qq' => '', 'title' => '标题', 'dest' => '', 'picurl' => '', 'srcpri' => '0.00', 'outpri' => '0.00', 'per' => '0.0', 'press' => '', 'adddate' => '2007-10-06', 'content' => '内容', ), ) $supply->up();//edit 3 编辑刚才那两条记录第一行记录内容 //up执行后 $supply->data就有数据了 //有点类似$result[0];样子 //如果再up一次就是$result[1] 如果最后没有了就会变成空了 //当然也可以 $rowobj=$supply->getObjRecord(); $row=$supply->getRecord(); //这两个都是取得$supply->record; //取回所有record数据
+
+
+
+现在我在数据库中添加了一个info表怎么办
+假设在数据库中添加一个info表字段也设置好了
+那么我们来生成info数据库模型
+
+我们在程序中写一句
+$supply=M("info");
+就可以自动生成了info数据库模型了
+可以在
+framework/model目录下面看到多了两个文件
+infoModel.class.php infoBase.class.php
+infoBase.class.php  是数据库表的基本信息，这个不用理
+infoModel.class.php 是模型文件可以在这里添加其实方法 比如->setpassword($pwd);
+
+PHP code
+
+    function setpassword($pwd) { $this->data['password']=md5($pwd); return $this; }
+
+ 
+             
+是不是很简单
+但是如果我的表是www_info表怎么办呢，这种就是加了前辍的表
+我的模型总不能有前辍吧
+看看document里面文档说明
+    //第一次使用请加上表名"www_channel"这样就会自动生成channel模型了，
+//生成在model目录下面一个是channelBase.class.php和channelModel.class.php结尾的两个文件
+//$channel=M("channel","www_channel");
+//如果已生成过就不用表名了，只有第一次用或数据库更新了需要刷新才使用表名，切记
+//使用一次后如果正确的那么生成了两个文件，于是赶紧把$channel=M("channel","www_channel");改为
+//$channel=M("channel"); 这样就可以了不会再去生成那个Base.class.php文件
+//如果我把数据库表改了一下添加或删除字段
+//$channel=M("channel","www_channel");再加上表名再去刷新一下那个Base.class.php文件
+//然后再改回来$channel=M("channel");
+//正式发布时候我们model目录下已有所有数据库表模型文件了所以我们不会再使用$channel=M("channel","www_channel");加表名了
+//有点哆嗦，意思是model下面有文件了就不要加表名了
+
+那么我们使用$info=M("info","www_info");就可以生成了
+framework/model目录下面 infoModel.class.php infoBase.class.php
+删除 把访问一次
+http://localhost/queryphp/ormtest.php
+
+是不是又生成了两个文件跟刚才一样
+infoBase.class.php
+var $tablename='www_info'; //这个才是表名
+
+
+下面说说怎么就用操作数据据库了
+$supply->where($supply->pkidkey().">12")->delete();
+表示删除主键大于12的
+现在我们做下查询
+$supply->whereuseridANDbookid(12,9)->fetch();
+表示要取得userid=12 and bookid=9记录
+
+$supply->whereuseridORbookid(12,9)->fetch();
+表示要取得userid=12 OR bookid=9记录
+
+$supply->whereuseridIN(12,9)->fetch();
+表示要取得userid IN (12,9)记录
+
+        $supply->up(0);
+$supply->address="北京海淀区";
+$supply->update("address");
+        修改$supply->record[0]中记录
+        我们只更新address字段
+       
+        我们想复制一行
+        那么还是操作刚才那个 $supply->up(0);
+        因为数据还留在$supply->data中
+        我们复制一个
+        $supply->copyRecord()->save();
+        这样就可以新插入数据了
+        copyRecord()作用是把data中数据主键删除，没有主键保存那么会以插放方式 
+
+
+
+新应用，关联查询
+
+PHP code
+
+    $supply=M("supply"); 
+$supply->get(3,4)->up(); 
+//把3设置为编辑状态 
+$books=M("booktype"); 
+$books->get(411)->up(); 
+//取得id为411的行 并设置为编辑状态 
+$info=M("info")->limit(1)->fetch()->up(); 
+//取得info一行记录并设置编辑状态 
+$supply->Books($books)->Infos($info)->fetch(); 
+//关联查询 
+//有点类似这样子 
+where("bookid='".$books->bookid."' and typeid='".$infos->infoid."'")->fetch();
+ //当然这样也行 只要设置了$books,$infos有数据为编辑状态后 
+$supply->Books()->Infos()->fetch(); //是一样的。 
+print_r($supply->getRecord());
+
+
+
+也有一些新的where条件设置方法
+
+PHP code
+
+    //$supply->findBySupplyidDY("12"); where supplyid>'12' //DY表示大于 //AND|OR|LIKE|DY|DD|XY|XD|BD|ISNULL|NOTNULL|IN|NOTIN|NOTEQ|EQ 
+//             > >= <  <= !=                         != = //对应的符号
+ //$supply->whereuseridORbookid(12,9); 
+where userid='12' OR bookid='9'
+ //像用户登录时候查询经常用到 
+//$supply->whereUseridANDBookid(12,9);
+ where userid='12' AND bookid='9'
+ //$supply->findBybookidORuseridINaddress(12,array(77,56,8,9),'cname');
+ where bookid='12' OR userid IN (77,56,8,9) AND address='cname'
+
