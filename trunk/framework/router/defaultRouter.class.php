@@ -12,7 +12,7 @@ class defaultRouter extends controller{
 	print_r($booktype->data);
 	echo $booktype->classname;
 	*/
-
+   echo "[".__FUNCTION__."]";
 	   $booktype=M("booktype");
 	   //$booktype->selectSupply("address,title");
        $booktype->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
@@ -90,6 +90,11 @@ class defaultRouter extends controller{
 	//$sub="useridAND";
 	//$sub="asdfdgdasdLIKE";
 	echo "</pre>";
+  }
+  function adorm()
+  {
+    //高级教程用法
+
   }
 }
 ?>

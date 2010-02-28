@@ -65,14 +65,7 @@ class Model
 	   }
 	 }
   }
-  /*
-  * 自动填充字段
-  * autoField(array("field"=>"aabbcc","field2"=>"112233"));
-  * autoField(array("field"=>"aabbcc","field2"=>"112233"),'field,field2');
-  * autoField(array("field"=>"aabbcc","field2"=>"112233"),'field','field2');
-  * autoField($_POST,'field','field2');
-  */
-  function autoField()
+  function createForm()
   {
     $numargs = func_num_args();
     if ($numargs==1&&is_array(func_get_arg(0))) {
@@ -84,8 +77,65 @@ class Model
 		     $this->data[$v]=$_POST[$v];
 		  }
 		}
-    }
-	if(is_array(func_get_arg(0)))
+    }elseif($numargs==0){
+	  foreach($this->fields as $k=>$v)
+		{
+         if(isset($_POST[$k]))
+		  {
+			 $this->data[$k]=$_POST[$k];
+		  }
+		} 
+	}elseif(is_array(func_get_arg()))
+	{
+		$arg_list = func_get_args();
+		  if(!isset($arg_list[2]))
+		  {
+             $filedarray=explode(",",$arglist[1]);
+		  }
+		$arg0=func_get_arg(0);
+		for ($i = 1; $i < $numargs; $i++) {
+		  if(isset($arg_list[2]))
+		  {
+		   if(isset($this->fields[$arg_list[$i]]))
+		   {
+		     $this->data[$v]=$arg0[$arg_list[$i]];
+		   }
+		  }else{
+		    $this->data[$v]=$arg0[$filedarray[--$i]];
+		  }
+		}
+	}
+	return $this;    
+  }
+  /*
+  * 自动填充字段
+  * autoFieldS(array("field"=>"aabbcc","field2"=>"112233"));
+  * autoFieldS(array("field"=>"aabbcc","field2"=>"112233"),'field,field2');
+  * autoFieldS(array("field"=>"aabbcc","field2"=>"112233"),'field','field2');
+  * autoFieldS($_POST,'field','field2');
+  */
+  function autoFields()
+  {
+    $numargs = func_num_args();
+    if ($numargs==1&&is_array(func_get_arg(0))) {
+        $prefields=func_get_arg(0);
+		foreach($prefields as $k=>$v)
+		{
+         if(isset($this->fields[$v]))
+		  {
+		     $this->data[$v]=$_POST[$v];
+		  }
+		}
+    }elseif($numargs==0)
+	{
+		foreach($this->fields as $k=>$v)
+		{
+         if(isset($_POST[$k]))
+		  {
+			 $this->data[$k]=$_POST[$k];
+		  }
+		}
+	}elseif(is_array(func_get_arg()))
 	{
 		$arg_list = func_get_args();
 		  if(!isset($arg_list[2]))
@@ -127,7 +177,7 @@ class Model
 	  if(count($this->record)>0)
 	  {
 		$this->objpoint=0;
-	    $this->up(0);
+	    $this->edit(0);
         if(isset($this->data[strtolower($name)]))
 			return $this->data[strtolower($name)];
 	  }
@@ -279,12 +329,8 @@ class Model
   {
     if($id!='')
 	{
-	   if(isset($this->record[$id])){ 
-		   $this->up($id);
-		}else{
-		   $this->getArray(intval($id));
-		   $this->up();
-		}
+	   $this->getArray(intval($id));
+	   $this->edit();
 	}
 	if($this->autoid) unset($this->data[$this->PRI]);
 	return $this;
@@ -328,7 +374,7 @@ class Model
 		  $fields=$this->gettargetPRIFields($m,$this->PRI);
 		  $this->maparray[$m][$key][$fields]=$this->pkid();
 		  $value[$fields]=$this->pkid();
-          M($mname)->clearData($value);
+          M($mname)->clearEdit($value);
 		  M($mname)->save();          
 		  $mapperid=M($mname)->pkid();
           $this->maparray[$m][$key][M($mname)->PRI]=M($mname)->pkid();
@@ -389,7 +435,7 @@ class Model
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
 			$this->sql=array();
-			$this->effactrow=$this->DB['master']->exec($this->string);
+			$this->effectrow=$this->DB['master']->exec($this->string);
 		   }
 		  if(!isset($arglist[2]))
 		  { 
@@ -410,7 +456,7 @@ class Model
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
 			$this->sql=array();
-			$this->effactrow=$this->DB['master']->exec($this->string);
+			$this->effectrow=$this->DB['master']->exec($this->string);
 		   }			
 	   }
 	 }elseif(is_array($arglist[0])){ //数组更新
@@ -428,7 +474,7 @@ class Model
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
 			$this->sql=array();
-			$this->effactrow=$this->DB['master']->exec($this->string);
+			$this->effectrow=$this->DB['master']->exec($this->string);
 			if(!isset($arglist[1]))
 			  {  
 				 $this->setData($arglist[0]);
@@ -481,7 +527,7 @@ class Model
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
 			$this->sql=array();
-			$this->effactrow=$this->DB['master']->exec($this->string);
+			$this->effectrow=$this->DB['master']->exec($this->string);
 		   }
 		  if(!isset($arglist[1]))
 		  {  //更新当然record
@@ -682,7 +728,7 @@ class Model
 		}	
 		$this->string.=") VALUES(".$temp.")";
 		try{
-		 $this->DB['master']->exec($this->string);
+		 $this->effectrow=$this->DB['master']->exec($this->string);
 		 $this->sql=array();
 	    }catch (PDOException $e) 
         {
@@ -714,16 +760,16 @@ class Model
 		 }
 		$this->string.=" where ".$pkey;
 		$this->sql=array();
-		$this->effactrow=$this->DB['master']->exec($this->string);
+		$this->effectrow=$this->DB['master']->exec($this->string);
 		$pkey=false;
 	  }
 	  if($pkey===true)
 	  {//插入后操作
          if(!Empty($saveafter))
 	     {
-			foreach($this->mapper as $v)
+			foreach($saveafter as $v)
 			{
-	          $this->objsaveafter($v);
+	          $this->save_after($v);
 			}
 	     }
 	  }
@@ -733,13 +779,13 @@ class Model
 	 }
 	  return $this;
   }
-  function objsaveafter($mapper)
+  function save_after($mapper)
   {
-     $fields=$this->gettargetPRIFields($mapper,$PRI);
+     $fields=$this->gettargetPRIFields($mapper,$this->$PRI);
      M($this->mapper[$mapper]['TargetModel'])->setData(array($fields=>$this->pkid()));
      M($this->mapper[$mapper]['TargetModel'])->update($fields);
   }
-  function clearData($data='')
+  function clearEdit($data='')
   {
     $this->data=array();
 	$this->setData($data);
@@ -801,8 +847,58 @@ class Model
   }
   function joinon($name,$modelname='')
   {
-    $this->sql['joinon']=$name;
-
+	$this->sql['from']=$this->sql['from']." ON ".$name;
+	return $this;
+  }
+  function joinpreon($fields,$t=0,$modelname)
+  {
+	 $str='';
+     for($i=0,$j=0;$i<$t;$i++,$j++)
+	 {
+			if(isset($this->sql[$modelname."."]))
+			{
+			  $mname=$this->getFixSQL($fields[$i],$modelname).$fields[$i];
+			}else{
+			  $mname=$this->getFixSQL($fields[$i]).$fields[$i];
+			}	
+			$i++;
+        $fields[$i]=str_replace("'","",$fields[$i]);
+		if(is_numeric($fields[$i]))
+		{
+		  $str.=$mname."='".$fields[$i]."'";
+		}elseif(isset($this->types[$fields[$i]]))
+		{
+		  $str.=$mname."=".$this->getFixSQL($fields[$i]).$fields[$i];
+		}else{
+		  $str.=$mname."=".$this->getFixSQL($fields[$i]).$fields[$i];
+		}
+		$j++;
+	 }
+	 return $str;
+  }
+  function joinwhere($name,$modelname)
+  {
+	$modelname=strtolower($modelname);
+	$fields=preg_split("/( AND | OR )/i",$name,-1,PREG_SPLIT_DELIM_CAPTURE);
+    $count=count($fields);
+	  $str='';
+	  for($i=0;$i<$count;$i++)
+	  {
+		  $field=explode("=",$fields[$i]);		  	  
+		  if(count($field)==2){
+			  echo $modelname;
+		    $str.=$this->joinpreon($field,2,$modelname);
+	      }else{
+			 $f=strtoupper(trim($fields[$i]));	
+			if($f=='AND'||$f=='OR') 
+		    {
+		     $str.=" ".$f." ";
+		    }else{
+		    $str.=$fields[$i];
+			}
+		  }
+	  }
+    if($str!='') $name=$str;
 	$this->sql['from']=$this->sql['from']." ON ".$name;
 	return $this;
   }
@@ -818,8 +914,12 @@ class Model
   }
   function where($name,$value='')
   {
-	if($value!='') $this->sql['where']=" where ".$this->getFixSQL($name).$name."='".$value."'";
-	else $this->sql['where']=" where ".$name;
+
+    if($this->sql['where']=='') $this->sql['where']=" where ";
+	else $this->sql['where'].=" and ";
+
+	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
+	else $this->sql['where'].=$name;
 	return $this;
   }
   function whereIn($name,$value)
@@ -850,6 +950,7 @@ class Model
   {
     if($this->sql['where']=='') $this->sql['where']=" where ";
 	else $this->sql['where'].=" and ";
+
 	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
 	else $this->sql['where'].=$name;
 	return $this;
@@ -866,8 +967,8 @@ class Model
 	$fix='';
 	if($this->sql['isjoinleft'])
 	{
-	   $fix=$this->sql["fix".$modelname.'.'];	   
-	   if(preg_match ("/".$fix."/i",$fields))
+	   $fix=$this->sql["fix".$modelname.'.'];	
+	   if(preg_match ("/".str_replace(".","\.",$fix)."/i",$fields))
 		   $fix='';
 	}
 	return $fix;
@@ -897,7 +998,7 @@ class Model
 	try{
 		$res=$this->DB['master']->query($this->string);	
 		$total=$res->fetch(PDO::FETCH_ASSOC);  
-		$this->sql=array();
+		//$this->sql=array();
 		return $total['totalnum'];
 	}catch (PDOException $e) 
         {
@@ -930,16 +1031,12 @@ class Model
   {
 	if(count($this->data)>0)
 	{
-	   if($obj='Object') return new ArrayObject($this->data);
+	   if($obj=='Object') return new ArrayObject($this->data);
        else return $this->data;
 	}
-	if(count($this->record)>0)
-	{
-       $this->up(0);
-	}	
 	if(count($this->data)>0)
 	{
-	  if($obj='Object') return new ArrayObject($this->data);
+	  if($obj=='Object') return new ArrayObject($this->data);
        else return $this->data;
 	}else{
 	  return null;
@@ -979,12 +1076,14 @@ class Model
 	  }	  
 	  $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 	  $this->sql=array();
-	  return $this->DB['master']->exec($this->string);
+		  $this->effectrow=$this->DB['master']->exec($this->string);
+		  return $this;
 	}else if($id=='all')
 	{
 	   $this->string="TRUNCATE TABLE `".$this->tablename."`";
 	   $this->sql=array();
-	   return $this->DB['master']->exec($this->string);
+		  $this->effectrow=$this->DB['master']->exec($this->string);
+		  return $this;
 	}else{
           if($this->sql['where']=='')
 		  {
@@ -993,8 +1092,14 @@ class Model
 
           $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 		  $this->sql=array();
-		  return $this->DB['master']->exec($this->string);
+		  $this->effectrow=$this->DB['master']->exec($this->string);
+		  return $this;
 	}
+  }
+  function isEffect()
+  {
+    if($this->effectrow>1) return  $this->effectrow;
+	else false;
   }
   /*
   *重新把指针设置为record开头
@@ -1032,7 +1137,11 @@ class Model
 	   return false;
 	 }
   }
-  function up($id=null)
+  /*
+  *设置编辑函数
+  *把原来的-> function up()改为edit这样比较理解
+  */
+  function edit($id=null)
   {
 	if($this->recordend==true){
 	  $this->data=array();
@@ -1183,7 +1292,7 @@ class Model
 			 }
 			try{
 				$this->maps[$mapper]->fetch();	
-				$this->maps[$mapper]->up();
+				$this->maps[$mapper]->edit();
 				$this->sql=array();
 				$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
 			}catch (PDOException $e) 
@@ -1204,7 +1313,7 @@ class Model
 		 }
 		try{
 			$this->maps[$mapper]->fetch();	
-			$this->maps[$mapper]->up();
+			$this->maps[$mapper]->edit();
 			$this->sql=array();
 			$this->record[$mapper]=$this->maps[$mapper]->record; 
 		}catch (PDOException $e) 
@@ -1237,7 +1346,7 @@ class Model
 	 }
 	try{
 		$this->maps[$mapper]->fetch();	
-		$this->maps[$mapper]->up(0);
+		$this->maps[$mapper]->edit(0);
 		$this->sql=array();
 		if(is_array($this->record)&&is_array($this->record[0]))
 		{
@@ -1279,7 +1388,7 @@ class Model
 
 	try{
 		$this->maps[$mapper]->fetch();	
-		$this->maps[$mapper]->up();
+		$this->maps[$mapper]->edit();
 		$this->sql=array();
 		if(is_array($this->record)&&is_array($this->record[0]))
 		{
@@ -1510,7 +1619,7 @@ class Model
 			  {
 			    $temp=substr($temp,0,-4);
 			  }
-			  $this->where($temp);
+			  $this->whereAnd($temp);
 			}
 		}
 		return $this;
@@ -1583,7 +1692,7 @@ class Model
       $sub=substr($name,5);	  
 	  if(isset($this->types[strtolower($sub)]))
 	  {
-	    $this->where($sub."='".$Args['0']."'");
+	    $this->where(strtolower($sub),$Args['0']);
 		return $this;
 	  }else{
         $this->whereSQL($sub,$Args);
@@ -1595,12 +1704,19 @@ class Model
       $sub=substr($name,6);	
 	  if(isset($this->types[strtolower($sub)]))
 	  {
-	    $this->where($sub."='".$Args['0']."'");
+	    $this->where(strtolower($sub),$Args['0']);
 		return $this;
 	  }else{
         $this->whereSQL($sub,$Args);
 		return $this;
 	  }
+	}
+
+	if(substr($name,0,6)=='joinon')
+	{
+	  $sub=substr($name,6);
+	  $this->joinwhere($Args['0'],$sub);
+	  return $this;
 	}
   }
 }

@@ -305,6 +305,6 @@ function __autoload($class_name) {
 function url_for()
 {
   $arg_list = func_get_args();
-  return $arg_list[0];
+  return substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"]))."/".$arg_list[0];
 }
 ?>
