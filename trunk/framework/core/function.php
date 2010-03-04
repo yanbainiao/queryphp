@@ -1,4 +1,36 @@
 <?php
+
+/*
+*加入类库
+*/
+function import($libpath)
+{
+   if(preg_match("|^@lib|i",$libpath))
+   {
+     $libpath=str_replace(".","/",substr($libpath,4)).".class.php";
+	 if(checkrequire(P("webprojectpath")."lib".$libpath)) return true;
+	 if(checkrequire(P("frameworkpath")."lib".$libpath)) return true;
+   }
+   if(preg_match("|^@plugin|i",$libpath))
+   {
+     $libpath=str_replace(".","/",substr($libpath,4)).".class.php";
+     if(checkrequire(P("webprojectpath")."plugin".$libpath)) return true;
+	 if(checkrequire(P("frameworkpath")."plugin".$libpath)) return true;
+   }
+}
+/*
+*
+*/
+function checkrequire($files)
+{
+  if(file_exists($files))
+  {
+    require_once($files);
+    return true;
+  }else{
+    return false;
+  }
+}
 /*
 *数据库链接生成
 */
@@ -305,6 +337,12 @@ function __autoload($class_name) {
 function url_for()
 {
   $arg_list = func_get_args();
-  return substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"]))."/".$arg_list[0];
+  $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"]))."/".$arg_list[0];
+  if(substr($url,-strlen($GLOBALS['config']['html']))!=$GLOBALS['config']['html'])
+  {
+     if(isset($arg_list[1])&&$arg_list[1]!=false)
+	   $url.=$GLOBALS['config']['html'];
+   }
+  return $url;
 }
 ?>

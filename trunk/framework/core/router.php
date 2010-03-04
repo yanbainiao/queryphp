@@ -32,7 +32,7 @@ class Router {
 	 $paths = explode("/",trim($_SERVER['PATH_INFO'],'/'));
      $controller=array_shift($paths);
      if(!empty($controller)){
-	   $this->urlcontroller=$controller;
+	   $this->urlcontroller=false;
 	   $rule=$this->RuleCheck($controller);	   
 	 }else{
 	   if(isset($_GET['router']))
@@ -40,7 +40,7 @@ class Router {
 		 $controller=$_GET['router'];
 	     $this->controller =$_GET['router']; 
 		 unset($_GET['router']);		 
-		 $this->urlcontroller=$controller;
+		 $this->urlcontroller=true;
 	   }
 	   if(isset($_GET['action']))
 	   {
@@ -152,8 +152,11 @@ class Router {
             $pathInfo = $_SERVER['PATH_INFO'];
             if(0 === strpos($pathInfo,$_SERVER['SCRIPT_NAME']))
                 $path = substr($pathInfo, strlen($_SERVER['SCRIPT_NAME']));
-            else
+            else{
                 $path = $pathInfo;
+			    if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME'])))
+				$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
+			}
         }elseif(!empty($_SERVER['ORIG_PATH_INFO'])) {
             $pathInfo = $_SERVER['ORIG_PATH_INFO'];
             if(0 === strpos($pathInfo, $_SERVER['SCRIPT_NAME']))
@@ -178,6 +181,8 @@ class Router {
                 reset($_SERVER);
             }
         }elseif(!empty($_SERVER["REDIRECT_URL"])){
+			$_SERVER["REDIRECT_URL"]=str_replace("//","/",$_SERVER["REDIRECT_URL"]);
+			$_SERVER["REQUEST_URI"]=$_SERVER["REDIRECT_URL"];
             $path = $_SERVER["REDIRECT_URL"];
             if(empty($_SERVER['QUERY_STRING']) || $_SERVER['QUERY_STRING'] == $_SERVER["REDIRECT_QUERY_STRING"])
             {
@@ -192,7 +197,15 @@ class Router {
                 }
                 reset($_SERVER);
             }
+			if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME'])))
+			$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
+
         }
+			if(isset($GLOBALS['config']['html'])&&$GLOBALS['config']['html']!='')
+			if(substr($path,-strlen($GLOBALS['config']['html']))==$GLOBALS['config']['html'])
+			{
+			  $path=substr($path,0,-strlen($GLOBALS['config']['html']));
+			}
         $_SERVER['PATH_INFO'] = empty($path) ? '/' : $path;
       	return $this;
 	} 
