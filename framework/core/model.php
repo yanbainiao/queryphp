@@ -23,7 +23,7 @@ class Model
    var $before;
    public function __construct() {
 	   $this->modelname=substr(get_class($this),0,-5);
-	   $this->DB=getConnect($this->tablename,$this->modelname,$this->conn);
+	   $this->DB=getConnect($this->getTablename(),$this->modelname,$this->conn);
 	   /*
 	   if(is_array($this->DB))
 	   {

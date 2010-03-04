@@ -13,6 +13,7 @@ class defaultRouter extends controller{
 	echo $booktype->classname;
 	*/
    echo "[".__FUNCTION__."]";
+   echo url_for("curd/edit");
 	   $booktype=M("booktype");
 	   //$booktype->selectSupply("address,title");
        $booktype->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
