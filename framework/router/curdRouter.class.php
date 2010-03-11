@@ -5,6 +5,7 @@ class curdRouter extends controller{
 	   $booktype=M("booktype");
 	   //getRecord表示么得
 	   $this->assign("list",$booktype->orderby("bookid desc")->limit(10)->fetch()->getRecord());
+	   //print_r($booktype->DB->getAttribute(PDO::ATTR_SERVER_INFO));
 	}
 	public function create()
 	{

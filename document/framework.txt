@@ -488,3 +488,82 @@ where userid='12' OR bookid='9'
  //$supply->findBybookidORuseridINaddress(12,array(77,56,8,9),'cname');
  where bookid='12' OR userid IN (77,56,8,9) AND address='cname'
 
+
+去除index.php测试
+
+C:\WINDOWS\system32\drivers\etc\hosts文件添加一行
+内容如下
+127.0.0.1       localhost
+192.168.0.10	www.app.com
+
+192.168.0.10的是你自己apache使用的IP,就是下面<VirtualHost *:80>
+*号中的IP，反证能访问你的本地网卡就可以了
+
+http://www.app.com/queryphp/project/index.php/default/index
+配置后希望可以变成这样子
+http://www.app.com/queryphp/project/default/index.html
+记得在inc.ini.php文件里面加多一行
+ $config['html']='.html'; 或把前面那个//去掉，这样就可以了
+虚拟主机配置测试，AllowOverride FileInfo 将会使用.htaccess配置
+<VirtualHost *:80>
+    <Directory "D:/work">
+        Order allow,deny
+        Allow from all
+	AllowOverride FileInfo 
+    </Directory> 
+  DocumentRoot "D:/work"
+  ServerName "www.app.com"
+</VirtualHost>
+
+
+.htaccess文件 放在project目录下面 就是每个项目目录下面，这样就会访问同级目录
+index.php文件
+
+  RewriteEngine On
+
+  # uncomment the following line, if you are having trouble
+  # getting no_script_name to work
+  #RewriteBase /
+
+  # we skip all files with .something
+  #RewriteCond %{REQUEST_URI} \..+$
+  #RewriteCond %{REQUEST_URI} !\.html$
+  #RewriteRule .* - [L]
+
+  # we check if the .html version is here (caching)
+  RewriteRule ^$ index.html [QSA]
+  RewriteRule ^([^.]+)$ $1.html [QSA]
+  RewriteCond %{REQUEST_FILENAME} !-f
+
+  # no, so we redirect to our front web controller
+  RewriteRule ^(.*)$ index.php [QSA,L]
+
+
+------------------------------------------------------------
+程序中使用url_for()方式
+
+
+模板中示示例 我们还是以CURD方式 
+
+    <td><a href="<?php echo url_for("curd/edit/id/".$value['bookid'])?>">编辑</a></td>
+    <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'])?>">删除</a></td>
+
+下载后在并在apache设置www.app.com 在c:/windows/system
+http://www.app.com/queryphp/project/curd/index
+
+是不是可以显示内容了
+
+
+如果显示了 在framework\config\inc.ini.php 文件中把下面这行内容去掉注释
+//$config['html']='.html';//开启.html结尾url
+
+
+http://www.app.com/queryphp/project/curd/index.html 访问
+是不是可以看到内容了
+
+所有链接都带.html结尾了。那我们有时候想不要.html结尾怎么办
+<a href="<?php echo url_for("curd/delete/id/".$value['bookid'],true)?>">删除</a>
+
+url_for(url,true);方式 表示不要html结尾
+删除会变成这样子
+http://www.app.com/queryphp/project/curd/delete/id/2
