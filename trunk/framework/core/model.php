@@ -23,7 +23,7 @@ class Model
    var $before;
    public function __construct() {
 	   $this->modelname=substr(get_class($this),0,-5);
-	   $this->DB=getConnect($this->getTablename(),$this->modelname,$this->conn);
+	   $this->DB=getConnect($this->getTablename(),$this->modelname,$this->conn);	   
 	   /*
 	   if(is_array($this->DB))
 	   {
@@ -40,7 +40,7 @@ class Model
         $result = $this->res->fetchAll(PDO::FETCH_ASSOC);  
 	} catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1001);
         }
 
 	return $result;
@@ -267,7 +267,7 @@ class Model
 		return $this;
 	}catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1002);
         }
   }
 
@@ -306,7 +306,7 @@ class Model
 		return $this;
 	}catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1003);
         }
   }
   function pkidkey()
@@ -732,7 +732,7 @@ class Model
 		 $this->sql=array();
 	    }catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1004);
         }
         if(isset($this->types[$this->PRI]))
 		{
@@ -886,7 +886,6 @@ class Model
 	  {
 		  $field=explode("=",$fields[$i]);		  	  
 		  if(count($field)==2){
-			  echo $modelname;
 		    $str.=$this->joinpreon($field,2,$modelname);
 	      }else{
 			 $f=strtoupper(trim($fields[$i]));	
@@ -984,7 +983,7 @@ class Model
 		return $res;
 	 }catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1005);
         }
 	}else{
 	  return false;
@@ -1002,7 +1001,7 @@ class Model
 		return $total['totalnum'];
 	}catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1006);
         }
 	return 0;
   }
@@ -1227,7 +1226,7 @@ class Model
 		return $this;
 	}catch (PDOException $e) 
         {
-           echo $e->getMessage();
+           throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1007);
         }    
   }
   function getDataBaseName()
@@ -1297,7 +1296,7 @@ class Model
 				$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
 			}catch (PDOException $e) 
 				{
-				   echo $e->getMessage();
+				   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1008);
 				}
 		 }
 	 }elseif(is_array($this->record))
@@ -1318,7 +1317,7 @@ class Model
 			$this->record[$mapper]=$this->maps[$mapper]->record; 
 		}catch (PDOException $e) 
 			{
-			   echo $e->getMessage();
+			   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1009);
 			}
 	 }
 	 return $this;
@@ -1361,7 +1360,7 @@ class Model
 		return $this;
 	}catch (PDOException $e) 
 	{
-	   echo $e->getMessage();
+	   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1010);
 	}
   }
   /*
@@ -1403,7 +1402,7 @@ class Model
 		return $this;
 	}catch (PDOException $e) 
 		{
-		   echo $e->getMessage();
+		   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1011);
 		}
   }
   /*

@@ -14,10 +14,11 @@ class defaultRouter extends controller{
 	*/
    echo "[".__FUNCTION__."]";
    echo url_for("curd/edit");
-	   $booktype=M("booktype");
+   phpinfo();
+	//   $booktype=M("booktype");
 	   //$booktype->selectSupply("address,title");
-       $booktype->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
-       print_r($booktype->getObjRecord());
+       //$booktype->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
+     //  print_r($booktype->getObjRecord());
 
 	//J("saybye",array("bbee"=>6666,"ccdd"=>888));
   }

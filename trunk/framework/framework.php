@@ -22,6 +22,7 @@ if($projectenv=='product'&&file_exists($config["frameworkpath"]."cache/core.cach
 	//$corecontent=substr(php_strip_whitespace($config["frameworkpath"]."core/base.class.php"),0,-2);
 	$corecontent=substr(php_strip_whitespace($config["frameworkpath"]."core/model.php"),0,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/function.php"),5,-2);
+	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/mylog.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/router.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/view.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/controller.php"),5);
@@ -33,6 +34,7 @@ if($projectenv=='product'&&file_exists($config["frameworkpath"]."cache/core.cach
 	include($config["frameworkpath"]."core/model.php");
 	include($config["frameworkpath"]."core/function.php");
 	include($config["frameworkpath"]."core/router.php");
+	include($config["frameworkpath"]."core/mylog.php");
 	include($config["frameworkpath"]."core/view.php");
 	include($config["frameworkpath"]."core/controller.php");
  }
@@ -57,5 +59,7 @@ $router=R($dispaths->controller);
 if (method_exists($router,$dispaths->action)) {
      call_user_func(array($router,$dispaths->action));
 	 $view->display(R($dispaths->controller)->view($dispaths->action));
+}else{
+  header("HTTP/1.1 404 Not Found");
 }
 ?>

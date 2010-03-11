@@ -45,7 +45,7 @@ hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #0
     <td><?php echo $value['classname'];?></td>
     <td><?php echo $value['typeid'];?></td>
     <td><a href="<?php echo url_for("curd/edit/id/".$value['bookid'])?>">编辑</a></td>
-    <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'])?>">删除</a></td>
+    <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'],true)?>">删除</a></td>
   </tr>
   <?php endforeach;?>
   <tr>
