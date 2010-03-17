@@ -27,31 +27,34 @@ hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #0
 </head>
 
 <body>
-目前编辑#:<?php echo $form['bookid']?>
 <ul>
 <li><a href="<?php echo url_for("curd/create")?>">添加新记录</a></li>
 <li><a href="<?php echo url_for("curd/index")?>">数据列表</a></li>
 </ul>
-<form id="form1" name="form1" method="post" action="<?php echo url_for("curd/update/id/".$form['bookid']);?>">
-<dt>
-<label for="clalssname">类型名</label>
-</dt>
-<dd>
-<input type="text" name="classname" id="classname" value="<?php echo $form['classname'];?>"/>
-</dd>
-<dt>
-<label for="clalssname">类型ID</label>
-</dt>
-<dd>
-<input type="text" name="typeid" id="typeid" value="<?php echo $form['typeid'];?>"/>
-</dd>
-<dt>
-<label for="clalssname"></label>
-</dt>
-<dd>
-<input name="submitform" value="修改" type="submit" />
-</dd>
-<input name="bookid" type="hidden" value="<?php echo $form['bookid']?>" />
-</form>
+<table width="400" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td>序号</td>
+    <td>类名</td>
+    <td>typeid</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <?php foreach($list as $key=>$value):?>
+  <tr>
+    <td><?php echo $value['bookid'];?></td>
+    <td><?php echo $value['classname'];?></td>
+    <td><?php echo $value['typeid'];?></td>
+    <td><a href="<?php echo url_for("curd/edit/id/".$value['bookid'],true)?>">编辑</a></td>
+    <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'],true)?>">删除</a></td>
+  </tr>
+  <?php endforeach;?>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
 </body>
 </html>
