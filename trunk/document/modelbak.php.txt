@@ -5,12 +5,12 @@ class Model
    var $tablename;
    var $fields=array();
    var $types=array();
-   var $PRI;  //主键名
-   var $data; //数据编辑焦点
-   var $autoid=false; //是否自增表
-   var $sql=array();  //查询使用的条件
-   var $string;       //保存查询sql语句
-   var $DB=array();   //数据库链接保存
+   var $PRI;
+   var $data;
+   var $autoid=false;
+   var $sql=array();
+   var $string;
+   var $DB=array();
    var $res=null;
    var $record=array();
    var $conn=0;
@@ -23,7 +23,7 @@ class Model
    var $before;
    public function __construct() {
 	   $this->modelname=substr(get_class($this),0,-5);
-	   $this->DB=getConnect($this->getTableName(),$this->modelname,$this->conn);	   
+	   $this->DB=getConnect($this->getTablename(),$this->modelname,$this->conn);	   
 	   /*
 	   if(is_array($this->DB))
 	   {
@@ -32,20 +32,9 @@ class Model
 	   */
 	   return $this;
    }
-  /*
-  *手工切换数据库链接
-  */
-  public function switchDB($model)
-  {
-	  $this->DB=getConnect($this->getTableName(),$model,$this->conn);
-	  return $this;
-  }
-  /*
-  *取得数据库结构
-  */
   public function getMate()
   {
-    $this->string="DESCRIBE ".$this->getTableName();	
+    $this->string="DESCRIBE ".$this->tablename;	
 	try{	
 	    $this->res=$this->DB['master']->query($this->string);
         $result = $this->res->fetchAll(PDO::FETCH_ASSOC);  
@@ -56,11 +45,8 @@ class Model
 
 	return $result;
   }
-  /*
-  *取得表结构字段信息
-  *处理表结构字段信息
-  */
-  public function fieldsTable()
+
+  public function analyseTable()
   {
      $mate=$this->getMate();
 	 if(is_array($mate))
@@ -79,14 +65,7 @@ class Model
 	   }
 	 }
   }
-  /*
-  * 自动填充字段
-  * create(array("field"=>"aabbcc","field2"=>"112233"));
-  * create(array("field"=>"aabbcc","field2"=>"112233"),'field,field2');
-  * create(array("field"=>"aabbcc","field2"=>"112233"),'field','field2');
-  * create($_POST,'field','field2');
-  */
-  function create()
+  function createForm()
   {
     $numargs = func_num_args();
     if ($numargs==1&&is_array(func_get_arg(0))) {
@@ -128,7 +107,57 @@ class Model
 	}
 	return $this;    
   }
-
+  /*
+  * 自动填充字段
+  * autoFieldS(array("field"=>"aabbcc","field2"=>"112233"));
+  * autoFieldS(array("field"=>"aabbcc","field2"=>"112233"),'field,field2');
+  * autoFieldS(array("field"=>"aabbcc","field2"=>"112233"),'field','field2');
+  * autoFieldS($_POST,'field','field2');
+  */
+  function autoFields()
+  {
+    $numargs = func_num_args();
+    if ($numargs==1&&is_array(func_get_arg(0))) {
+        $prefields=func_get_arg(0);
+		foreach($prefields as $k=>$v)
+		{
+         if(isset($this->fields[$v]))
+		  {
+		     $this->data[$v]=$_POST[$v];
+		  }
+		}
+    }elseif($numargs==0)
+	{
+		foreach($this->fields as $k=>$v)
+		{
+         if(isset($_POST[$k]))
+		  {
+			 $this->data[$k]=$_POST[$k];
+		  }
+		}
+	}elseif(is_array(func_get_arg()))
+	{
+		$arg_list = func_get_args();
+		  if(!isset($arg_list[2]))
+		  {
+             $filedarray=explode(",",$arglist[1]);
+		  }
+		$arg0=func_get_arg(0);
+		for ($i = 1; $i < $numargs; $i++) {
+		  if(isset($arg_list[2]))
+		  {
+		   if(isset($this->fields[$arg_list[$i]]))
+		   {
+		     $this->data[$v]=$arg0[$arg_list[$i]];
+		   }
+		  }else{
+		    $this->data[$v]=$arg0[$filedarray[--$i]];
+		  }
+		}
+	}
+	return $this;
+  }
+  
   function __get($name)
   {
     if(isset($this->data[strtolower($name)]))
@@ -139,6 +168,10 @@ class Model
 		call_user_func(array($this,$this->mapper[$name]['map']),$name);
 	  }
 	  $this->ismapper=true;
+	  $this->after=$name;
+	  $this->aftermodel=$this->mapper[$name]['TargetModel'];
+	  $this->before=$name;
+	  $this->beforemodel=$this->modelname;
 	  return $this->maps[$mapper]=M($this->mapper[$name]['TargetModel']);
 	}else{ 
 	  if(count($this->record)>0)
@@ -158,6 +191,10 @@ class Model
 	  return $this->data[strtolower($name)]=$value;
 	}elseif(isset($this->mapper[$name])){
         $this->ismapper=true;
+	    $this->after=$name;
+	    $this->aftermodel=$this->mapper[$name]['TargetModel'];
+	    $this->before=$name;
+	    $this->beforemodel=$this->modelname;
 		$this->promaparray($name,$value);       
 		return $this;
 	 }else{
@@ -178,7 +215,7 @@ class Model
   * $book->get(1,6);
   * $book->find(1,6)
   */
-  function getOne()
+  function getArray()
   {
 	$arg_list = func_get_args();
 	$arg_list=$arg_list[0];
@@ -222,7 +259,7 @@ class Model
 	  $fields=$this->sql['fields'];
 	}
 
-    $this->string="select ".$fields." from ".$this->getTableName()." where ".$pkey.$order;	
+    $this->string="select ".$fields." from ".$this->tablename." where ".$pkey.$order;	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
@@ -233,9 +270,7 @@ class Model
            throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1002);
         }
   }
-  /*
-  *返回所有行数
-  */
+
   function getAllArray()
   {
 	$arg_list = func_get_args();
@@ -263,7 +298,7 @@ class Model
 	{
 	  $fields=$this->sql['fields'];
 	}
-    $this->string="select ".$fields." from ".$this->getTableName()." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $this->string="select ".$fields." from ".$this->tablename." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
@@ -274,10 +309,7 @@ class Model
            throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1003);
         }
   }
-  /*
-  *取回ID主键名
-  */
-  function pkkey()
+  function pkidkey()
   {
 	return $this->PRI;
   }
@@ -293,15 +325,11 @@ class Model
 	if($this->autoid) unset($this->data[$this->PRI]);
 	return $this;
   }
-  /*
-  *复制一行对像内容
-  *$id为pkid();
-  */
   function copyRecord($id='')
   {
     if($id!='')
 	{
-	   $this->getOne(intval($id));
+	   $this->getArray(intval($id));
 	   $this->edit();
 	}
 	if($this->autoid) unset($this->data[$this->PRI]);
@@ -400,7 +428,7 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
@@ -421,7 +449,7 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
@@ -439,7 +467,7 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
@@ -492,7 +520,7 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
@@ -682,7 +710,7 @@ class Model
 			   $this->data[$k]=date("Y-m-d H:i:s");
 			 }
 		}    
-		$this->string="INSERT INTO `".$this->getTableName()."` (";
+		$this->string="INSERT INTO `".$this->tablename."` (";
 		$i=0;
 		$temp='';
 		foreach($this->data as $key=>$value)
@@ -713,7 +741,7 @@ class Model
 		$pkey=true;
 	  }else
 	  {
-		$this->string="UPDATE ".$this->getTableName()." set ";
+		$this->string="UPDATE ".$this->tablename." set ";
 		$i=0;
 		foreach($this->data as $key=>$value)
 		{
@@ -757,95 +785,66 @@ class Model
      M($this->mapper[$mapper]['TargetModel'])->setData(array($fields=>$this->pkid()));
      M($this->mapper[$mapper]['TargetModel'])->update($fields);
   }
-  /*
-  *清除对象编辑内容
-  *也可以使用新数组覆盖
-  */
   function clearEdit($data='')
   {
     $this->data=array();
 	$this->setData($data);
   }
-  /*
-  *返回主键值
-  *
-  */
   function pkid()
   {
 	if(isset($this->data[$this->PRI])) return $this->data[$this->PRI]; else null;
   }
-  /*
-  *清除所有sql设置
-  */
-  function newSQL()
-  {
-    $this->sql=array();
-	$this->effectrow=false;
-	return $this;
-  }
-  /*
-  *选择字段
-  */
   function select($name)
   {
     if($this->sql['fields']=='') $this->sql['fields'].=$name;
 	else $this->sql['fields'].=",".$name;
 	return $this;
   }
-  /*
-  *选择表名 内链接表各table1,table2
-  *默认不用选择自身表名
-  */
   function from($name='')
   {
     if($name==''){ 
-	   $this->sql['from']=$this->getTableName();
+	   $this->sql['from']=$this->tablename;
 	}else{		
-		if(M($name)->getTableName()!=$this->getTableName())
+		if(M($name)->tablename!=$this->tablename)
 		{
 		  $this->sql['isjoinleft']=true;
-		  $this->sql[$this->modelname.'.']=$this->getTableName().".";
+		  $this->sql[$this->modelname.'.']=$this->tablename.".";
 		  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 		  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 		  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 		  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 		  $this->sql['joinmodel']=M($name)->modelname.".";
-		  $this->sql['from']=$this->getDataBaseName().".".$this->getTableName()." as ".$this->modelname.",".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname.",".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 		}else
-		  $this->sql['from']=$this->getTableName();
+		  $this->sql['from']=$this->tablename;
 	}
 	return $this;
   }
-  /*
-  *左链接表名left join 主式
-  */
+
   function leftjoin($name,$one=null)
   {
 	if(isset($this->sql['isjoinleft']))
 	{
 	  $this->sql['isjoinleft']=true;
-	  $this->sql[$this->modelname.'.']=$this->getTableName().".";
+	  $this->sql[$this->modelname.'.']=$this->tablename.".";
 	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 	  $this->sql['joinmodel']=M($name)->modelname.".";
-	  $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+	  $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}else{
 	  $this->sql['isjoinleft']=true;
-	  $this->sql[$this->modelname.'.']=$this->getTableName().".";
+	  $this->sql[$this->modelname.'.']=$this->tablename.".";
 	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 	  $this->sql['joinmodel']=M($name)->modelname.".";
-     $this->sql['from']=$this->getDataBaseName().".".$this->getTableName()." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+     $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->tablename." as ".M($name)->modelname;
 	}
 	return $this;
   }
-  /*
-  *左链接条件
-  */
   function joinon($name,$modelname='')
   {
 	$this->sql['from']=$this->sql['from']." ON ".$name;
@@ -877,9 +876,6 @@ class Model
 	 }
 	 return $str;
   }
-  /*
-  *左链接表断在ON部分
-  */
   function joinwhere($name,$modelname)
   {
 	$modelname=strtolower($modelname);
@@ -905,10 +901,6 @@ class Model
 	$this->sql['from']=$this->sql['from']." ON ".$name;
 	return $this;
   }
-  /*
-  * orderby 条件
-  * 前面可以带model.fields
-  */
   function orderby($name)
   {
 	$this->sql['orderby']=" order by ".$this->getFixSQL($name).$name;
@@ -968,9 +960,6 @@ class Model
 	if($end!=null) $this->sql['limit'].=",".intval($end);
     return $this;
   }
-  /*
-  *取得字段前辍，看看是不是带有model名的
-  */
   function getFixSQL($fields,$modelname='')
   {
     if($modelname=='') $modelname=$this->modelname;
@@ -983,15 +972,11 @@ class Model
 	}
 	return $fix;
   }
-  /*
-  *字段累加可以自己设置累加值
-  *比如在点击数时候有用
-  */
-  function updateCol($colname,$num=1)
+  function colupdate($colname,$num=1)
   {	
     if(isset($this->types[$colname]))
 	{
-    $this->string="update ".$this->getTableName()." set "."`$colname`=`$colname`+".intval($num)." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $this->string="update ".$this->tablename." set "."`$colname`=`$colname`+".intval($num)." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$res=$this->DB['master']->exec($this->string);
 		$this->sql=array();
@@ -1004,18 +989,15 @@ class Model
 	  return false;
 	}
   }
-  /*
-  *取得表的行数，在做列表分页时候经常用到
-  *
-  */
-  function count()
+  function Totalnum()
   {
     $pfields="*";
 	if(isset($this->types[$this->PRI])) $pfields=$this->PRI;
-    $this->string="select count(".$pfields.") as totalnum from ".$this->getTableName()." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $this->string="select count(".$pfields.") as totalnum from ".$this->tablename." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$res=$this->DB['master']->query($this->string);	
 		$total=$res->fetch(PDO::FETCH_ASSOC);  
+		//$this->sql=array();
 		return $total['totalnum'];
 	}catch (PDOException $e) 
         {
@@ -1023,9 +1005,6 @@ class Model
         }
 	return 0;
   }
-  /*
-  *取回查询后内容。设置为对象形式
-  */
   function getObjRecord()
   {
 	if(count($this->record)>0)
@@ -1034,9 +1013,6 @@ class Model
 	}
 	return null;    
   }
-  /*
-  *取得已经查询的数据内容
-  */
   function getRecord($i='')
   {
 	if(count($this->record)>0)
@@ -1050,36 +1026,23 @@ class Model
 	}
 	return null;
   }
-  /*
-  *取得编辑数据可以返回对象形式
-  */
   function getData($obj='')
   {
 	if(count($this->data)>0)
 	{
-	  if($obj=='Object'){
-		  return new ArrayObject($this->data);       
-	  }elseif(is_array($obj)){
-		  $t=array();
-	      foreach($obj as $k)
-		  {
-			if(isset($this->types[$k]))
-			{
-			  $t[$k]=$this->data[$k];
-			}
-		  }
-		  return $t;
-	   }else return $this->data;
+	   if($obj=='Object') return new ArrayObject($this->data);
+       else return $this->data;
+	}
+	if(count($this->data)>0)
+	{
+	  if($obj=='Object') return new ArrayObject($this->data);
+       else return $this->data;
 	}else{
 	  return null;
 	}
   }
-  /*
-  *设置编辑数据
-  */
   function setData($caseArray)
   {
-	if(is_object($caseArray)) $caseArray=get_class_vars($caseArray);
 	if(is_array($caseArray))
 	{
 	  foreach($caseArray as $k=>$v)
@@ -1094,12 +1057,9 @@ class Model
 	  return null;
 	}
   }
-  /*
-  *清空数据库内容，慎用
-  */
   function clear()
   {
-  	 $this->string="TRUNCATE TABLE `".$this->getTableName()."`";
+  	 $this->string="TRUNCATE TABLE `".$this->tablename."`";
 	 $this->sql=array();
 	 return $this->DB['master']->exec($this->string);
   }
@@ -1113,13 +1073,13 @@ class Model
 	  }else{
 		$this->whereAnd($this->PRI."='".$id."'");
 	  }	  
-	  $this->string="DELETE from ".$this->getTableName()." ".$this->sql['where'].$this->sql['limit'];
+	  $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 	  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
 	}else if($id=='all')
 	{
-	   $this->string="TRUNCATE TABLE `".$this->getTableName()."`";
+	   $this->string="TRUNCATE TABLE `".$this->tablename."`";
 	   $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
@@ -1129,15 +1089,12 @@ class Model
 		    $this->where($this->PRI."='".$this->data[$this->PRI]."'");
 		  }
 
-          $this->string="DELETE from ".$this->getTableName()." ".$this->sql['where'].$this->sql['limit'];
+          $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 		  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
 	}
   }
-  /*
-  *判断是否有插入更新删除效果
-  */
   function isEffect()
   {
     if($this->effectrow>1) return  $this->effectrow;
@@ -1163,13 +1120,9 @@ class Model
 	  return $this;
 	}
   }
-  /*
-  *返回查询数据的行数或是否为真
-  */
   function isEmpty()
   {
     if(count($this->record)==0) return true;
-	else return false;
   }
   /*
   *判断是否up完record数组
@@ -1252,7 +1205,7 @@ class Model
 	}
 	if($this->sql['from']=='')
 	{
-	  $this->sql['from']=$this->getTableName();
+	  $this->sql['from']=$this->tablename;
 	}
 	if($this->sql['where']=='')
 	{
@@ -1276,9 +1229,6 @@ class Model
            throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1007);
         }    
   }
-  /*
-  *返回数据库名
-  */
   function getDataBaseName()
   {
 	  if($this->databasename) return $this->databasename;
@@ -1288,9 +1238,6 @@ class Model
 	  $this->databasename=$database['name'];
 	  return $database['name'];
   }
-  /*
-  *返回表名可以重载设置表名
-  */
   function getTableName()
   {
      return $this->tablename;
@@ -1466,9 +1413,6 @@ class Model
   {
     return new ArrayObject($this->fields);
   }
-  /*
-  *填充一行内容，没有使用默认值填充
-  */
   function getDefaultFormField($data=array())
   {
      $t=array();
@@ -1479,9 +1423,6 @@ class Model
 	 }
 	 return $t;
   }
-  /*
-  *从数组中取得表字段的值也跟过滤差不多
-  */
   function getArrayFormField($data='')
   {
     if($data=='') $data=$this->data;
@@ -1682,9 +1623,6 @@ class Model
 		}
 		return $this;
   }
-  /*
-  *关联对像查询
-  */
   function wheremapper($mapper)
   {
 	$this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
@@ -1705,8 +1643,8 @@ class Model
   }
   function __call($name,$Args)
   {
-	if($name=='get') return $this->getOne($Args);
-	if($name=='find') return $this->getOne($Args);
+	if($name=='get') return $this->getArray($Args);
+	if($name=='find') return $this->getArray($Args);
 	if($name=='getAll') return $this->getAllArray($Args);
 	if(isset($this->mapper[$name])){
 	  $this->maps[$name]=M($this->mapper[$name]['TargetModel']);
@@ -1719,6 +1657,10 @@ class Model
 	  }elseif(method_exists($this,$this->mapper[$name]['map'])) {
 		call_user_func(array($this,$this->mapper[$name]['map']),$name,$Args);
 	  }	  
+	  $this->after=$name;
+	  $this->aftermodel=$this->mapper[$name]['TargetModel'];
+	  $this->before=$name;
+	  $this->beforemodel=$this->modelname;
 	  return $this->maps[$mapper];
 	}
 	if(substr($name,0,6)=='select')

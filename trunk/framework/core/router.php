@@ -10,6 +10,11 @@ class Router {
   public $urlcontroller;
   public function __construct() {
 	self::getPathInfo();
+	if(isset($GLOBALS['config']['realhtml'])&&$GLOBALS['config']['realhtml']!='')
+	{
+	  if(strncasecmp($_SERVER['PATH_INFO'],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
+	  $_SERVER['PATH_INFO']=substr($_SERVER['PATH_INFO'],strlen($GLOBALS['config']['realhtml']));  
+	}
     $this->request_uri = $_SERVER['PATH_INFO'];
     $this->routes = array();
 	//if(file_exists($GLOBALS['config']["frameworkpath"]."cache/".$GLOBALS['config']["webprojectname"]."rule.cache.php"))

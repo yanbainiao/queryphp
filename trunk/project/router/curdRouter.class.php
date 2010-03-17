@@ -13,7 +13,7 @@ class curdRouter extends controller{
 	}
 	public function createForm()
 	{
-	  $booktype=M("booktype")->createForm()->save();
+	  $booktype=M("booktype")->create()->save();
 	  //看看mysql没有操作成功
 	  if($booktype->isEffect())
 	  {
@@ -28,7 +28,7 @@ class curdRouter extends controller{
 	}
 	public function update()
 	{
-	  $booktype=M("booktype")->createForm()->save();
+	  $booktype=M("booktype")->create()->save();
 	  $this->assign("form",$booktype->getData());
 	  if($booktype->isEffect())
 	  {

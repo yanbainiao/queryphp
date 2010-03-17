@@ -27,6 +27,7 @@ $config['pdoconn']=array(
 $config['defaultrouter']='default'; //默认URL路由控制器 Router
 $config['defaultindex']='index';//默认URL路由控制器方法    action
 $config['html']='.html';//开启.html结尾url
+$config['realhtml']="/html";
 //视图设置,默认为空使用自带php模板
 /*
 *  php自带模板意思是在模板中使用php代码foreach(): endforeach if(): else: endif这几种标签当然也可以使用php代码

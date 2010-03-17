@@ -58,7 +58,16 @@ $view=C("view");
 $router=R($dispaths->controller);
 if (method_exists($router,$dispaths->action)) {
      call_user_func(array($router,$dispaths->action));
-	 $view->display(R($dispaths->controller)->view($dispaths->action));
+	$content=$view->fetch(R($dispaths->controller)->view($dispaths->action));
+	if(isset($GLOBALS['config']['html'])&&(substr($_SERVER["REQUEST_URI"],-strlen($GLOBALS['config']['html']))==$GLOBALS['config']['html']))
+    {	  
+	  $filename=filename_safe(basename($_SERVER["REQUEST_URI"]));
+	  $filename=substr($filename,0,-strlen($GLOBALS['config']['html'])).$GLOBALS['config']['html'];
+      $htmlpath=substr($config["webprojectpath"],0,-1).url_for($dispaths->controller."/".$dispaths->action);
+      mkdir(dirname($htmlpath),0777,true);
+	  file_put_contents(dirname($htmlpath)."/".$filename,$content);
+	}
+	echo $content;
 }else{
   header("HTTP/1.1 404 Not Found");
 }

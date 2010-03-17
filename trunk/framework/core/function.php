@@ -1,6 +1,13 @@
 <?php
 
 /*
+* 文件名安全处理
+*/
+function filename_safe($name) {
+    $except = array('\\', '/', ':', '*', '?', '"', '<', '>', '|');
+    return str_replace($except, '', $name);
+} 
+/*
 *加入类库
 */
 function import($libpath)
