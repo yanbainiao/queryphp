@@ -1,6 +1,46 @@
 <?php
 
 /*
+*语言显示可以自动显示目标语言
+*默认是I('systemlanuage');
+*需要转换语言是I('language');
+*/
+function L($str,$model='') {
+	if(I('language')!=I('systemlanuage'))
+	{
+		 /*
+		 *在这里取得缓存翻译结果没有就翻译
+		 */
+		$url = 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=' .
+			urlencode($str) . 
+			'&langpair=' . I('systemlanuage') . '%7C' .
+			I('language');			
+		$json_data = file_get_contents($url);		
+		$j = json_decode($json_data);		   
+		if (isset($j->responseStatus) and $j->responseStatus == 200)
+		{
+			$t = $j->responseData->translatedText;
+			 /*
+			 *在这里开始做翻译好的文本缓存
+			 */
+			 
+			 /*
+			 *结束翻译好的文件缓存;
+			 */
+			 Return $t;
+		}
+	}
+	Return $str;
+}
+
+/*
+* 文件名安全处理
+*/
+function filepath_safe($name) {
+    $except = array('\\',' ', '..', ':', '*', '?', '"', '<', '>', '|');
+    return str_replace($except,'', $name);
+} 
+/*
 * 文件名安全处理
 */
 function filename_safe($name) {
@@ -44,8 +84,7 @@ function checkrequire($files)
 function pdoconnects($dsn,$connmodel)
 {    
    try {
-	    $GLOBALS['pdolinks'][$connmodel]=new PDO($dsn['dsn'],$dsn['username'],$dsn['password']);
-	    $GLOBALS['pdolinks'][$connmodel]->exec('SET CHARACTER SET '.$dsn['CHARACTER']);
+	    $GLOBALS['pdolinks'][$connmodel]=new PDO($dsn['dsn'],$dsn['username'],$dsn['password'],array(PDO::MYSQL_ATTR_INIT_COMMAND =>'SET CHARACTER SET '.$dsn['CHARACTER']));
 	    return $GLOBALS['pdolinks'][$connmodel];
 	  } catch (PDOException $e) {
        print "connects Error!: " . $e->getMessage() . "<br/>";
@@ -56,11 +95,10 @@ function pdoconnects($dsn,$connmodel)
 */
 function getConnect($table,$model=null,$connper=0)
 {
-	 $conn=$GLOBALS['config']['pdoconn'];
 	 $tconn=array();
-	 if(is_array($conn))
+	 if(is_array($GLOBALS['config']['pdoconn']))
 	 {
-        foreach($conn as $k=>$v)
+        foreach($GLOBALS['config']['pdoconn'] as $k=>$v)
 		{
 		  if($k==$model||preg_match("|".$k."|i",$table)||preg_match("|".$k."|i",$model))
 		  {
@@ -80,26 +118,27 @@ function getConnect($table,$model=null,$connper=0)
 			 {
 			   $tconn['slaves']=pdoconnects($v["slaves"][$prand],$connmodel);
 			 }
+		    break;
 		  }
 		}
 	 }
 	 if(count($tconn)<2)
 	 {
-		$prand=rand(0,count($conn['default']["master"])-1);
-	    $connmodel=md5(json_encode($conn['default']["master"][$prand]));
+		$prand=rand(0,count($GLOBALS['config']['pdoconn']['default']["master"])-1);
+	    $connmodel=md5(json_encode($GLOBALS['config']['pdoconn']['default']["master"][$prand]));
 		 if($GLOBALS['pdolinks'][$connmodel]!='')
 		 {
 			$tconn['master']=$GLOBALS['pdolinks'][$connmodel];
 		 }else{
-			$tconn['master']=pdoconnects($conn['default']["master"][$prand],$connmodel);
+			$tconn['master']=pdoconnects($GLOBALS['config']['pdoconn']['default']["master"][$prand],$connmodel);
 		 }
-        $prand=rand(0,count($conn['default']["slaves"])-1);
-		$connmodel=md5(json_encode($conn['default']["slaves"][$prand]));
+        $prand=rand(0,count($GLOBALS['config']['pdoconn']['default']["slaves"])-1);
+		$connmodel=md5(json_encode($GLOBALS['config']['pdoconn']['default']["slaves"][$prand]));
 		 if($GLOBALS['pdolinks'][$connmodel]!='')
 		   $tconn['slaves']=$GLOBALS['pdolinks'][$connmodel];
 		 else
 		 {
-		   $tconn['slaves']=pdoconnects($conn['default']["slaves"][$prand],$connmodel);
+		   $tconn['slaves']=pdoconnects($GLOBALS['config']['pdoconn']['default']["slaves"][$prand],$connmodel);
 		 }
 	 }
 	 if($connper==1)
@@ -321,6 +360,11 @@ function __autoload($class_name) {
 	  require_once P("frameworkpath")."class/".$class_name.'.class.php';
 	  return;
 	}
+	if(file_exists(P("frameworkpath")."lib/".$class_name.'.class.php'))
+	{		   
+	  require_once P("frameworkpath")."lib/".$class_name.'.class.php';
+	  return;
+	}
 	if(file_exists(P("frameworkpath").$class_name.'.php'))
 	{		   
 	  require_once P("frameworkpath").$class_name.'.php';
@@ -349,8 +393,14 @@ function url_for()
   {
      if(isset($arg_list[1])&&$arg_list[1]===true)
 	  {
-	  }else
+	  }else{
 	   $url.=$GLOBALS['config']['html'];
+	   //把静态目录补上
+	   if(isset($GLOBALS['config']['realhtml']))
+	   {
+		   $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"])).$GLOBALS['config']['realhtml']."/".$arg_list[0].$GLOBALS['config']['html'];
+	   }
+	  }
    }
   return $url;
 }

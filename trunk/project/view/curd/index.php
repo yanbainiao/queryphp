@@ -38,12 +38,14 @@ hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #0
     <td>typeid</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
   </tr>
   <?php foreach($list as $key=>$value):?>
   <tr>
     <td><?php echo $value['bookid'];?></td>
     <td><?php echo $value['classname'];?></td>
     <td><?php echo $value['typeid'];?></td>
+    <td><a href="<?php echo url_for("curd/show/id/".$value['bookid'])?>">显示</a></td>
     <td><a href="<?php echo url_for("curd/edit/id/".$value['bookid'],true)?>">编辑</a></td>
     <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'],true)?>">删除</a></td>
   </tr>
@@ -54,7 +56,13 @@ hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #0
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
   </tr>
 </table>
+<span>
+<?php
+echo $pager->getWholeBar(url_for("curd/index/page/:page"));
+?>
+</span>
 </body>
 </html>

@@ -32,7 +32,7 @@ hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #0
 <li><a href="<?php echo url_for("curd/create")?>">添加新记录</a></li>
 <li><a href="<?php echo url_for("curd/index")?>">数据列表</a></li>
 </ul>
-<form id="form1" name="form1" method="post" action="<?php echo url_for("curd/createForm");?>">
+<form id="form1" name="form1" method="post" action="<?php echo url_for("curd/createForm",true);?>">
 <dt>
 <label for="clalssname">类型名</label>
 </dt>

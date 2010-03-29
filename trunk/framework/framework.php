@@ -21,16 +21,19 @@ if($projectenv=='product'&&file_exists($config["frameworkpath"]."cache/core.cach
  {
 	//$corecontent=substr(php_strip_whitespace($config["frameworkpath"]."core/base.class.php"),0,-2);
 	$corecontent=substr(php_strip_whitespace($config["frameworkpath"]."core/model.php"),0,-2);
+
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/function.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/mylog.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/router.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/view.php"),5,-2);
+	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/sitehtml.php"),5,-2);
 	$corecontent.=substr(php_strip_whitespace($config["frameworkpath"]."core/controller.php"),5);
+
 	file_put_contents($config["frameworkpath"]."cache/core.cache.php",$corecontent);
 	unset($corecontent);
 	require_once $config["frameworkpath"]."cache/core.cache.php";
  }else{
-	//include($config["frameworkpath"]."core/base.class.php");
+	include($config["frameworkpath"]."core/sitehtml.php");
 	include($config["frameworkpath"]."core/model.php");
 	include($config["frameworkpath"]."core/function.php");
 	include($config["frameworkpath"]."core/router.php");
@@ -57,17 +60,18 @@ $dispaths=C("router")->setMaps($config["routermaps"])->start();
 $view=C("view");
 $router=R($dispaths->controller);
 if (method_exists($router,$dispaths->action)) {
-     call_user_func(array($router,$dispaths->action));
-	$content=$view->fetch(R($dispaths->controller)->view($dispaths->action));
-	if(isset($GLOBALS['config']['html'])&&(substr($_SERVER["REQUEST_URI"],-strlen($GLOBALS['config']['html']))==$GLOBALS['config']['html']))
-    {	  
-	  $filename=filename_safe(basename($_SERVER["REQUEST_URI"]));
-	  $filename=substr($filename,0,-strlen($GLOBALS['config']['html'])).$GLOBALS['config']['html'];
-      $htmlpath=substr($config["webprojectpath"],0,-1).url_for($dispaths->controller."/".$dispaths->action);
-      mkdir(dirname($htmlpath),0777,true);
-	  file_put_contents(dirname($htmlpath)."/".$filename,$content);
+    //call_user_func(array($router,$dispaths->action));
+	//检查有没有要前置执行方法
+	if (method_exists($router,"pre_".$dispaths->action)) {
+	  $viewmodel=$router->{"pre_".$dispaths->action}();
 	}
-	echo $content;
+	if($viewmodel!==false) $viewmodel=$router->{$dispaths->action}();
+	//检查有没有要后置执行方法
+	if(method_exists($router,"after_".$dispaths->action)) {
+	  $viewmodel=$router->{"after_".$dispaths->action}();
+	}
+	//如果$viewmodel有值就使用$viewmodel中的值设置视图
+	$view->display(R($dispaths->controller)->view($dispaths->action));
 }else{
   header("HTTP/1.1 404 Not Found");
 }

@@ -1,6 +1,7 @@
 <?php
 class view{
   var $vvar=array();
+  protected $content;
   public function assign($name,$value=''){
         if(is_array($name)) {
             $this->vvar   =  array_merge($this->vvar,$name);
@@ -17,9 +18,22 @@ class view{
         else
             return false;
     }
-	public function display($viewfile='index')
+	public function filter(){}
+	public function display($viewfile='index',$display=true)
 	{
-       echo $this->fetch($viewfile);	
+       $this->content=$this->fetch($viewfile);
+	   //视图自身过滤输出内容
+	   $this->filter();
+	   //使用路由类过滤输出内容,就是每个路由可以自定义输出内容过滤
+	   if(method_exists(R(C("router")->controller),"view_filter"))
+	   {
+	     $this->content=call_user_func(array(R(C("router")->controller),"view_filter"),$this->content);
+	   }
+	   if($display===true){
+		   echo $this->content;
+	   }else {
+	   	 Return $this->content;
+	   }
 	}
     public function fetch($viewfile='',$display=false)
     {

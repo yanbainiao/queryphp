@@ -8,12 +8,41 @@ class Router {
   public $route_found = false;
   public $rules=array();
   public $urlcontroller;
+  public $isScript=false;
+  public $fixpath;
   public function __construct() {
 	self::getPathInfo();
-	if(isset($GLOBALS['config']['realhtml'])&&$GLOBALS['config']['realhtml']!='')
+	//去掉静态目录
+	if(isset($GLOBALS['config']['realhtml']))
 	{
+	  //消除path中静态缓存目录
 	  if(strncasecmp($_SERVER['PATH_INFO'],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
-	  $_SERVER['PATH_INFO']=substr($_SERVER['PATH_INFO'],strlen($GLOBALS['config']['realhtml']));  
+	  $_SERVER['PATH_INFO']=substr($_SERVER['PATH_INFO'],strlen($GLOBALS['config']['realhtml']));
+	  if(strncasecmp($_SERVER["REQUEST_URI"],$_SERVER["SCRIPT_NAME"],strlen($_SERVER["SCRIPT_NAME"]))==0){
+	    $this->isScript=true;//带有index.php的
+        $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($_SERVER["SCRIPT_NAME"]));
+		//先切开开始目录，删除html目录然后再组装起来
+        if(strncasecmp($_SERVER["REQUEST_URI"],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
+	     $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($GLOBALS['config']['realhtml']));
+       $_SERVER["REQUEST_URI"]=$_SERVER["SCRIPT_NAME"].$_SERVER["REQUEST_URI"];
+	  }
+      //重写时候没有index.php，去掉中间html目录 这样动态可以不使用html目录
+	  if(0!==strrpos($_SERVER["SCRIPT_NAME"],"/"))
+	  {
+		  $this->fixpath=substr($_SERVER["SCRIPT_NAME"],0,strrpos($_SERVER["SCRIPT_NAME"],"/"));
+		  if(strncasecmp($_SERVER["REQUEST_URI"],$this->fixpath.$GLOBALS['config']['realhtml'],strlen($this->fixpath.$GLOBALS['config']['realhtml']))==0)
+		  {
+			  $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($this->fixpath.$GLOBALS['config']['realhtml']));
+			  $_SERVER["REQUEST_URI"]=$this->fixpath.$_SERVER["REQUEST_URI"];
+		  }
+      }
+	  //echo(substr($_SERVER["REQUEST_URI"],0,strlen(substr($_SERVER["SCRIPT_NAME"],0,strrpos($_SERVER["SCRIPT_NAME"],"/")))));
+	  //如果没有PATH目录
+	  if(strncasecmp($_SERVER["REQUEST_URI"],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
+	  $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($GLOBALS['config']['realhtml']));
+	  if(strncasecmp($_SERVER["REDIRECT_URL"],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
+	  $_SERVER["REDIRECT_URL"]=substr($_SERVER["REDIRECT_URL"],strlen($GLOBALS['config']['realhtml']));
+	  $this->fixpath.=$GLOBALS['config']['realhtml'];
 	}
     $this->request_uri = $_SERVER['PATH_INFO'];
     $this->routes = array();
@@ -31,6 +60,9 @@ class Router {
   public function RuleCheck($controller)
   {
     if(isset($this->rules[$controller])) return $this->rules[$controller]; else return false;
+  }
+  public function isPathInfo() {
+  	  Return $this->urlcontroller;
   }
   public function start()
   {
@@ -160,7 +192,9 @@ class Router {
             else{
                 $path = $pathInfo;
 			    if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME'])))
-				$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
+				{
+				 $path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));                
+				}
 			}
         }elseif(!empty($_SERVER['ORIG_PATH_INFO'])) {
             $pathInfo = $_SERVER['ORIG_PATH_INFO'];
@@ -203,9 +237,11 @@ class Router {
                 reset($_SERVER);
             }
 			if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME'])))
+			{
 			$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
-
+			}
         }
+		    //是否带有静态文件结尾形式
 			if(isset($GLOBALS['config']['html'])&&$GLOBALS['config']['html']!='')
 			if(substr($path,-strlen($GLOBALS['config']['html']))==$GLOBALS['config']['html'])
 			{

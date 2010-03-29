@@ -2,11 +2,25 @@
 class defaultRouter extends controller{
   function index()
   {
+	  echo "bye<pre>";
     echo "hello world!";
 	$this->assign("ssss","aa");
 	$this->hhh="88";
-	
-	//$booktype=M("booktype");
+	$this->pager=C("pager");
+	$this->pager->setPager(500,10,'page');
+	print_r($this->pager->getWholeBar(url_for("default/index/page/:page")));
+
+	echo("page:".$this->pager->offset().":");
+	$booktype=M("booktype");
+    $booktype->limit($this->pager->offset(),10);
+	$booktype->getAll();
+	print_r($booktype->getRecord());
+	//echo C("zh2pinyin")->T("开源硬件能否像    开源软件一样流行");
+	//print_r($booktype->getAll());
+	C("waterimg")->createWaterPng("水印开始");
+	$img=C("img");
+	echo "</pre>";
+	//echo($img->safeName("开源硬件能否像    开源软件一样流行@#$%@#asdf=-_afasdf.jpg"));
 	/*
 	echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
 	print_r($booktype->data);
@@ -92,8 +106,10 @@ class defaultRouter extends controller{
   }
   function adorm()
   {
-    //高级教程用法
 
+  }
+  function uploadtest() {
+  	
   }
 }
 ?>

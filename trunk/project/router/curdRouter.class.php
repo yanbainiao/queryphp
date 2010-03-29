@@ -3,9 +3,9 @@ class curdRouter extends controller{
     public function index()
 	{
 	   $booktype=M("booktype");
-	   //getRecord表示么得
-	   $this->assign("list",$booktype->orderby("bookid desc")->limit(10)->fetch()->getRecord());
-	   //print_r($booktype->DB->getAttribute(PDO::ATTR_SERVER_INFO));
+	   $this->pager=C("pager");//取得分类
+	   $this->pager->setPager($booktype->count(),10,'page');//取得数据总数中，设置每页为10
+	   $this->assign("list",$booktype->orderby("bookid desc")->limit($this->pager->offset(),10)->fetch()->getRecord());
 	}
 	public function create()
 	{
@@ -19,6 +19,12 @@ class curdRouter extends controller{
 	  {
 	    $this->assign("msg","添加成功!");
 	  }
+	}
+	public function show()
+	{
+	  //显示数据
+	  $form=M("booktype")->get(intval($_GET['id']))->edit()->getData();
+	  $this->assign("form",$form);
 	}
 	public function edit()
 	{
