@@ -2,21 +2,21 @@
 
 class Model
 {
-   var $tablename;
+   public $tablename;
    var $fields=array();
    var $types=array();
-   var $PRI;  //主键名
+   public $PRI;  //主键名
    var $data; //数据编辑焦点
    var $autoid=false; //是否自增表
-   var $sql=array();  //查询使用的条件
+   private $sql=array();  //查询使用的条件
    var $string;       //保存查询sql语句
-   var $DB=array();   //数据库链接保存
-   var $res=null;
-   var $record=array();
+   private $DB=array();   //数据库链接保存
+   private $res=null;
+   private $record=array();
    var $conn=0;
    var $objpoint=0;
    var $modelname;
-   var $databasename;
+   public $databasename;
    var $ismapper;
    var $isjoinleft;
    var $after;
@@ -265,6 +265,7 @@ class Model
 	}
     $this->string="select ".$fields." from ".$this->getTableName()." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
+		echo($this->string);
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
 		$this->sql=array();
@@ -784,6 +785,13 @@ class Model
 	return $this;
   }
   /*
+  *返回最新的sql语句
+  */
+  function querySQL()
+  {
+	return $this->string;
+  }
+  /*
   *选择字段
   */
   function select($name)
@@ -1010,9 +1018,13 @@ class Model
   */
   function count()
   {
-    $pfields="*";
-	if(isset($this->types[$this->PRI])) $pfields=$this->PRI;
-    $this->string="select count(".$pfields.") as totalnum from ".$this->getTableName()." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $pfields=$this->getTableName().".*";
+	if($this->sql['from']=='')
+	{
+	  $this->sql['from']=$this->getTableName();
+	}
+	if(isset($this->types[$this->PRI])) $pfields=$this->getTableName().".".$this->PRI;
+    $this->string="select count(".$pfields.") as totalnum from ".$this->sql['from']." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$res=$this->DB['master']->query($this->string);	
 		$total=$res->fetch(PDO::FETCH_ASSOC);  
@@ -1103,9 +1115,13 @@ class Model
 	 $this->sql=array();
 	 return $this->DB['master']->exec($this->string);
   }
+  /*
+  *删除对象数据记录
+  */
   function delete($id='')
   {
-    if(is_numeric($id))
+    
+	if(is_numeric($id))
 	{
 	  if($this->sql['where']=='')
 	  {
@@ -1123,17 +1139,36 @@ class Model
 	   $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
-	}else{
-          if($this->sql['where']=='')
+	}elseif(is_object($id)){
+		$objectname=get_class($id);
+		$objectname=substr($objectname,0,-5);
+		$mapper='';
+		//关联删除
+		if(count($this->mapper)>0&&$objectname!='')
+		{
+		  $localfields='';
+		  foreach($this->mapper as $k=>$v)
 		  {
-		    $this->where($this->PRI."='".$this->data[$this->PRI]."'");
-		  }
-
-          $this->string="DELETE from ".$this->getTableName()." ".$this->sql['where'].$this->sql['limit'];
+		    if($v['TargetModel']==$objectname)
+			{
+			  $mapper=$k;
+			  $this->wheremapper($mapper);
+			  break;
+			}
+		  }          
+		}
+	}elseif(is_array($id)){
+	   $this->whereIn($this->PRI,implode(",",$id));	
+	}else{
+	  if($this->sql['where']=='')
+	  {
+		$this->where($this->PRI."='".$this->data[$this->PRI]."'");
+	  }
+	}
+	      $this->string="DELETE from ".$this->getTableName()." ".$this->sql['where'].$this->sql['limit'];
 		  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
-	}
   }
   /*
   *判断是否有插入更新删除效果

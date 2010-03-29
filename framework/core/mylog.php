@@ -14,5 +14,4 @@ class mylog extends Exception {
     return "\n---------------- '".$this->getMessage()."' File: ".$this->getFile()." Line:".$this->getLine()."\nStack trace:\n".$this->getTraceAsString();
   }
 }
-
 ?>
