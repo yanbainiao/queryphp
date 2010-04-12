@@ -3,7 +3,7 @@
 class preg {
   /*
   *正则表达式提取表格tr行
-  *
+  *csdn 网友 挪威的森林
   */
   static function match_tr($content) {
   	Return preg_match_all('/<tr.*?>[\r\n]{0,2}(<td.*?>.*?<\/td>[\r\n]{0,2})*<td.*?>.*?hidden.*?<\/td>[\r\n]{0,2}(<td.*?>.*?<\/td>[\r\n]{0,2})*<\/tr>/i',$content,$matchs)?$matchs:null;

@@ -26,4 +26,9 @@ index.php/default/index 方式
 
 
 其它请看document文档
-
+生成所有模型
+  	    $user=M("member")->query("SHOW TABLES");
+		foreach($tables as $k=>$v)
+	    {
+		  M(str_replace("_","",$v['Tables_in_google17']),$v['Tables_in_google17']);
+		}

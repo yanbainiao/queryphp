@@ -4,25 +4,42 @@
 *Date:   2006-11-13
 *图像处理和生成水印等
 * upload(); 1.为指定大小;2为生成不大于,有一边等于，75*75小图. 默认为自动大小 3为生成固定大小
-*	    $up=new img("File",$uploadpath,"640","480");
-		$up->setBasename($newfile);
-		$up->setIcopath($uploadpath."_ico/");
-		if(!$up->upload(5))
-		{
-		  header("HTTP/1.0 500 Internal Server Error");
- 		}else{
-		  echo "success!";
-		}
+	$img=C("img");
+	$img->setInfo(
+		  array("files"=>"upload",
+		        "uploadpath"=>$GLOBALS['config']['webprojectpath']."upimages/",
+		        "icopath"=>$GLOBALS['config']['webprojectpath']."upimages/",		        
+		        "icowidth"=>"128",
+		        "icoheight"=>"98",
+		        "fangpath"=>$GLOBALS['config']['webprojectpath']."upimages/_ico/",
+		        "fangsize"=>"75",
+		        "nzsize"=>"180",
+		        "uploadsize"=>320000
+	            )
+	      )->setBasename($_FILES['upload']['name'],true)->init();
+	if($img->upload(1))
+	{
+	  echo("上传成功");
+	}else{
+	  echo("上传失败");
+	  echo $img->message;
+	}
+	'fill_size' 提定为小图大小
+	size_ico    提供指定大小
+	auto_ico    自动缩放不大于ico
+	fix_ico     提定大小
+	fix_side    固定一边到nzsize大小
+
 ************************************************************/
 class img {
     var $upfile;   //上传文件名字
 	var $icopic;   //缩放成小图片的名字;
 	var $imgpic;   //大图名字
-	var $uppath;   //上传图片存放的路径
+	var $uploadpath;   //上传图片存放的路径
 	var $basename; //基本名字不包括护展名
 	var $extfile;  //扩展名
     var $isup;     //是否上传成功
-	var $upsize;
+	var $uploadsize;
 	var $icowidth;
 	var $icoheight; //
 	var $imgwidth;
@@ -32,25 +49,66 @@ class img {
 	var $newim;   //临时im
 	var $type;    //mime类型 
 	var $attr;    //直接显示高和宽
+	var $info=array();
 	function __construct()
 	{
 	  $this->isup=false;
 	  $this->shuiyin=false;
 	  $this->icopath=''; //小图保存路径
 	}
-	function setImg($upfile,$upimages,$width,$height,$nzsize=0,$upsize=300000) {
+	function setFiles($upfile){
+		$this->info['name']=$this->safeName($_FILES[$upfile]['name']);
+		$this->info['tmp_name']=$_FILES[$upfile]['tmp_name'];
+		$this->info['type']=$_FILES[$upfile]['type'];
+		$this->info['size']=$_FILES[$upfile]['size'];
+		$this->info['error']=$_FILES[$upfile]['error'];
+		Return $this;
+	}
+	/*
+	*设置图片上传信息
+	*icowidth 小图信息
+	*icoheight 
 
-	   
-       $this->upfile=$upfile;
+	*fangpath 方形图信息
+	*fangsize  
 
-	   $this->icowidth=$width;
-	   $this->icoheight=$height;
-	   $this->nzsize=($nzsize==0)?$width:$nzsize;
-	   $this->upsize=$upsize;
-	   
-	   $this->uppath=$upimages;  //图片保存路径	   
-	   $this->init();
-	   Return $this;
+	*uploadpath 上传目录
+	*files       上传input名
+	*/
+	function setInfo($info=array()) {
+	  if(isset($info['uploadpath']))
+	  $this->uploadpath=$info['uploadpath'];
+	  if(isset($info['icowidth']))
+	  $this->icowidth=$info['icowidth'];
+	  if(isset($info['icoheight']))
+	  $this->icoheight=$info['icoheight'];
+
+	  $this->icopath=isset($info['icopath'])?$info['icopath']:$this->uploadpath;
+	  $this->fangpath=isset($info['fangpath'])?$info['fangpath']:$this->uploadpath;
+	  $this->fangsize=isset($info['fangsize'])?$info['fangsize']:75;
+
+
+
+	  if(isset($info['files']))
+	  {
+	   	$this->setFiles($info['files']);
+
+	  }else{
+	    	$this->isup=false;
+		   $this->message="no upimages from !";
+	  }
+	  if(isset($info['uploadsize']))
+	  {
+	   	$this->uploadsize=$info['uploadsize'];
+		if($this->info['size']>$this->uploadsize)
+		{
+		   $this->isup=false;
+		   $this->message="up images too size !";
+		}
+
+	  }
+	   	$this->nzsize=isset($info['nzsize'])?$info['nzsize']:$this->icowidth;
+	  Return $this;
 	}
 	/*
 	*文件名过滤，把中文转为拼音删除非法字符
@@ -75,6 +133,14 @@ class img {
 		$this->shuiyin=$mask;
 		Return $this;
 	}
+	function setFangpath($path)
+	{
+	  if($path!="")
+	  {
+	    $this->fangpath=$path;
+	  }
+	  Return $this;
+	}
 	function setIcopath($path)
 	{
 	  if($path!="")
@@ -98,19 +164,28 @@ class img {
 	  }
 	  Return $this;
 	}
-	function setBasename($name)
+	function setBasename($name,$fix=false)
 	{
 	  if($name!="")
 	  {
+		if($fix)
+		{
+			$upfile=pathinfo($this->safeName($name));
+			$name=basename($name,".".$upfile["extension"]);
+		}
 	    $this->basename=$name;
+		$this->icopic=$name."_ico";
 	  }
 	  Return $this;
 	}
 	function init() {
-	    $this->basename=date("Ymdhis").rand(10,99);
-		$this->icopic=$this->basename."_ico";
+	    if(empty($this->basename))
+		{
+		 $this->basename=date("Ymdhis").rand(10,99);
+		 $this->icopic=$this->basename."_ico";
+	    }
 			 //设定类型
-       switch($_FILES[$this->upfile]['type'])
+       switch($this->info['type'])
 	   {
 	     case 'image/gif':
                $this->extfile=".gif";
@@ -126,27 +201,16 @@ class img {
               $this->isup=true;
 		   break;
 		 default:
-			 $upfile=pathinfo($_FILES[$this->upfile]["name"]);
-		     $ext=array("jpg","gif","png");	
-	         $extup=strtolower($upfile['extension']);
-	         if(in_array($extup,$ext))
-		     {
-			  $this->extfile=".".$extup;
-              $this->isup=true;
-			 }else{
 			  $this->isup=false;
 		      $this->message="images type error!";
-			 }
 	   }
-	   if($_FILES[$this->upfile]['size']>$this->upsize)
+	   if($this->isup&&$this->info['size']>$this->uploadsize)
 	   {
 	     $this->isup=false;
 		 $this->message="up images too size !";
 	   }
-	   if(!$this->isup)
-	   {
-	      Return false;
-	   }	 
+	   Return $this->isup;
+
 	}
 	/*
 	*
@@ -159,25 +223,30 @@ class img {
 	* 缺省是自动大小，不大于小图大小
 	* 如果指定了文件名，将会替换掉原来的文件
 	*/
-	function upload($up=1,$updatename="") {
+	function upload($up=array(),$updatename="") {
 	  if(!$this->isup)
-	   {
+	   { 
+		  echo('aa');
 	      Return false;
+	   }
+	   if(empty($this->extfile)||in_array($this->extfile,array('gif','jpg','png')))
+	   {
+	     $this->init();
 	   }
 	   if($updatename!="")
 	   {
 	     $this->basename=$updatename;
 		 $this->icopic=$updatename."_ico";
 	   }
-	  if(!move_uploaded_file($_FILES[$this->upfile]['tmp_name'],$this->uppath.$this->basename.$this->extfile))
+	  if(!move_uploaded_file($this->info['tmp_name'],$this->uploadpath.$this->basename.$this->extfile))
 	   {
 	     $this->isup=false;
 		 $this->message="uploaded error!";
 		 Return $this->isup;
 	   }
 	   
-	   $this->imgpic=$this->uppath.$this->basename.$this->extfile;
-	   if($up>4) Return true;
+	   $this->imgpic=$this->uploadpath.$this->basename.$this->extfile;
+	   if(empty($up)) Return true;
 	   if(file_exists($this->imgpic))
 	   {
 		   list($this->imgwidth, $this->imgheight,$this->type,$this->attr) = getimagesize($this->imgpic);
@@ -192,22 +261,28 @@ class img {
 					$this->im = imagecreatefrompng($this->imgpic); 
 					break;
 			  }
-            switch($up)
-		    {
-			  case '1': //固定一边大小
-			  	$this->Resizenumm();
-			    $this->Resizecut();
-			  	break;
-			  case '2':
-				$this->Resizeauto();
-			  	break;
-			  case '3':
-				$this->ResizeIco();
-			  	break;
-			  case '0':
-			  case '4':
-				$this->ResizeImage();
-			    break;
+			//如果设置了水印，那么缩小和放大都有水印
+			if(isset($up['water'])) $this->shuiyin=true;
+			foreach($up as $cutimg)
+		    {			
+				switch($cutimg)
+				{
+				  case 'fix_side': //固定一边大小
+					$this->Resizenumm();					
+					break;
+				  case 'size_ico':
+					$this->Resizeauto();
+					break;
+				  case 'fix_ico':
+					$this->ResizeIco();
+					break;
+				  case 'fill_size':
+					  $this->Resizecut();
+				      break;
+				  case 'auto_ico':
+					$this->ResizeImage();
+					break;
+				 }
 			}
 			/*
 			*生成缩小75*75图
@@ -262,10 +337,10 @@ function ResizeImage(){
 	 $newim = imagecreatetruecolor($newwidth, $newheight); //生成真彩色图片
 	 imagecopyresampled($newim, $this->im, 0, 0, 0, 0, $newwidth, $newheight, $this->imgwidth,$this->imgheight); 
 	 if($this->shuiyin) $this->shuiyin();
-	 ImageJpeg ($newim,$this->uppath.$this->icopic.".jpg",100); 
+	 ImageJpeg ($newim,$this->uploadpath.$this->icopic.".jpg",100); 
 	 ImageDestroy ($newim); 
 	}else{ 
-	 ImageJpeg ($this->im,$this->uppath.$this->icopic.".jpg",100); 
+	 ImageJpeg ($this->im,$this->uploadpath.$this->icopic.".jpg",100); 
 	} 
 } 
 /*
@@ -284,6 +359,11 @@ function ResizeImage(){
      $this->icowidth=ceil(($this->nzsize/$this->imgheight)*$this->imgwidth);
 	 $this->icoheight=$this->nzsize;
    }
+    $this->newim = imagecreatetruecolor($this->icowidth,$this->icoheight);
+	imagecopyresampled($this->newim,$this->im, 0, 0, 0,0,$this->icowidth,$this->icoheight,$this->imgwidth,$this->imgheight); 
+     if($this->shuiyin) $this->shuiyin();
+     ImageJpeg($this->newim,$this->uploadpath.$this->icopic.".jpg",100); 
+	 imagedestroy($this->newim);
  }
  /*
  *
@@ -316,7 +396,7 @@ function Resizeauto() {
     $this->newim = imagecreatetruecolor($this->icowidth,$this->icoheight);
 	imagecopyresampled($this->newim,$this->im, 0, 0, $x1, $y1,$this->icowidth,$this->icoheight,$x2,$y2); 
      if($this->shuiyin) $this->shuiyin();
-     ImageJpeg($this->newim,$this->uppath.$this->icopic.".jpg",100); 
+     ImageJpeg($this->newim,$this->uploadpath.$this->icopic.".jpg",100); 
 	 imagedestroy($this->newim);
 }
 
@@ -351,7 +431,7 @@ function Resizeauto() {
 	$this->newim= imagecreatetruecolor($this->icowidth,$this->icoheight);
 	imagecopyresampled($this->newim, $this->im, 0, 0, 0, 0,$this->icowidth,$this->icoheight,$this->imgwidth,$this->imgheight); 
     if($this->shuiyin) $this->shuiyin();
-    ImageJpeg($this->newim,$this->uppath.$this->icopic.".jpg",100); 
+    ImageJpeg($this->newim,$this->uploadpath.$this->icopic.".jpg",100); 
 	if($unim) {
 		imagedestroy($this->newim);
 	}
@@ -419,7 +499,7 @@ function Resizeauto() {
 	$newim = imagecreatetruecolor($size,$size);
 	imagecopyresampled($newim, $this->im, 0, 0, $x1,$y1,$size,$size,$x2,$y2);
 
-	ImageJpeg($newim,$this->icopath.$this->basename."_".$size.".jpg",100); 
+	ImageJpeg($newim,$this->fangpath.$this->basename."_".$size.".jpg",100); 
 	ImageDestroy($newim); 
  }
 /*

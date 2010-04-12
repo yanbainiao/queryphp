@@ -30,8 +30,8 @@ $config['defaultindex']='index';//默认URL路由控制器方法    action
 *网站静态化开始，可以做seo优化
 **/
 $config['html']='.html';//开启.html结尾url
-$config['realhtml']="/html"; //开启超级缓存目录，如果第一次访问没有html页面自动产生html页面，第二次访问时候就是静态化了
-$config['htmlcache']=array("class"=>"sitehtml","method"=>"realhtml"); //生成html文件类和方法,不设置将不会生成html页面,传入参数为$content,$pathinfo;
+//$config['realhtml']="/html"; //开启超级缓存目录，如果第一次访问没有html页面自动产生html页面，第二次访问时候就是静态化了
+//$config['htmlcache']=array("class"=>"sitehtml","method"=>"realhtml"); //生成html文件类和方法,不设置将不会生成html页面,传入参数为$content,$pathinfo;
 /*
 *网站静态化结束
 **/
