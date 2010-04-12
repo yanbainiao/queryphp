@@ -2,9 +2,9 @@
 class defaultRouter extends controller{
   function index()
   {
-	  echo "bye<pre>";
     echo "hello world!";
-	$this->assign("ssss","aa");
+		  echo "<pre>";
+		  /*$this->assign("ssss","aa");
 	$this->hhh="88";
 	$this->pager=C("pager");
 	$this->pager->setPager(500,10,'page');
@@ -21,7 +21,7 @@ class defaultRouter extends controller{
 	$img=C("img");
 	echo "</pre>";
 	//echo($img->safeName("开源硬件能否像    开源软件一样流行@#$%@#asdf=-_afasdf.jpg"));
-	/*
+	
 	echo $booktype->fetch('FETCH_OBJ')->up()->bookid;
 	print_r($booktype->data);
 	echo $booktype->classname;
@@ -32,6 +32,7 @@ class defaultRouter extends controller{
      //  print_r($booktype->getObjRecord());
 
 	//J("saybye",array("bbee"=>6666,"ccdd"=>888));
+	return false;
   }
   function saybye()
   {
@@ -104,12 +105,28 @@ class defaultRouter extends controller{
 	//$sub="asdfdgdasdLIKE";
 	echo "</pre>";
   }
-  function adorm()
+  function hasOne()
   {
-
+    echo "<pre>";
+    $books=M("booktype");
+	print_r($books->find(946,911)->getRecord());
+	print_r($books->Supply->getRecord());
+	print_r($books->getRecord());
+	echo "</pre>";
+	Return false;//表示不使用模板视图
   }
-  function uploadtest() {
-  	
+  /*
+  *ajax测试显示页面
+  */
+  function ajax() {
+       echo(strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"]));
+  }
+  /*
+  *ajax显示页面
+  */
+  function ajaxtest() {
+  	ECHO json_encode($_SERVER);
+    Return ajax;
   }
 }
 ?>

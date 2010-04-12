@@ -577,6 +577,8 @@ http://www.app.com/queryphp/project/curd/delete/id/2
          //setPager(total,pagenum,'page');设置$_GET page变量
          //setPager(total,pagenum);
 	$pager->setPager(100,10,'page');
+        //可以使用$booktype->count();取得总数
+        //详细看curdRouter.class.php文件
         //取得导航html 我们要传入url其中使用:page代替跟上面setPager()参数中 page 一致
         //$pager->getLinks()  取得分页数组
         //$pager->getLinks(5)
@@ -616,8 +618,8 @@ config里面有一个waterfont.TTF字体是水字体
 
 
 自动生成html方法
-
-   /*
+framework\config\inc.ini.php
+/*
 *网站静态化开始，可以做seo优化
 **/
 $config['html']='.html';//开启.html结尾url
@@ -634,4 +636,14 @@ http://www.app.com/project/html/curd/index/page/2.html
 生成html文件会在$config['realhtml']目录里面
 如果要更新请删除里面的html内容
 
-
+apache配置
+<VirtualHost *:80>
+    <Directory "D:/work/queryphp">
+        Order allow,deny
+        Allow from all
+	AllowOverride FileInfo 
+    </Directory> 
+  DocumentRoot "D:/work/queryphp"
+  ServerName "www.app.com"
+</VirtualHost>
+把框架解压到queryphp目录

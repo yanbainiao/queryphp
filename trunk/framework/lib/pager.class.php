@@ -114,6 +114,7 @@ class pager
    *<a href="url">5</a>
    */
   public function getWholeBar($url){
+	  if($this->total_page==0) Return "";
 	   $this->linkhead=str_replace(":".$this->pagesplit,"%d",$url);
 	   $links='';
 	   $links.='<a href="'.sprintf($this->linkhead,1).'"><span>'.L('第一页').'</span></a>';

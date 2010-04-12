@@ -3,33 +3,27 @@
 class Model
 {
    public $tablename;
-   var $fields=array();
-   var $types=array();
+   public $fields=array();
+   public $types=array();
    public $PRI;  //主键名
-   var $data; //数据编辑焦点
-   var $autoid=false; //是否自增表
+   public $data; //数据编辑焦点
+   public $autoid=false; //是否自增表
    private $sql=array();  //查询使用的条件
-   var $string;       //保存查询sql语句
+   public $string;       //保存查询sql语句
    private $DB=array();   //数据库链接保存
    private $res=null;
    private $record=array();
-   var $conn=0;
-   var $objpoint=0;
-   var $modelname;
+   public $conn=0;
+   public $objpoint=0;
+   public $modelname;
    public $databasename;
-   var $ismapper;
-   var $isjoinleft;
-   var $after;
-   var $before;
+   public $ismapper;
+   public $isjoinleft;
+   public $after;
+   public $before;
    public function __construct() {
 	   $this->modelname=substr(get_class($this),0,-5);
 	   $this->DB=getConnect($this->getTableName(),$this->modelname,$this->conn);	   
-	   /*
-	   if(is_array($this->DB))
-	   {
-	     
-	   }
-	   */
 	   return $this;
    }
   /*
@@ -37,7 +31,7 @@ class Model
   */
   public function switchDB($model)
   {
-	  $this->DB=getConnect($this->getTableName(),$model,$this->conn);
+	  $this->DB=getConnect($this->tablename,$model,$this->conn);
 	  return $this;
   }
   /*
@@ -45,7 +39,7 @@ class Model
   */
   public function getMate()
   {
-    $this->string="DESCRIBE ".$this->getTableName();	
+    $this->string="DESCRIBE ".$this->tablename;	
 	try{	
 	    $this->res=$this->DB['master']->query($this->string);
         $result = $this->res->fetchAll(PDO::FETCH_ASSOC);  
@@ -86,7 +80,7 @@ class Model
   * create(array("field"=>"aabbcc","field2"=>"112233"),'field','field2');
   * create($_POST,'field','field2');
   */
-  function create()
+ public function create()
   {
     $numargs = func_num_args();
     if ($numargs==1&&is_array(func_get_arg(0))) {
@@ -125,11 +119,27 @@ class Model
 		    $this->data[$v]=$arg0[$filedarray[--$i]];
 		  }
 		}
+	}else{
+		if('fix'==func_get_arg(0))
+		{
+		  $fix=func_get_arg(1);
+		  foreach($this->fields as $k=>$v)
+			{
+			 if(isset($_POST[$k]))
+			  {
+				 $this->data[$k]=$_POST[$k];
+			  }			
+			  if(isset($fix[$k])&&isset($_POST[$fix[$k]]))
+			  {
+				 $this->data[$k]=$_POST[$fix[$k]];
+			  }		  
+			}
+		}
 	}
 	return $this;    
   }
 
-  function __get($name)
+  public function __get($name)
   {
     if(isset($this->data[strtolower($name)]))
 	{
@@ -151,7 +161,7 @@ class Model
 	  return null;
 	}
   } 
-  function __set($name,$value)
+ public function __set($name,$value)
   {
     if(isset($this->types[strtolower($name)]))
 	{
@@ -165,7 +175,7 @@ class Model
 	}
   }
 
-  function __isset($name)
+ public function __isset($name)
   {
     return isset($this->data[strtolower($name)]);
   }
@@ -178,7 +188,7 @@ class Model
   * $book->get(1,6);
   * $book->find(1,6)
   */
-  function getOne()
+ public function getOne()
   {
 	$arg_list = func_get_args();
 	$arg_list=$arg_list[0];
@@ -203,10 +213,12 @@ class Model
 	  }
 	}
     for (; $i < $numargs; $i++) {
-	   if(strtoupper($arg_list[$i])=="DESC"||strtoupper($arg_list[$i])=="ASC")
+		$t=strtoupper($arg_list[$i]);
+	   if($t=="DESC"||$t=="ASC")
 		{
-		  $order=" order by ".$this->PRI." ".strtoupper($arg_list[$i]);
-		}else if(strtoupper($arg_list[$i])=="FETCH_OBJ"){
+		  	if($this->sql['orderby']=='')
+		    $this->sql['orderby']=" order by ".$this->PRI." ".$t;
+		}else if($t=="FETCH_OBJ"){
 		  $returnobj=PDO::FETCH_OBJ;
 		}else
 		 $pkey.=intval($arg_list[$i]).",";
@@ -221,11 +233,13 @@ class Model
 	{
 	  $fields=$this->sql['fields'];
 	}
-
-    $this->string="select ".$fields." from ".$this->getTableName()." where ".$pkey.$order;	
+    if($order=='') $order=$this->sql['orderby'];
+    $this->string="select ".$fields." from ".$this->tablename." where ".$pkey.$order;	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
+		$this->data=$this->record[0];
+		$this->objpoint=0;
 		$this->sql=array();
 		return $this;
 	}catch (PDOException $e) 
@@ -236,7 +250,7 @@ class Model
   /*
   *返回所有行数
   */
-  function getAllArray()
+ public function getAllArray()
   {
 	$arg_list = func_get_args();
 	$arg_list=$arg_list[0];
@@ -245,11 +259,12 @@ class Model
 	$fields="*";
     $returnobj=PDO::FETCH_ASSOC;   
     for ($i=0; $i < $numargs; $i++) {
-	   if(strtoupper($arg_list[$i])=="DESC"||strtoupper($arg_list[$i])=="ASC")
+		$t=strtoupper($arg_list[$i]);
+	   if($t=="DESC"||$t=="ASC")
 		{
 		  if($this->sql['orderby']=='')
-		    $this->sql['orderby']=" order by ".$this->PRI." ".strtoupper($arg_list[$i]);
-		}else if(strtoupper($arg_list[$i])=="FETCH_OBJ"){
+		    $this->sql['orderby']=" order by ".$this->PRI." ".$t;
+		}else if($t=="FETCH_OBJ"){
 		  $returnobj=PDO::FETCH_OBJ;
 		}else if(is_numeric($arg_list[$i])){
 		  $this->where($this->PRI."='".$arg_list[$i]."'");
@@ -263,11 +278,12 @@ class Model
 	{
 	  $fields=$this->sql['fields'];
 	}
-    $this->string="select ".$fields." from ".$this->getTableName()." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $this->string="select ".$fields." from ".$this->tablename." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
-		echo($this->string);
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
+		$this->data=$this->record[0];
+		$this->objpoint=0;
 		$this->sql=array();
 		return $this;
 	}catch (PDOException $e) 
@@ -278,7 +294,7 @@ class Model
   /*
   *取回ID主键名
   */
-  function pkkey()
+ public function pkkey()
   {
 	return $this->PRI;
   }
@@ -287,7 +303,7 @@ class Model
   *也可以返回一个空的小对像 
   *$this->getObjFields 返回一个空的数组对象
   */
-  function newRecord($data=array())
+public  function newRecord($data=array())
   {    
 	$this->data=array();
 	$this->getDefaultFormField($data);
@@ -298,7 +314,7 @@ class Model
   *复制一行对像内容
   *$id为pkid();
   */
-  function copyRecord($id='')
+ public function copyRecord($id='')
   {
     if($id!='')
 	{
@@ -311,7 +327,7 @@ class Model
   /*
   插入前操作
   */
-  function updatemaper()
+ public function updatemaper()
   {
 	foreach($this->maparray as $m=>$v)
 	{	  
@@ -335,7 +351,7 @@ class Model
   /*
   插入后操作
   */
-  function updatemaperafter()
+ public function updatemaperafter()
   {
     foreach($this->maparray as $m=>$v)
 	{
@@ -374,7 +390,7 @@ class Model
   * $supply->update($books,true); 
   * $supply->update('fields,fields',array("aa","bbb"));
   */
-  function update()
+ public function update()
   {
      $arglist=func_get_args();
 	 $argnum=func_num_args();
@@ -401,9 +417,13 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
+			   if(isset($arglist[1][$this->PRI]))
+			   {
+				 $this->where($this->PRI."='".$arglist[1][$this->PRI]."'");
+			   }else
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
@@ -422,7 +442,7 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
@@ -440,9 +460,13 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
+			   if(isset($arglist[0][$this->PRI]))
+			   {
+				 $this->where($this->PRI."='".$arglist[0][$this->PRI]."'");
+			   }else
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
@@ -468,9 +492,9 @@ class Model
 			{
 			  $mapper=$k;
               $this->objsaveper($mapper);
-			  $k=$this->setMapperToData($mapper)->getlocalPRIFields($mapper,M($objectname)->PRI);
-			  if($k!='')
-			    $localfields.=$k.",";
+			  $t=$this->setMapperToData($mapper)->getlocalPRIFields($mapper,M($objectname)->PRI);
+			  if($t!='')
+			    $localfields.=$t.",";
 			}
 		  }
           if($mapper!='')
@@ -493,9 +517,13 @@ class Model
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->getTableName()." set ".substr($sql,0,-1);
+	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
+			   if(isset($arrays[$this->PRI]))
+			   {
+				 $this->where($this->PRI."='".$arrays[$this->PRI]."'");
+			   }else
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
 			}
 			$this->string.=" ".$this->sql['where'].$this->sql['limit'];
@@ -503,7 +531,7 @@ class Model
 			$this->effectrow=$this->DB['master']->exec($this->string);
 		   }
 		  if(!isset($arglist[1]))
-		  {  //更新当然record
+		  {  //更新DATA
 		     $this->setData($arrays);
 		  }
 		}
@@ -517,12 +545,15 @@ class Model
   public function getMappertargetFields($mapper)
   {
     $fileds='';
-	if(isset($this->mapper[$mapper]['targetFiled'])) $fileds=$this->mapper[$mapper]['targetFiled'].",";
-	if(isset($this->mapper[$mapper]['targetFiled2'])) $fileds.=$this->mapper[$mapper]['targetFiled2'].",";
-	if(isset($this->mapper[$mapper]['targetFiled3'])) $fileds.=$this->mapper[$mapper]['targetFiled3'].",";
-	if($fileds!='')
-    $fileds=substr($fileds,0,-1);
-	return $fileds;
+    if(is_array($this->mapper[$mapper]['mapping']))
+	{
+		$fileds=array_values($this->mapper[$mapper]['mapping']);
+		if(empty($fileds)) Return '';
+		else {
+			Return implode(",",$fileds);
+		}
+	}
+	return '';
   }
   /*
   * 取得本模型关联模型字段
@@ -531,12 +562,15 @@ class Model
   public function getMapperlocalFields($mapper)
   {
     $fileds='';
-	if(isset($this->mapper[$mapper]['localFiled'])) $fileds=$this->mapper[$mapper]['localFiled'].",";
-	if(isset($this->mapper[$mapper]['localFiled2'])) $fileds.=$this->mapper[$mapper]['localFiled2'].",";
-	if(isset($this->mapper[$mapper]['localFiled3'])) $fileds.=$this->mapper[$mapper]['localFiled3'].",";
-	if($fileds!='')
-    $fileds=substr($fileds,0,-1);
-	return $fileds;
+    if(is_array($this->mapper[$mapper]['mapping']))
+	{
+		$fileds=array_keys($this->mapper[$mapper]['mapping']);
+		if(empty($fileds)) Return '';
+		else {
+			Return implode(",",$fileds);
+		}
+	}
+	Return '';
   }
   /*
   * 取得本模型关联模型字段
@@ -544,9 +578,10 @@ class Model
   */
   public function gettargetPRIFields($mapper,$PRI)
   {
-	if(isset($this->mapper[$mapper]['targetFiled'])&&$this->mapper[$mapper]['localFiled']==$PRI) return $this->mapper[$mapper]['targetFiled'];
-	if(isset($this->mapper[$mapper]['targetFiled2'])&&$this->mapper[$mapper]['localFiled2']==$PRI) return $this->mapper[$mapper]['targetFiled2'];
-	if(isset($this->mapper[$mapper]['targetFiled3'])&&$this->mapper[$mapper]['localFiled3']==$PRI) return $this->mapper[$mapper]['targetFiled3'];
+	if(is_array($this->mapper[$mapper]['mapping']))
+	{		
+		if(isset($this->mapper[$mapper]['mapping'][$PRI])) Return $this->mapper[$mapper]['mapping'][$PRI];
+	}	
     return '';
   }
   /*
@@ -555,10 +590,12 @@ class Model
   */
   public function getlocalPRIFields($mapper,$PRI)
   {
-	if(isset($this->mapper[$mapper]['localFiled'])&&$this->mapper[$mapper]['targetFiled']==$PRI) return $this->mapper[$mapper]['localFiled'];
-	if(isset($this->mapper[$mapper]['localFiled2'])&&$this->mapper[$mapper]['targetFiled2']==$PRI) return $this->mapper[$mapper]['localFiled2'];
-	if(isset($this->mapper[$mapper]['localFiled3'])&&$this->mapper[$mapper]['targetFiled3']==$PRI) return $this->mapper[$mapper]['localFiled3'];
-    return '';
+	if(is_array($this->mapper[$mapper]['mapping']))
+	{		
+		$t=array_search($PRI,$this->mapper[$mapper]['mapping']);
+        if($t!=false) return $t;
+	}
+	return '';
   }
   /*
   *关联mapper更新,本模块更新到关联mapper
@@ -566,36 +603,24 @@ class Model
   public function setMapperToData($mapper,$args=array(),$PRI=false)
   {
  	 $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
-	 if(isset($this->mapper[$mapper]['localFiled']))
-	  {
-		if($this->PRI==$this->mapper[$mapper]['localFiled'])
+
+    if(is_array($this->mapper[$mapper]['mapping']))
+	{
+		foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
 		{
-		 if($PRI)
-		   $this->setData(array($this->mapper[$mapper]['localFiled']=>$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled']]));		   
-		}else{
-		   $this->setData(array($this->mapper[$mapper]['localFiled']=>$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled']]));	
+	       if($this->PRI==$local)
+			{
+			 if($PRI)
+			   $this->setData(array($local=>$this->maps[$mapper]->data[$target]));		   
+			}else{
+			   $this->setData(array($local=>$this->maps[$mapper]->data[$target]));	
+			}
 		}
-	  }
-	 if(isset($this->mapper[$mapper]['localFiled2']))
-	  {
-		if($this->PRI==$this->mapper[$mapper]['localFiled2'])
-		{
-		 if($PRI)
-		   $this->setData(array($this->mapper[$mapper]['localFiled2']=>$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled2']]));	   
-		}else{
-		   $this->setData(array($this->mapper[$mapper]['localFiled2']=>$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled2']]));
-		}
-	  }
-	 if(isset($this->mapper[$mapper]['localFiled3']))
-	  {
-		if($this->PRI==$this->mapper[$mapper]['localFiled3'])
-		{
-		 if($PRI)
-		   $this->setData(array($this->mapper[$mapper]['localFiled3']=>$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled3']]));   
-		}else{
-		   $this->setData(array($this->mapper[$mapper]['localFiled3']=>$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled3']]));
-		}
-	  }
+	}else{
+	  //没有使用主键关联
+	  $this->setData(array($this->maps[$mapper]->pkkey()=>$this->maps[$mapper]->pkid()));
+	}
+
 	 if(!Empty($args))
 	   $this->setData($args);
 	 return $this;     
@@ -683,7 +708,7 @@ class Model
 			   $this->data[$k]=date("Y-m-d H:i:s");
 			 }
 		}    
-		$this->string="INSERT INTO `".$this->getTableName()."` (";
+		$this->string="INSERT INTO `".$this->tablename."` (";
 		$i=0;
 		$temp='';
 		foreach($this->data as $key=>$value)
@@ -714,7 +739,7 @@ class Model
 		$pkey=true;
 	  }else
 	  {
-		$this->string="UPDATE ".$this->getTableName()." set ";
+		$this->string="UPDATE ".$this->tablename." set ";
 		$i=0;
 		foreach($this->data as $key=>$value)
 		{
@@ -807,20 +832,20 @@ class Model
   function from($name='')
   {
     if($name==''){ 
-	   $this->sql['from']=$this->getTableName();
+	   $this->sql['from']=$this->tablename;
 	}else{		
-		if(M($name)->getTableName()!=$this->getTableName())
+		if(M($name)->getTableName()!=$this->tablename)
 		{
 		  $this->sql['isjoinleft']=true;
-		  $this->sql[$this->modelname.'.']=$this->getTableName().".";
+		  $this->sql[$this->modelname.'.']=$this->tablename.".";
 		  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 		  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 		  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 		  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 		  $this->sql['joinmodel']=M($name)->modelname.".";
-		  $this->sql['from']=$this->getDataBaseName().".".$this->getTableName()." as ".$this->modelname.",".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname.",".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
 		}else
-		  $this->sql['from']=$this->getTableName();
+		  $this->sql['from']=$this->tablename;
 	}
 	return $this;
   }
@@ -832,7 +857,7 @@ class Model
 	if(isset($this->sql['isjoinleft']))
 	{
 	  $this->sql['isjoinleft']=true;
-	  $this->sql[$this->modelname.'.']=$this->getTableName().".";
+	  $this->sql[$this->modelname.'.']=$this->tablename.".";
 	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
@@ -841,13 +866,13 @@ class Model
 	  $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
 	}else{
 	  $this->sql['isjoinleft']=true;
-	  $this->sql[$this->modelname.'.']=$this->getTableName().".";
+	  $this->sql[$this->modelname.'.']=$this->tablename.".";
 	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 	  $this->sql['joinmodel']=M($name)->modelname.".";
-     $this->sql['from']=$this->getDataBaseName().".".$this->getTableName()." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+     $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
 	}
 	return $this;
   }
@@ -859,6 +884,9 @@ class Model
 	$this->sql['from']=$this->sql['from']." ON ".$name;
 	return $this;
   }
+  /*
+  *魔术引用带modelname的方法
+  */
   function joinpreon($fields,$t=0,$modelname)
   {
 	 $str='';
@@ -887,10 +915,11 @@ class Model
   }
   /*
   *左链接表断在ON部分
+  *注释掉要全部小写
   */
   function joinwhere($name,$modelname)
   {
-	$modelname=strtolower($modelname);
+	//$modelname=strtolower($modelname);
 	$fields=preg_split("/( AND | OR )/i",$name,-1,PREG_SPLIT_DELIM_CAPTURE);
     $count=count($fields);
 	  $str='';
@@ -999,11 +1028,13 @@ class Model
   {	
     if(isset($this->types[$colname]))
 	{
-    $this->string="update ".$this->getTableName()." set "."`$colname`=`$colname`+".intval($num)." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+	$fix=$num>0?'+':'-';
+	$num=abs($num);
+    $this->string="update ".$this->tablename." set "."`$colname`=`$colname`".$fix.$num." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
-		$res=$this->DB['master']->exec($this->string);
+		$this->effectrow=$this->DB['master']->exec($this->string);
 		$this->sql=array();
-		return $res;
+		return $this;
 	 }catch (PDOException $e) 
         {
            throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1005);
@@ -1018,12 +1049,12 @@ class Model
   */
   function count()
   {
-    $pfields=$this->getTableName().".*";
+    $pfields=$this->tablename.".*";
 	if($this->sql['from']=='')
 	{
-	  $this->sql['from']=$this->getTableName();
+	  $this->sql['from']=$this->tablename;
 	}
-	if(isset($this->types[$this->PRI])) $pfields=$this->getTableName().".".$this->PRI;
+	if(isset($this->types[$this->PRI])) $pfields=$this->tablename.".".$this->PRI;
     $this->string="select count(".$pfields.") as totalnum from ".$this->sql['from']." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$res=$this->DB['master']->query($this->string);	
@@ -1034,6 +1065,23 @@ class Model
            throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1006);
         }
 	return 0;
+  }
+  /*
+  *简单分页数据量偏移 pager要离在最后面就是，不然取count时候可能后面设置的条件得不到
+  */
+  public function pager($page,$onepage) {	
+        $total= $this->count();		
+        $total_page =ceil($total/$onepage);
+        if (empty($page))  
+        {
+			$this->limit(0,$onepage);
+        }else
+        {			
+            if($page>$total_page) $page=$total_page+1;
+			$page = ($page-1)*$onepage;
+			$this->limit($page,intval($onepage));
+        }  
+		Return $this;
   }
   /*
   *取回查询后内容。设置为对象形式
@@ -1111,14 +1159,15 @@ class Model
   */
   function clear()
   {
-  	 $this->string="TRUNCATE TABLE `".$this->getTableName()."`";
+  	 $this->string="TRUNCATE TABLE `".$this->tablename."`";
 	 $this->sql=array();
+	 $this->record=array();
 	 return $this->DB['master']->exec($this->string);
   }
   /*
   *删除对象数据记录
   */
-  function delete($id='')
+ public function delete($id='')
   {
     
 	if(is_numeric($id))
@@ -1129,13 +1178,13 @@ class Model
 	  }else{
 		$this->whereAnd($this->PRI."='".$id."'");
 	  }	  
-	  $this->string="DELETE from ".$this->getTableName()." ".$this->sql['where'].$this->sql['limit'];
+	  $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 	  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
 	}else if($id=='all')
 	{
-	   $this->string="TRUNCATE TABLE `".$this->getTableName()."`";
+	   $this->string="TRUNCATE TABLE `".$this->tablename."`";
 	   $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
@@ -1165,7 +1214,7 @@ class Model
 		$this->where($this->PRI."='".$this->data[$this->PRI]."'");
 	  }
 	}
-	      $this->string="DELETE from ".$this->getTableName()." ".$this->sql['where'].$this->sql['limit'];
+	      $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 		  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
@@ -1173,7 +1222,7 @@ class Model
   /*
   *判断是否有插入更新删除效果
   */
-  function isEffect()
+ public function isEffect()
   {
     if($this->effectrow>1) return  $this->effectrow;
 	else false;
@@ -1181,27 +1230,28 @@ class Model
   /*
   *重新把指针设置为record开头
   */
-  function reset()
+ public function reset()
   {
      $this->objpoint=0;
 	 $this->recordend=false;
-	 unset($this->recordend);
 	 return $this;
   }
-  function next()
+ public function next()
   {
-    if(count($this->record)>=$this->objpoint){
-	  $this->objpoint=count($this->record);
+    $p=$this->objpoint+1;
+	$c=count($this->record);
+	if($c>$p){
+	  $this->objpoint++;	  
 	  return $this;
 	}else{
-	  $this->objpoint++;
+	  $this->objpoint=$c-1;
 	  return $this;
 	}
   }
   /*
   *返回查询数据的行数或是否为真
   */
-  function isEmpty()
+ public function isEmpty()
   {
     if(count($this->record)==0) return true;
 	else return false;
@@ -1209,12 +1259,19 @@ class Model
   /*
   *判断是否up完record数组
   */
-  function isEnd()
+ public function isEnd()
   {
-	 if(count($this->record)==$this->objpoint){
+	 $p=$this->objpoint+1;
+	 $c=count($this->record);
+	 if($p>=$c){
+	   if($p>$c)
+	   {
+	     $this->objpoint=$c>0?$c-1:0;
+	   }
 	   $this->recordend=true;
 	   return true;
 	 }else{
+
 	   return false;
 	 }
   }
@@ -1222,7 +1279,7 @@ class Model
   *设置编辑函数
   *把原来的-> function up()改为edit这样比较理解
   */
-  function edit($id=null)
+ public function edit($id=null)
   {
 	if($this->recordend==true){
 	  $this->data=array();
@@ -1231,6 +1288,7 @@ class Model
 	$this->data=array();
     if(is_array($this->record))
 	{
+	  $this->isEnd();
 	  if($id!=null) $this->objpoint=$id;
 	  if(is_object($this->record[$this->objpoint]))
 	  {
@@ -1268,7 +1326,7 @@ class Model
   *自定义sql，手工使用sql操作 $ms为指定是master还slaves数据库链接
   *自己手动支持sql,目前还不清楚是返回数组好还是返回pdo对像好
   */
-  function query($string,$ms='')
+ public function query($string,$ms='')
   {
 	$this->string=$string;
 	$this->sql=array();
@@ -1277,7 +1335,7 @@ class Model
 	else
 	 return $this->DB['slaves']->query($this->string); 	 
   }
-  function fetch($fetchobj='')
+ public function fetch($fetchobj='')
   {
 	if($this->sql['fields']!='')
 	{
@@ -1287,24 +1345,34 @@ class Model
 	}
 	if($this->sql['from']=='')
 	{
-	  $this->sql['from']=$this->getTableName();
+	  $this->sql['from']=$this->tablename;
 	}
 	if($this->sql['where']=='')
 	{
-	  if(isset($this->data[$this->PRI])&&is_numeric($this->data[$this->PRI]))
-      $this->where($this->PRI."='".$this->data[$this->PRI]."'");
+      $this->where("1");
 	}
     $this->string="select ".$pfields." from ".$this->sql['from']." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'].$this->sql['limit'];	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
-        if($fetchobj=='FETCH_OBJ')
-        {
-		   $fetchobj=PDO::FETCH_OBJ;
+		if($fetchobj=='FETCH_OBJ')
+		{
+		   $f=PDO::FETCH_OBJ;
+		   $fetchobj='';
 		}else{
-		   $fetchobj=PDO::FETCH_ASSOC;
+		   $f=PDO::FETCH_ASSOC;
 		}
-		$this->record=$res->fetchAll($fetchobj);  
 		$this->sql=array();
+		if(is_object($fetchobj))
+		{
+		  $res->setFetchMode(PDO::FETCH_INTO,$fetchobj);		  
+		  Return $res->fetchAll(PDO::FETCH_INTO);
+		}elseif($fetchobj!=''&&class_exists($fetchobj,false)){
+		  Return $res->fetchAll(PDO::FETCH_CLASS,$fetchobj);
+		}else{		    
+		  $this->record=$res->fetchAll($f); 
+		  $this->objpoint=0;
+		  $this->data=$this->record[0];
+		}		
 		return $this;
 	}catch (PDOException $e) 
         {
@@ -1314,19 +1382,22 @@ class Model
   /*
   *返回数据库名
   */
-  function getDataBaseName()
+ public function getDataBaseName()
   {
-	  if($this->databasename) return $this->databasename;
-	  $this->string="SELECT DATABASE() AS name";
-	  $res=$this->DB['slaves']->query($this->string);
-      $database=$res->fetch(PDO::FETCH_ASSOC);  
-	  $this->databasename=$database['name'];
-	  return $database['name'];
+	  if(empty($this->databasename)){ 
+		  $this->string="SELECT DATABASE() AS name";
+		  $res=$this->DB['slaves']->query($this->string);
+		  $database=$res->fetch(PDO::FETCH_ASSOC);  
+		  $this->databasename=$database['name'];
+		  return $database['name'];
+	  }else{
+	    return $this->databasename;
+	  }
   }
   /*
   *返回表名可以重载设置表名
   */
-  function getTableName()
+ public function getTableName()
   {
      return $this->tablename;
   }
@@ -1334,7 +1405,7 @@ class Model
   *链接leftjoin 时候使用
   *->selectbooks("bookname,bookid")这样子
   */
-  function selectFileds($fields,$modelname)
+ public function selectFileds($fields,$modelname)
   {
      $tablename=M($modelname)->getTableName();
 	 $modelname=M($modelname)->modelname;
@@ -1352,10 +1423,29 @@ class Model
 	 return $this;
   }
   /*
+  *把编辑数据库设置到record里面
+  *有时候新添加数据时候又想做关系查询
+  *dataUP(true);是附加到现有数组后面
+  */
+ public function dataUp($up=true){
+  	if($up){
+	  if($this->record[$this->objpoint][$this->PRI]==$this->pkid())
+	  {
+		$this->record[$this->objpoint]=$this->data;
+	  }else{
+		$this->record[]=$this->data;
+	  }	  
+	}else{
+	  $this->record=array();
+	  $this->record[]=$this->data;
+	}
+	Return $this;
+  }
+  /*
   *数据关联$m->Books->bookname;
   *多对多
   */
-  function ManyhasMany($mapper,$relation=array())
+ public function ManyhasMany($mapper,$relation=array())
   {
 	 $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
 	 if(count($relation)>0)
@@ -1368,18 +1458,19 @@ class Model
 		 for($i=0;$i<$n;$i++)
 		 {
 			 $this->maps[$mapper]->select($fileds);
-			 $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$i][$this->mapper[$mapper]['localFiled']]."'");
-			 if(isset($this->mapper[$mapper]['targetFiled2']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
-			 }
-			 if(isset($this->mapper[$mapper]['targetFiled3']))
-			 {
-			   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
-			 }
+
+		    if(is_array($this->mapper[$mapper]['mapping']))
+			{
+				foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+				{
+				  $this->maps[$mapper]->whereAnd($target,$this->record[$i][$local]);
+				}
+			}else{
+			  //没有使用主键关联
+			  $this->maps[$mapper]->whereAnd($this->maps[$mapper]->pkkey(),$this->record[$i][$this->pkkey()]);
+			}
 			try{
-				$this->maps[$mapper]->fetch();	
-				$this->maps[$mapper]->edit();
+				$this->maps[$mapper]->fetch();					
 				$this->sql=array();
 				$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
 			}catch (PDOException $e) 
@@ -1388,16 +1479,17 @@ class Model
 				}
 		 }
 	 }elseif(is_array($this->record))
-	 {
-		$this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->record[$this->mapper[$mapper]['localFiled']]."'");
-		if(isset($this->mapper[$mapper]['targetFiled2']))
-		 {
-		   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
-		 }
-		 if(isset($this->mapper[$mapper]['targetFiled3']))
-		 {
-		   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
-		 }
+	 {	   
+		    if(is_array($this->mapper[$mapper]['mapping']))
+			{
+				foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+				{
+				  $this->maps[$mapper]->whereAnd($target,$this->record[$local]);
+				}
+			}else{
+			  //没有使用主键关联
+			  $this->maps[$mapper]->whereAnd($this->maps[$mapper]->pkkey(),$this->record[$this->pkkey()]);
+			}		
 		try{
 			$this->maps[$mapper]->fetch();	
 			$this->maps[$mapper]->edit();
@@ -1414,7 +1506,7 @@ class Model
   *数据关联$m->Books->bookname;
   *一对多
   */
-  function hasMany($mapper,$relation=array())
+ public function hasMany($mapper,$relation=array())
   {
 	 $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
 	 if(count($relation)>0)
@@ -1422,40 +1514,65 @@ class Model
 	    $fileds=implode(",",$relation);
 		$this->maps[$mapper]->select($fileds);
 	 }
-	 $this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'");
-	 if(isset($this->mapper[$mapper]['targetFiled2']))
-	 {
-	   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->data[$this->mapper[$mapper]['localFiled2']]."'");
+     if(is_array($this->record)&&isset($this->record[0]))
+	 { 
+		 	$this->maps[$mapper]->select($fileds);
+            $this->isEnd();
+			echo($this->objpoint);
+		    if(is_array($this->mapper[$mapper]['mapping']))
+			{
+				foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+				{
+				  $this->maps[$mapper]->whereAnd($target,$this->record[$this->objpoint][$local]);
+				}
+			}else{
+			  //没有使用主键关联
+			  $this->maps[$mapper]->whereAnd($this->maps[$mapper]->pkkey(),$this->record[$this->objpoint][$this->pkkey()]);
+			}
+			try{
+				$this->maps[$mapper]->fetch();	
+				$this->maps[$mapper]->edit();
+				$this->sql=array();
+				$n=count($this->record);
+				 for($i=0;$i<$n;$i++)
+				 {
+					$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+				 }
+				
+			}catch (PDOException $e) 
+				{
+				   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1008);
+				}
+		 
+	 }elseif(is_array($this->record))
+	 {	   
+		    if(is_array($this->mapper[$mapper]['mapping']))
+			{
+				foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+				{
+				  $this->maps[$mapper]->whereAnd($target,$this->record[$local]);
+				}
+			}else{
+			  //没有使用主键关联
+			  $this->maps[$mapper]->whereAnd($this->maps[$mapper]->pkkey(),$this->record[$this->pkkey()]);
+			}	
+		try{
+			$this->maps[$mapper]->fetch();	
+			$this->maps[$mapper]->edit();
+			$this->sql=array();
+			$this->record[$mapper]=$this->maps[$mapper]->record; 
+		}catch (PDOException $e) 
+			{
+			   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1009);
+			}
 	 }
-	 if(isset($this->mapper[$mapper]['targetFiled3']))
-	 {
-	   $this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->data[$this->mapper[$mapper]['localFiled3']]."'");
-	 }
-	try{
-		$this->maps[$mapper]->fetch();	
-		$this->maps[$mapper]->edit(0);
-		$this->sql=array();
-		if(is_array($this->record)&&is_array($this->record[0]))
-		{
-		  $n=count($this->record);
-		  for($i=0;$i<$n;$i++)
-		  {
-		   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
-		  }
-		}elseif(is_array($this->record)){
-		  $this->record[$mapper]=$this->maps[$mapper]->record;
-		}
-		return $this;
-	}catch (PDOException $e) 
-	{
-	   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1010);
-	}
+	 return $this;
   }
   /*
   *数据关联$m->Books->bookname;
   *一对一
   */
-  function hasOne($mapper,$relation=array())
+ public function hasOne($mapper,$relation=array())
   {
 	$this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
 	if(count($relation)>0)
@@ -1463,48 +1580,73 @@ class Model
 		$fileds=implode(",",$relation);
 		$this->maps[$mapper]->select($fileds);
 	}
-	$this->maps[$mapper]->where($this->mapper[$mapper]['targetFiled']."='".$this->data[$this->mapper[$mapper]['localFiled']]."'")->limit(1);
-	if(isset($this->mapper[$mapper]['targetFiled2']))
-	{
-		$this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled2']."='".$this->record[$i][$this->mapper[$mapper]['localFiled2']]."'");
-	}
-	if(isset($this->mapper[$mapper]['targetFiled3']))
-	{
-		$this->maps[$mapper]->whereAnd($this->mapper[$mapper]['targetFiled3']."='".$this->record[$i][$this->mapper[$mapper]['localFiled3']]."'");
-	}
 
-	try{
-		$this->maps[$mapper]->fetch();	
-		$this->maps[$mapper]->edit();
-		$this->sql=array();
-		if(is_array($this->record)&&is_array($this->record[0]))
+     if(is_array($this->record)&&isset($this->record[0]))
+	 { 
+	    $this->maps[$mapper]->select($fileds);
+		$this->isEnd();
+		if(is_array($this->mapper[$mapper]['mapping']))
 		{
-		  $n=count($this->record);
-		  for($i=0;$i<$n;$i++)
-		  {
-		   $this->record[$i][$mapper]=$this->maps[$mapper]->record; 
-		  }
-		}elseif(is_array($this->record)){
-		  $this->record[$mapper]=$this->maps[$mapper]->record;
+			foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+			{
+			  $this->maps[$mapper]->whereAnd($target,$this->record[$this->objpoint][$local]);
+			}
+		}else{
+		  //没有使用主键关联
+		  $this->maps[$mapper]->whereAnd($this->maps[$mapper]->pkkey(),$this->record[$this->objpoint][$this->pkkey()]);
 		}
-		return $this;
-	}catch (PDOException $e) 
-		{
-		   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1011);
-		}
+		$this->maps[$mapper]->limit(1);
+		try{
+			$this->maps[$mapper]->fetch();	
+			$this->maps[$mapper]->edit();
+			$this->sql=array();
+			 $n=count($this->record);
+			 for($i=0;$i<$n;$i++)
+			 {
+				$this->record[$i][$mapper]=$this->maps[$mapper]->record; 
+			 }
+			
+		}catch (PDOException $e) 
+			{
+			   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1008);
+			}
+	 }elseif(is_array($this->record))
+	 {	   
+		    if(is_array($this->mapper[$mapper]['mapping']))
+			{
+				foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+				{
+				  $this->maps[$mapper]->whereAnd($target,$this->record[$local]);
+				}
+			}else{
+			  //没有使用主键关联
+			  $this->maps[$mapper]->whereAnd($this->maps[$mapper]->pkkey(),$this->record[$this->pkkey()]);
+			}	
+			$this->maps[$mapper]->limit(1);
+		try{
+			$this->maps[$mapper]->fetch();	
+			$this->maps[$mapper]->edit();
+			$this->sql=array();
+			$this->record[$mapper]=$this->maps[$mapper]->record; 
+		}catch (PDOException $e) 
+			{
+			   throw new mylog('model ['.$e->getMessage()."]".$this->modelname,1009);
+			}
+	 }
+	 return $this;
   }
   /*
   * 返回一个record空对像
   *
   */
-  function getObjFields()
+ public function getObjFields()
   {
     return new ArrayObject($this->fields);
   }
   /*
   *填充一行内容，没有使用默认值填充
   */
-  function getDefaultFormField($data=array())
+ public function getDefaultFormField($data=array())
   {
      $t=array();
 	 foreach($this->fields as $key=>$value)
@@ -1517,7 +1659,7 @@ class Model
   /*
   *从数组中取得表字段的值也跟过滤差不多
   */
-  function getArrayFormField($data='')
+ public function getArrayFormField($data='')
   {
     if($data=='') $data=$this->data;
 	$t=array();
@@ -1530,7 +1672,7 @@ class Model
   /*
   *处理映像数组
   */
-  function promaparray($mapper,$maparray)
+ public function promaparray($mapper,$maparray)
   {
 	if(empty($maparray)){ $this->maparray[$mapper]=array(); return $this; } //清空mapper关系
     $mapmodel=$this->mapper[$mapper]['TargetModel'];
@@ -1539,11 +1681,10 @@ class Model
 	{
 	  if(isset(M($mapmodel)->types[$k]))
 	  {
-	    $this->maparray[$mapper][$mpi][$k]=$v;
-		$mpi++;
+		$this->maparray[$mapper][$mpi][$k]=$v;
 	  }elseif(is_array($v))
-	  {
-	    $this->maparray[$mapper][]=M($mapmodel)->getArrayFormField($v);
+	  {	    
+		$this->maparray[$mapper][]=M($mapmodel)->getArrayFormField($v);
 	  }elseif(is_object($v))
 	  {
 	    $this->maparray[$mapper][]=M($mapmodel)->getArrayFormField(get_object_vars($v));
@@ -1551,22 +1692,18 @@ class Model
 	}
 	//处理关联模型
     foreach($this->maparray[$mapper] as $k=>$v)
-	{
-	  if(isset($this->mapper[$mapper]['targetFiled'])&&M($mapmodel)->PRI!=$this->mapper[$mapper]['targetFiled'])
-	  {
-		 if(!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled']]))
-		   $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled']]=$this->data[$this->mapper[$mapper]['localFiled']];
-	  }
-	  if(isset($this->mapper[$mapper]['targetFiled2'])&&M($mapmodel)->PRI!=$this->mapper[$mapper]['targetFiled2'])
-	  {
-		 if(!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled2']]))
-		  $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled2']]=$this->data[$this->mapper[$mapper]['localFiled2']];
-	  }
-	  if(isset($this->mapper[$mapper]['targetFiled3'])&&M($mapmodel)->PRI!=$this->mapper[$mapper]['targetFiled3'])
-	  {
-		 if(!isset($this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled3']])) 
-		  $this->maparray[$mapper][$k][$this->mapper[$mapper]['targetFiled3']]=$this->data[$this->mapper[$mapper]['localFiled3']];
-	  }
+	{	  
+		if(is_array($this->mapper[$mapper]['mapping']))
+		{
+			foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+			{
+				if(M($mapmodel)->pkkey()!=$target)
+				{
+		          if(!isset($this->maparray[$mapper][$k][$target]))
+		             $this->maparray[$mapper][$k][$target]=$this->data[$local];	
+				}
+			}
+		}
 	}
 	return $this;
   }
@@ -1577,36 +1714,19 @@ class Model
   public function setDataToMapper($mapper,$args=array(),$PRI=false)
   {
 	 $this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
-	 if(isset($this->mapper[$mapper]['targetFiled']))
-	  {
-		if($this->maps[$mapper]->PRI==$this->mapper[$mapper]['targetFiled'])
+	if(is_array($this->mapper[$mapper]['mapping']))
+	{
+		foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
 		{
-		 if($PRI)
-		   $this->maps[$mapper]->setData(array($this->mapper[$mapper]['targetFiled']=>$this->data[$this->mapper[$mapper]['localFiled']]));		   
-		}else{
-		   $this->maps[$mapper]->setData(array($this->mapper[$mapper]['targetFiled']=>$this->data[$this->mapper[$mapper]['localFiled']]));	
+		    if($this->maps[$mapper]->pkkey()==$target)
+			{
+			 if($PRI) $this->maps[$mapper]->setData(array($target=>$this->data[$local]));		   
+			}else{
+			   $this->maps[$mapper]->setData(array($target=>$this->data[$local]));	
+			}
 		}
-	  }
-	 if(isset($this->mapper[$mapper]['targetFiled2']))
-	  {
-		if($this->maps[$mapper]->PRI==$this->mapper[$mapper]['targetFiled2'])
-		{
-		 if($PRI)
-		   $this->maps[$mapper]->setData(array($this->mapper[$mapper]['targetFiled2']=>$this->data[$this->mapper[$mapper]['localFiled2']]));	   
-		}else{
-		   $this->maps[$mapper]->setData(array($this->mapper[$mapper]['targetFiled2']=>$this->data[$this->mapper[$mapper]['localFiled2']]));
-		}
-	  }
-	 if(isset($this->mapper[$mapper]['targetFiled3']))
-	  {
-		if($this->maps[$mapper]->PRI==$this->mapper[$mapper]['targetFiled3'])
-		{
-		 if($PRI)
-		   $this->maps[$mapper]->setData(array($this->mapper[$mapper]['targetFiled3']=>$this->data[$this->mapper[$mapper]['localFiled3']]));   
-		}else{
-		   $this->maps[$mapper]->setData(array($this->mapper[$mapper]['targetFiled3']=>$this->data[$this->mapper[$mapper]['localFiled3']]));
-		}
-	  }
+	}
+
 	 if(!Empty($args))
 	   $this->maps[$mapper]->setData($args);
 	 return $this;
@@ -1720,25 +1840,23 @@ class Model
   /*
   *关联对像查询
   */
-  function wheremapper($mapper)
+ public function wheremapper($mapper)
   {
 	$this->maps[$mapper]=M($this->mapper[$mapper]['TargetModel']);
     
-	if(isset($this->mapper[$mapper]['targetFiled'])&&isset($this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled']]))
+    if(is_array($this->mapper[$mapper]['mapping']))
 	{
-	  $this->whereAnd($this->mapper[$mapper]['localFiled'],$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled']]);	  
-	}
-	if(isset($this->mapper[$mapper]['targetFiled2'])&&isset($this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled2']]))
-	{
-	  $this->whereAnd($this->mapper[$mapper]['localFiled2'],$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled2']]);	  
-	}
-	if(isset($this->mapper[$mapper]['targetFiled3'])&&isset($this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled3']]))
-	{
-	  $this->whereAnd($this->mapper[$mapper]['localFiled3'],$this->maps[$mapper]->data[$this->mapper[$mapper]['targetFiled3']]);	  
+		foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
+		{
+		  $this->whereAnd($local,$this->maps[$mapper]->data[$target]);
+		}
+	}else{
+	  //没有使用主键关联
+	  $this->whereAnd($this->pkkey(),$this->maps[$mapper]->data[$this->maps[$mapper]->pkid()]);
 	}
 	return $this;
   }
-  function __call($name,$Args)
+ public function __call($name,$Args)
   {
 	if($name=='get') return $this->getOne($Args);
 	if($name=='find') return $this->getOne($Args);
@@ -1754,7 +1872,7 @@ class Model
 	  }elseif(method_exists($this,$this->mapper[$name]['map'])) {
 		call_user_func(array($this,$this->mapper[$name]['map']),$name,$Args);
 	  }	  
-	  return $this->maps[$mapper];
+	  return $this->maps[$name];
 	}
 	if(substr($name,0,6)=='select')
 	{
@@ -1773,8 +1891,8 @@ class Model
 	}
 	if(strtolower(substr($name,0,3))=='get')
 	{
-	  $str=substr($name,3);
-      if(isset($this->types[strtolower($str)]))
+	  $str=strtolower(substr($name,3));
+      if(isset($this->types[$str]))
 	  {
 		return $this->data[$str];
 	  }

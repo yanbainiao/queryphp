@@ -35,5 +35,6 @@ function echo_memory_usage() {
     } 
 $time_end = microtime_float();
 $time = $time_end - $time_start;
+if($viewmodel!='ajax')
 echo " <div style=\"position:absolute;right:0px;top:0px;border:2px solid red;background:#ccc;filter:alpha(opacity=70); -moz-opacity:0.7; opacity: 0.7;\">内存:".echo_memory_usage()." 时间(秒):".number_format($time,3,'.', '')."</div>";
 ?>

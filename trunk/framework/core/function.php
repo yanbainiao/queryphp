@@ -1,5 +1,50 @@
 <?php
 
+
+/*
+*用户对像返回函数
+*/
+function MY() {
+	if(isset($GLOBALS['myUser']))
+	{
+	 return $GLOBALS['myUser'];
+	}  	
+	$GLOBALS['myUser']=new myUser();
+	return $GLOBALS['myUser'];
+}
+/*
+*跳转函数
+*/
+function redirect($url,$msg,$second=0,$o=true) {
+	header("Content-type: text/html; charset=utf-8");
+    $str='<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="refresh" content="'.$second.';URL='.$url.'"></head><body>'.$msg.'</body></html>';
+	if($o){
+	  echo $str;exit;
+	}
+   Return $str;
+}
+/*
+*权限控制函数
+*/
+function ACL($acl) {
+   if(isset($GLOBALS[$acl."ACL"]))
+   {
+     return $GLOBALS[$acl."ACL"];
+   }
+
+		if(file_exists(P("webprojectpath")."router/acl/".$acl."ACL.class.php"))
+		{
+		   require_once P("webprojectpath")."router/acl/".$acl."ACL.class.php";
+		}elseif(file_exists(P("modelpath")."router/acl/".$acl."ACL.class.php")){
+		   require_once P("modelpath")."router/acl/".$acl."ACL.class.php";	
+		}else{
+		  Return false;
+		}	
+
+     $t=$acl."ACL";
+	 $GLOBALS[$acl."DM"]=new $t();
+	 return $GLOBALS[$acl."DM"];
+}
 /*
 *语言显示可以自动显示目标语言
 *默认是I('systemlanuage');
@@ -33,6 +78,12 @@ function L($str,$model='') {
 	Return $str;
 }
 
+/*
+*视图函数
+*/
+function V() {
+	Return new view();
+}
 /*
 * 文件名安全处理
 */
@@ -104,6 +155,7 @@ function getConnect($table,$model=null,$connper=0)
 		  {
 			 $prand=rand(0,count($v["master"])-1);
 			 $connmodel=md5(json_encode($v["master"][$prand]));
+			 $table_fix=$v["master"][$prand]['table_fix'];
 			 if($GLOBALS['pdolinks'][$connmodel]!='')
 			   $tconn['master']=$GLOBALS['pdolinks'][$connmodel];
 			 else
@@ -126,6 +178,7 @@ function getConnect($table,$model=null,$connper=0)
 	 {
 		$prand=rand(0,count($GLOBALS['config']['pdoconn']['default']["master"])-1);
 	    $connmodel=md5(json_encode($GLOBALS['config']['pdoconn']['default']["master"][$prand]));
+		$table_fix=$GLOBALS['config']['pdoconn']['default']["master"][$prand]['table_fix'];
 		 if($GLOBALS['pdolinks'][$connmodel]!='')
 		 {
 			$tconn['master']=$GLOBALS['pdolinks'][$connmodel];
@@ -143,10 +196,10 @@ function getConnect($table,$model=null,$connper=0)
 	 }
 	 if($connper==1)
 	 {
-	   return array('master'=>$tconn['master'],'slaves'=>$tconn['slaves']);//根据$model返回主从就可以了
+	   return array('master'=>$tconn['master'],'slaves'=>$tconn['slaves'],'table_fix'=>$table_fix);//根据$model返回主从就可以了
 	 }else if($connper==0)
 	 {
-	   return array('master'=>$tconn['master'],'slaves'=>$tconn['master']);//根据$model返回主从就可以了
+	   return array('master'=>$tconn['master'],'slaves'=>$tconn['master'],'table_fix'=>$table_fix);//根据$model返回主从就可以了
 	 }
      
 }
@@ -197,8 +250,30 @@ function J()
 	$router=R(C("router")->controller);
 	if(method_exists($router,C("router")->action)) {
 		$router->render(C("router")->action);
-		call_user_func(array($router,C("router")->action),$arg);
+		Return $router->{C("router")->action}($arg);
+		//call_user_func(array($router,C("router")->action),$arg);
 	}
+}
+/*
+*DM是datamodel数据模型类
+*就是提数据集合类
+*/
+function DM($newc) {
+   if(isset($GLOBALS[$newc."DM"]))
+   {
+     return $GLOBALS[$newc."DM"];
+   }
+
+		if(file_exists(P("webprojectpath")."model/dm/".$newc."DM.class.php"))
+		{
+		   require_once P("webprojectpath")."model/dm/".$newc."DM.class.php";
+		}elseif(file_exists(P("modelpath")."model/dm/".$newc."DM.class.php")){
+		   require_once P("modelpath")."model/dm/".$newc."DM.class.php";	
+		}	
+      $t=$newc."DM";
+     $GLOBALS[$newc."DM"]=new $t();
+	 return $GLOBALS[$newc."DM"];
+
 }
 //C创建类
 function C($class=null)
@@ -360,6 +435,11 @@ function __autoload($class_name) {
 	  require_once P("frameworkpath")."class/".$class_name.'.class.php';
 	  return;
 	}
+	if(file_exists(P("frameworkpath")."lib/".$class_name."/".$class_name.'.class.php'))
+	{		   
+	  require_once P("frameworkpath")."lib/".$class_name."/".$class_name.'.class.php';
+	  return;
+	}
 	if(file_exists(P("frameworkpath")."lib/".$class_name.'.class.php'))
 	{		   
 	  require_once P("frameworkpath")."lib/".$class_name.'.class.php';
@@ -388,20 +468,48 @@ function __autoload($class_name) {
 function url_for()
 {
   $arg_list = func_get_args();
-  $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"]))."/".$arg_list[0];
-  if(isset($GLOBALS['config']['html'])&&(substr($url,-strlen($GLOBALS['config']['html']))!=$GLOBALS['config']['html']))
-  {
-     if(isset($arg_list[1])&&$arg_list[1]===true)
-	  {
-	  }else{
-	   $url.=$GLOBALS['config']['html'];
-	   //把静态目录补上
-	   if(isset($GLOBALS['config']['realhtml']))
+	if(C("router")->isPathInfo()===true)
+	{
+	  $url=explode("?",$arg_list[0]);
+	  $t=explode("/",$url[0]);
+	    
+	   $u="?router=".array_shift($t)."&action=".array_shift($t);
+	   if(is_array($t))
 	   {
-		   $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"])).$GLOBALS['config']['realhtml']."/".$arg_list[0].$GLOBALS['config']['html'];
+	     $n=count($t);
+		 for($i=0;$i<$n;$i++)
+		 {
+		   $u.="&".$t[$i]."=".$t[++$i];
+		 }
 	   }
-	  }
-   }
+	   if(!empty($url[1]))
+	   {
+		 $u.="&".$url[1];
+	   }
+	   $url='';
+       $url=$_SERVER["SCRIPT_NAME"].$u;
+	}else{
+	  //如果是动态使用$_SERVER["SCRIPT_NAME"]
+	  if($_SERVER["PATH_INFO"]=='/'&&!isset($GLOBALS['config']['html']))
+	  {
+	   $url=$_SERVER["SCRIPT_NAME"]."/".$arg_list[0];	   
+	  }else{
+	   $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"]))."/".$arg_list[0];
+      }
+	  if(isset($GLOBALS['config']['html'])&&(substr($url,-strlen($GLOBALS['config']['html']))!=$GLOBALS['config']['html']))
+	  {
+		 if(isset($arg_list[1])&&$arg_list[1]===true)
+		  {
+		  }else{
+		   $url.=$GLOBALS['config']['html'];
+		   //把静态目录补上
+		   if(isset($GLOBALS['config']['realhtml']))
+		   {
+			   $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"])).$GLOBALS['config']['realhtml']."/".$arg_list[0].$GLOBALS['config']['html'];
+		   }
+		  }
+	   }
+	}
   return $url;
 }
 ?>
