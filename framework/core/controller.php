@@ -28,20 +28,20 @@ class controller{
     return C("view")->get($name);
   }
   /*
-  *¿ÉÒÔ×Ô¼ºÉèÖÃÉú³ÉhtmlÎÄ¼şÃû
-  *²»È»Ê¹ÓÃ$_SERVER["REQUEST_URI"]Éú³É
+  *å¯ä»¥è‡ªå·±è®¾ç½®ç”Ÿæˆhtmlæ–‡ä»¶å
+  *ä¸ç„¶ä½¿ç”¨$_SERVER["REQUEST_URI"]ç”Ÿæˆ
   */
   function setHtmlPath($htmlpath) {
   	$this->htmlpath=$htmlpath;
   }
   /*
-  *ÏÔÊ¾×îºóÒ»²½¹ıÂËÄÚÈİ,±ÈÈçÉú³Éhtml£¬Ìæ»»ÏÔÊ¾ÄÚÈİÔÙÊä³ö.
-  *¿ÉÒÔ¼Ì³Ğ±¾·½·¨,´¦Àí¹ıµÄÄÚÈİÔÙµ÷ÓÃ¸¸Ààview_filter()Ò²¾ÍÊÇ±¾·½·¨Éú³Éhtml
+  *æ˜¾ç¤ºæœ€åä¸€æ­¥è¿‡æ»¤å†…å®¹,æ¯”å¦‚ç”Ÿæˆhtmlï¼Œæ›¿æ¢æ˜¾ç¤ºå†…å®¹å†è¾“å‡º.
+  *å¯ä»¥ç»§æ‰¿æœ¬æ–¹æ³•,å¤„ç†è¿‡çš„å†…å®¹å†è°ƒç”¨çˆ¶ç±»view_filter()ä¹Ÿå°±æ˜¯æœ¬æ–¹æ³•ç”Ÿæˆhtml
   *$GLOBALS['config']['htmlcache']['class'],$GLOBALS['config']['htmlcache']['method']
-  *ÔÚinc.ini.phpÖĞÉèÖÃµ±È»Ò²¿ÉÒÔÔÚprojectÖĞÉèÖÃÕâÑùÃ¿Ò»¸öÏîÄ¿¶¼²»ÓĞÍ¬µÄ»º´æ·½·¨¡£
-  *Èç¹ûÖ»ÊÇÖØĞ´Ä£Äâhtml¾²Ì¬Ò³Ãæ¿ÉÒÔ°Ñ
-  *$GLOBALS['config']['htmlcache']['class']),$GLOBALS['config']['htmlcache']['method']ÉèÖÃÎª¿Õ
-  *$GLOBALS['config']['htmlcache']=''»ò×¢ÊÍµô
+  *åœ¨inc.ini.phpä¸­è®¾ç½®å½“ç„¶ä¹Ÿå¯ä»¥åœ¨projectä¸­è®¾ç½®è¿™æ ·æ¯ä¸€ä¸ªé¡¹ç›®éƒ½ä¸æœ‰åŒçš„ç¼“å­˜æ–¹æ³•ã€‚
+  *å¦‚æœåªæ˜¯é‡å†™æ¨¡æ‹Ÿhtmlé™æ€é¡µé¢å¯ä»¥æŠŠ
+  *$GLOBALS['config']['htmlcache']['class']),$GLOBALS['config']['htmlcache']['method']è®¾ç½®ä¸ºç©º
+  *$GLOBALS['config']['htmlcache']=''æˆ–æ³¨é‡Šæ‰
   */
   function view_filter($content) {
     if(C("router")->isPathInfo()||C("router")->isScript) Return $content;
@@ -56,11 +56,11 @@ class controller{
 		 $this->htmlpath=substr($_SERVER["REQUEST_URI"],strlen(substr($_SERVER["SCRIPT_NAME"],0,strrpos($_SERVER["SCRIPT_NAME"],"/"))));
 	   }
 	  }
-	  $this->htmlpath=filepath_safe($this->htmlpath);//Ïû³ı°²È«Ä¿Â¼
-	  //°ÑprojectÄ¿Â¼²¹ÉÏ
+	  $this->htmlpath=filepath_safe($this->htmlpath);//æ¶ˆé™¤å®‰å…¨ç›®å½•
+	  //æŠŠprojectç›®å½•è¡¥ä¸Š
 	  $htmlpath=$GLOBALS['config']["webprojectpath"].$this->htmlpath;
 	  $htmlpath=str_replace("//","/",$htmlpath);
-      //¿´¿´ÓĞÃ»ÓĞÉèÖÃ»º´æÀà£¬Ã»ÓĞ¾Í²»Éú³É£¬Ö»×öhtml½áÎ²Ä£Äâ
+      //çœ‹çœ‹æœ‰æ²¡æœ‰è®¾ç½®ç¼“å­˜ç±»ï¼Œæ²¡æœ‰å°±ä¸ç”Ÿæˆï¼Œåªåšhtmlç»“å°¾æ¨¡æ‹Ÿ
 	  if(class_exists($GLOBALS['config']['htmlcache']['class']))
 	  {
 	    call_user_func(array(C($GLOBALS['config']['htmlcache']['class']),$GLOBALS['config']['htmlcache']['method']),$content,$htmlpath);
