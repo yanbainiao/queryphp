@@ -63,6 +63,8 @@ class pager
 	*echo url_for("/model/action/page/").$page;
 	*/
    public function getLinks($num=10) {
+		$links=array();
+        if($this->total_page==0) Return array();
 	    $mid       =  floor($num/2);
         $last      =  $num - 1; 
         $minpage   =  ($this->page-$mid)<1 ? 1 : $this->page-$mid;
@@ -73,7 +75,7 @@ class pager
             $minpage =  $maxpage - $last;
             $minpage =  $minpage<1 ? 1 : $minpage;
         }
-		$links=array();
+
 		$links=range($minpage,$maxpage);
 		Return $links;
 	}
@@ -85,6 +87,7 @@ class pager
 	*echo "<a href=".$page.">".$key."</a>";
 	*/
   public function getBar($url){
+	    if($this->total_page==0) Return array();
 	   $this->linkhead=str_replace(":".$this->pagesplit,"%d",$url);
 	   $links=array();
 	   $links[L('第一页')]=sprintf($this->linkhead,1);

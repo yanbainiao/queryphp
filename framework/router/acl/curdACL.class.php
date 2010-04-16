@@ -15,6 +15,7 @@
 class curdACL extends acl {
 	public $routername="curd";
 	public $aclid='';
+	public $roledisable=array();
 	public $aclgroup=array("create"=>"4,45,8"); //create需要的组才能创建
 	public $aclrole=array("all"=>"6","create"=>"7,95,78"); //create需要的角色才能创建,该组需要ID为6的角色才能访问
 	public $acl=array("all"=>0,

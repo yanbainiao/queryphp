@@ -1,146 +1,146 @@
-Õâ¸öÒ»¸öÎ¢ĞÍ¿ò¼Ü
-¿ÉÒÔÊµÏÖMVC·½Ê½ 
-Ò²¿ÉÒÔµ¥¶ÀÊ¹ÓÃÊı¾İ¿âÄ£ĞÍ£¬µ±×÷Êı¾İÀàÊ¹ÓÃ¾Í¿ÉÒÔÁË¡£
-Ò²·½±ãÇ¶ÈëÄãÏÖÓĞµÄÏîÄ¿ÖĞ¡£±¾Êı¾İ¿â²Ù×÷Ç¿´ó
-µ¥¶ÀÊ¹ÓÃ±¾ÄÚºËÎÄÖĞºóÃæÓĞ¾ßÌå½éÉÜ¡£
-Õû¸öÄÚºËÒ²ÊÇ30¶àKB
-$supply=M("supply"); //new Êı¾İ¿âÖĞµÄ±íÃû£¬Ä¿Ç°ÊÇÄ£ĞÍÃû£¬
-                     //¿ÉÒÔÔÚsupplyBase.class.phpÖĞĞŞ¸Ä±íÃû
+è¿™ä¸ªä¸€ä¸ªå¾®å‹æ¡†æ¶
+å¯ä»¥å®ç°MVCæ–¹å¼ 
+ä¹Ÿå¯ä»¥å•ç‹¬ä½¿ç”¨æ•°æ®åº“æ¨¡å‹ï¼Œå½“ä½œæ•°æ®ç±»ä½¿ç”¨å°±å¯ä»¥äº†ã€‚
+ä¹Ÿæ–¹ä¾¿åµŒå…¥ä½ ç°æœ‰çš„é¡¹ç›®ä¸­ã€‚æœ¬æ•°æ®åº“æ“ä½œå¼ºå¤§
+å•ç‹¬ä½¿ç”¨æœ¬å†…æ ¸æ–‡ä¸­åé¢æœ‰å…·ä½“ä»‹ç»ã€‚
+æ•´ä¸ªå†…æ ¸ä¹Ÿæ˜¯30å¤šKB
+$supply=M("supply"); //new æ•°æ®åº“ä¸­çš„è¡¨åï¼Œç›®å‰æ˜¯æ¨¡å‹åï¼Œ
+                     //å¯ä»¥åœ¨supplyBase.class.phpä¸­ä¿®æ”¹è¡¨å
 $books=M("books");
-echo $supply->Books->classname;//×Ô¶¯È¡µÃBooksÖĞÄÚÈİ
-echo $supply->Books->Supply->title; //·´¹ıÀ´È¡supplyÖĞµÄÄÚÈİ
+echo $supply->Books->classname;//è‡ªåŠ¨å–å¾—Booksä¸­å†…å®¹
+echo $supply->Books->Supply->title; //åè¿‡æ¥å–supplyä¸­çš„å†…å®¹
 echo $supply->title;
 echo $books->classname; 
 
 
-Ö§³Öpath_info·½Ê½
+æ”¯æŒpath_infoæ–¹å¼
 
-¿ØÖÆ¶¯×÷ÔÚrouterÄ¿Â¼ÏÂÃæ
+æ§åˆ¶åŠ¨ä½œåœ¨routerç›®å½•ä¸‹é¢
 /default/index
-µ÷ÓÃrouterÄ¿Â¼ÏÂÃædefaultRouter.class.phpÎÄ¼ş
-È¡µÃÀàºóµ÷ÓÃindex·½Ê½
-J()ÊÇindex·½·¨Ìø×ª
-R()ÊÇÓÉ¿ØÖÆ
-C()ÊÇÉú³ÉÀà
-M()ÊÇÊı¾İ¿âÀàÄ£ĞÍ 
-P()ÊÇ¼ÓÔØÂ·¾¶º¯Êı
+è°ƒç”¨routerç›®å½•ä¸‹é¢defaultRouter.class.phpæ–‡ä»¶
+å–å¾—ç±»åè°ƒç”¨indexæ–¹å¼
+J()æ˜¯indexæ–¹æ³•è·³è½¬
+R()æ˜¯ç”±æ§åˆ¶
+C()æ˜¯ç”Ÿæˆç±»
+M()æ˜¯æ•°æ®åº“ç±»æ¨¡å‹ 
+P()æ˜¯åŠ è½½è·¯å¾„å‡½æ•°
 
 inc.ini.php
-ÀïÃæÉèÖÃÊı¾İ¿âÁ´½ÓºÍÈ±Ê¡·½·¨£¬Ö§³Ö¶à¿âÁ´½ÓºÍ¶à¸öÁ´½Ó£¬·Ö²¼Ê½Êı¾İ¿â Ö÷/´ÓÁ´½Ó
+é‡Œé¢è®¾ç½®æ•°æ®åº“é“¾æ¥å’Œç¼ºçœæ–¹æ³•ï¼Œæ”¯æŒå¤šåº“é“¾æ¥å’Œå¤šä¸ªé“¾æ¥ï¼Œåˆ†å¸ƒå¼æ•°æ®åº“ ä¸»/ä»é“¾æ¥
 
-Ö»°üÀ¨framework.phpÎÄ¼ş¾Í¿ÉÒÔÁË¡£
-ÔÚÏîÄ¿ÖĞÎÄ¼ş°üº¬ÏÂÃæ´úÂë¾Í¿ÉÒÔÁË
+åªåŒ…æ‹¬framework.phpæ–‡ä»¶å°±å¯ä»¥äº†ã€‚
+åœ¨é¡¹ç›®ä¸­æ–‡ä»¶åŒ…å«ä¸‹é¢ä»£ç å°±å¯ä»¥äº†
 	<?php
-	//²úÆ·»·¾³Ê¹ÓÃ(Product)
+	//äº§å“ç¯å¢ƒä½¿ç”¨(Product)
 	//$projectenv="product"; $projectenv="test";
 	$projectenv="product";
 	$config["webprojectpath"]=dirname(__FILE__)."/";
 	include("framework/framework.php");
 	?>
 
-Â·ÓÉËµÃ÷
-	path_info·½Ê½
+è·¯ç”±è¯´æ˜
+	path_infoæ–¹å¼
 	testframework.php?router=default&action=index
 	testframework.php/default/index
 
-	¿ÉÒÔÊ¹ÓÃapacheÖØĞ´ È¥µôtestframework.phpÎÄ¼ş
+	å¯ä»¥ä½¿ç”¨apacheé‡å†™ å»æ‰testframework.phpæ–‡ä»¶
 
-	¿ÉÒÔ×Ô¼ºÉèÖÃÂ·ÓÉ¹æÔò
+	å¯ä»¥è‡ªå·±è®¾ç½®è·¯ç”±è§„åˆ™
 	C("router")->ruleMaps("login",'/login/:id', array('controller' => 'auth', 'action' => 'login'));
-	ÄÇÃ´»áÅäÆ¥testframework.php/login/5555
-	ÕâÑù¿ÉÒÔÊ¹ÓÃ$_GET['id']µÃµ½5555;
+	é‚£ä¹ˆä¼šé…åŒ¹testframework.php/login/5555
+	è¿™æ ·å¯ä»¥ä½¿ç”¨$_GET['id']å¾—åˆ°5555;
 	'controller' => 'auth', 'action' => 'login'
-	ÊÇ¿ØÖÆÆ÷ºÍ·½·¨
+	æ˜¯æ§åˆ¶å™¨å’Œæ–¹æ³•
 
-	ÆäËüÉèÖÃ ¿ÉÒÔÌí¼Ó×Ô¼º¶¨ÒåµÄÂ·ÓÉ¹æÔò
+	å…¶å®ƒè®¾ç½® å¯ä»¥æ·»åŠ è‡ªå·±å®šä¹‰çš„è·¯ç”±è§„åˆ™
 	C("router")->ruleMaps('logout','/logout', array('controller' => 'auth', 'action' => 'logout'));
 	C("router")->ruleMaps('signup','/signup', array('controller' => 'auth', 'action' => 'signup'));
 	C("router")->ruleMaps('profile','/profile/:action', array('controller' => 'profile')); // will call controller "Profile" with dynamic method ":action()"
 	C("router")->ruleMaps('users','/users/:id', array('controller' => 'users'), array('id' => '[\d]{1,8}')); // define filters for the url parameters
 
 
-Êı¾İ¿âÊı¾İÄ£ĞÍ
-Ê¹ÓÃ·½·¨
+æ•°æ®åº“æ•°æ®æ¨¡å‹
+ä½¿ç”¨æ–¹æ³•
 
-	¹¹ÔìÒ»¸öÊı¾İ¿â±íÄ£ĞÍ
+	æ„é€ ä¸€ä¸ªæ•°æ®åº“è¡¨æ¨¡å‹
 	$beian=M('beian');
 
-	×Ô¶¯Ìî³äaaa bbb×Ö¶Î $_POSTÖĞÒ²ÒªÓĞÕâÁ½¸ö×Ö¶Î
+	è‡ªåŠ¨å¡«å……aaa bbbå­—æ®µ $_POSTä¸­ä¹Ÿè¦æœ‰è¿™ä¸¤ä¸ªå­—æ®µ
 	//$beian->autoField(array("aaa","bbbb"));
-	$dataÖĞÌî³ä
+	$dataä¸­å¡«å……
 	$beian->autoField($data,array("aaa","bbbb"));
-	È¡Á½¸öÖ÷¼üÖµ£¬ÅÅĞòÎªÉıĞò
+	å–ä¸¤ä¸ªä¸»é”®å€¼ï¼Œæ’åºä¸ºå‡åº
 	//print_r($beian->get(53,54,'asc'));
 
-	¸³Öµ¸ø×Ö¶Î¡£
+	èµ‹å€¼ç»™å­—æ®µã€‚
 	$beian->userid=2;
 	$beian->language=1;
 
 
-	´òÓ¡ÒÑ¾­¸³Öµ×Ö¶Î
+	æ‰“å°å·²ç»èµ‹å€¼å­—æ®µ
 	//print_r($beian->data);
 
-	±£´æ£¬ÔÙÏÔÊ¾¸Õ²Å²åÈëµÄID
+	ä¿å­˜ï¼Œå†æ˜¾ç¤ºåˆšæ‰æ’å…¥çš„ID
 	//echo $beian->save()->pkid();
 
-	ÉèÖÃÖ÷¼üÈ»ºóÉ¾³ı
+	è®¾ç½®ä¸»é”®ç„¶ååˆ é™¤
 	//echo($beian->pkid(69)->delete());
 
-	È¡µÃ±íµÄĞĞÊı
+	å–å¾—è¡¨çš„è¡Œæ•°
 	//echo $beian->Totalnum();
 
-	selectÏÔÊ¾Á½¸ö×Ö¶Î£¬ArraylistÎªÊı×é
-	//print_r($beian->getAll("userid,language")->record); //¸ÄÎªrecordÁË
+	selectæ˜¾ç¤ºä¸¤ä¸ªå­—æ®µï¼ŒArraylistä¸ºæ•°ç»„
+	//print_r($beian->getAll("userid,language")->record); //æ”¹ä¸ºrecordäº†
 
-	²éÑ¯Á½¸öuseridºÍlanguageÎª1ºÍ5£¬fetchÎªÈ¡Öµ
+	æŸ¥è¯¢ä¸¤ä¸ªuseridå’Œlanguageä¸º1å’Œ5ï¼Œfetchä¸ºå–å€¼
 	print_r($beian->whereUseridAndLanguage('1','5')->fetch()->record);
 
-	È¡µÃÁ½¸öÖ÷¼ü£¬ÏÔÊ¾Èı¸ö×Ö¶Î£¬ÉıĞò
+	å–å¾—ä¸¤ä¸ªä¸»é”®ï¼Œæ˜¾ç¤ºä¸‰ä¸ªå­—æ®µï¼Œå‡åº
 	//print_r($beian->get('confid,userid,language',53,54,'asc')->record);
 
-	Êä³öÖ÷¼üÖµ
+	è¾“å‡ºä¸»é”®å€¼
 	//echo $beian->confid;
 
-	¸üĞÂÄ³¸ö±íµÄ×Ö¶ÎÀÛ¼Ó1
+	æ›´æ–°æŸä¸ªè¡¨çš„å­—æ®µç´¯åŠ 1
 	$beian->colupdate('tplid');
 
-	¿ÉÒÔÔÚmodelÄ¿Â¼ÏÂ£¬*****Model.class.phpÎÄ¼şÀïÃæÌí¼Ó·½·¨¡£
+	å¯ä»¥åœ¨modelç›®å½•ä¸‹ï¼Œ*****Model.class.phpæ–‡ä»¶é‡Œé¢æ·»åŠ æ–¹æ³•ã€‚
 
-	Éú³ÉÄ£ĞÍºó¿ÉÒÔÂíÉÏ¿ÉÒÔÊ¹ÓÃ
+	ç”Ÿæˆæ¨¡å‹åå¯ä»¥é©¬ä¸Šå¯ä»¥ä½¿ç”¨
 	print_r($booktype=M("booktype")->getAll());
 
-	¹ØÁª±£´æ£¬Ê¹ÓÃmapperÉèÖÃ£¬Ïê¼ûsupplyModel.class.phpÎÄ¼şÖĞ
+	å…³è”ä¿å­˜ï¼Œä½¿ç”¨mapperè®¾ç½®ï¼Œè¯¦è§supplyModel.class.phpæ–‡ä»¶ä¸­
 	 var $mapper=array("Books"=>array("map"=>"ManyhasMany","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
         
-	¿ÉÒÔ¿´µ½ÊÇtypeid¹ØÁª£¬ÄÇÃ´M("booktype")»á×Ô¶¯µÃµ½$supplyÖĞtypeidµÄÖµ£¬Èç¹ûÃ»ÓĞÏÈ±£´æ$supply ÔÙ´ÎÈ¡Öµ
+	å¯ä»¥çœ‹åˆ°æ˜¯typeidå…³è”ï¼Œé‚£ä¹ˆM("booktype")ä¼šè‡ªåŠ¨å¾—åˆ°$supplyä¸­typeidçš„å€¼ï¼Œå¦‚æœæ²¡æœ‰å…ˆä¿å­˜$supply å†æ¬¡å–å€¼
 	$supply->get(3,4);
 	$supply->up();//edit 3
-	M("booktype")->classname="ĞÇ¼Ê½â°Ô2";//ÉèÖÃbooktype ÀàÃû
+	M("booktype")->classname="æ˜Ÿé™…è§£éœ¸2";//è®¾ç½®booktype ç±»å
 
         $supply->save(M("booktype"));
 
-³£ÓÃº¯ÊıËµÃ÷
+å¸¸ç”¨å‡½æ•°è¯´æ˜
 
-	¸üĞÂJ()Ìøº¯Êı
-	¿ÉÒÔÖ§³Ö¸÷¸öÂ·ÓÉÖ®¼äÌø×ªºÍ´«µİ²ÎÊı
-	²ÎÊıÎªarray
-	J("show") Îª×ªµ½±¾Â·ÓÉ·½·¨show
-	J("show",array("id"=>555)) Îª×ªµ½±¾Â·ÓÉ·½·¨show ²¢´«µİ²ÎÊıID¹ıÈ¥
-	J(R("member"),"list") ½«Ìø×ªµ½memberÂ·ÓÉÉÏÃæ²¢µ÷ÓÃlist·½·¨ Èç¹ûÃ»ÓĞlistÄÇÃ´Ä¬ÈÏÎªindex·½·¨£¬¾ßÌå¿ò¼ÜÖĞÉèÖÃµÄÄ¬ÈÏ·½·¨¡£
+	æ›´æ–°J()è·³å‡½æ•°
+	å¯ä»¥æ”¯æŒå„ä¸ªè·¯ç”±ä¹‹é—´è·³è½¬å’Œä¼ é€’å‚æ•°
+	å‚æ•°ä¸ºarray
+	J("show") ä¸ºè½¬åˆ°æœ¬è·¯ç”±æ–¹æ³•show
+	J("show",array("id"=>555)) ä¸ºè½¬åˆ°æœ¬è·¯ç”±æ–¹æ³•show å¹¶ä¼ é€’å‚æ•°IDè¿‡å»
+	J(R("member"),"list") å°†è·³è½¬åˆ°memberè·¯ç”±ä¸Šé¢å¹¶è°ƒç”¨listæ–¹æ³• å¦‚æœæ²¡æœ‰listé‚£ä¹ˆé»˜è®¤ä¸ºindexæ–¹æ³•ï¼Œå…·ä½“æ¡†æ¶ä¸­è®¾ç½®çš„é»˜è®¤æ–¹æ³•ã€‚
 	J("member")
 	J("member","list",array("userid"=>999))
 
-	M("Ä£ĞÍ"); newÒ»¸öĞÂµÄÄ£ĞÍ
-	C("Àà");   newÒ»¸öÕı³£µÄphpÀà
-Ä£ĞÍËµÃ÷ÎÄ¼ş
-    hasOne hasMany ManyhasMany ORM(Object-Relational Mapper) ¶ÔÏó¹ØÏµÓ°ÉäÓĞÈıÖÖ¿ÉÒÔÔÚ"map"=>"hasOne"ÕâÀï¸ü¸Ä
+	M("æ¨¡å‹"); newä¸€ä¸ªæ–°çš„æ¨¡å‹
+	C("ç±»");   newä¸€ä¸ªæ­£å¸¸çš„phpç±»
+æ¨¡å‹è¯´æ˜æ–‡ä»¶
+    hasOne hasMany ManyhasMany ORM(Object-Relational Mapper) å¯¹è±¡å…³ç³»å½±å°„æœ‰ä¸‰ç§å¯ä»¥åœ¨"map"=>"hasOne"è¿™é‡Œæ›´æ”¹
 	<?php 
 	class supplyModel extends supplyBase{ 
 	  var $mapper=array("Books"=>array("map"=>"hasOne","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid"));
 	  var $maps;
 	}
 	?>
-¿ØÖÆÆ÷ÎÄ¼ş
+æ§åˆ¶å™¨æ–‡ä»¶
 	index.php/default/index 
 	<?php
 	class defaultRouter extends controller{
@@ -172,17 +172,17 @@ inc.ini.php
 	  }
 	}
 	?>
-Èı Êı¾İ¿â±í²Ù×÷
+ä¸‰ æ•°æ®åº“è¡¨æ“ä½œ
 
 	$supply=M("supply");
 	$supply->get(3,4)->up();
-	echo ($supply->Books->classname);//×Ô¶¯È¡µÃBooksÖĞÄÚÈİ
+	echo ($supply->Books->classname);//è‡ªåŠ¨å–å¾—Booksä¸­å†…å®¹
 	print_r($supply->record);	
-	echo $supply->Books->Supply->title; //·´¹ıÀ´È¡supplyÖĞµÄÄÚÈİ
-	print_r(M("booktype")->record);	//booktypeÖĞÒÑÓĞ¶ÔÏñ¹ØÏµÁË
+	echo $supply->Books->Supply->title; //åè¿‡æ¥å–supplyä¸­çš„å†…å®¹
+	print_r(M("booktype")->record);	//booktypeä¸­å·²æœ‰å¯¹åƒå…³ç³»äº†
 
-	ÆäËüÊ¹ÓÃ·½·¨
-	¿ÉÒÔÊ¹ÓÃ
+	å…¶å®ƒä½¿ç”¨æ–¹æ³•
+	å¯ä»¥ä½¿ç”¨
 
 
 	M("booktype")->where('name',5555);
@@ -194,15 +194,15 @@ inc.ini.php
 	M("booktype")->limit(10)->fetch();
 	M("booktype")->limit(10,20)->fetch();
 
-	È¡µÃĞĞ×ÜÊı
+	å–å¾—è¡Œæ€»æ•°
 	M("booktype")->Totalnum();
 	M("booktype")->where('name',5555)->Totalnum();
 
-	¸üĞÂclicknum×Ö¶Î++ÊıÁ¿
+	æ›´æ–°clicknumå­—æ®µ++æ•°é‡
 	M("booktype")->colupdate("clicknum");//UPDATE table set clicknum=clicknum+1(num) where pkid=M("booktype")->pkik
 	M("booktype")->where('name',5555)->colupdate("clicknum");
 
-	È¡µÃuserid>1 and language<5
+	å–å¾—userid>1 and language<5
 	$books->where("userid>1")->whereAnd("language <5")->orderby("desc")->limit(10,20)->fetch();
 	print_r($books->record); 
 
@@ -213,50 +213,50 @@ inc.ini.php
 	......
 	</form>
 
-	×Ô¶¯´¦Àípost·½·¨
-	Ìá½»ºó´¦Àí
-	$form=M("±íÃû»òÄ£ĞÍÃû")->autoField('name','sex','age')->save();
-	»ò´¦ÀíºóÊı×é´«Èë
-	$form=M("±íÃû»òÄ£ĞÍÃû")->autoField($insertArray,'name','sex','age')->save(); 
+	è‡ªåŠ¨å¤„ç†postæ–¹æ³•
+	æäº¤åå¤„ç†
+	$form=M("è¡¨åæˆ–æ¨¡å‹å")->autoField('name','sex','age')->save();
+	æˆ–å¤„ç†åæ•°ç»„ä¼ å…¥
+	$form=M("è¡¨åæˆ–æ¨¡å‹å")->autoField($insertArray,'name','sex','age')->save(); 
 
 
 	$supply=M("supply");
 	$supply->get(3,4);
 	$supply->up();//edit 3
-	//M("booktype")->classname="ĞÇ¼Ê½â°Ô2";
+	//M("booktype")->classname="æ˜Ÿé™…è§£éœ¸2";
 
-        $supply->copyRecord()->save(M("booktype")); //×Ô¶¯»á´Ó$supplyÖĞÈ¡µÃ¹ØÁªÖµ¸³¸øM("booktype");
+        $supply->copyRecord()->save(M("booktype")); //è‡ªåŠ¨ä¼šä»$supplyä¸­å–å¾—å…³è”å€¼èµ‹ç»™M("booktype");
 
-	$supply->Books=array("classname"=>"ĞÇ¼Ê½â°Ô5"); //Ö§³ÖÁ½¸ö±íÁ½¸öÖ÷¼üÖ®¼ä»¥Áª
-	print_r($supply->save());                       //Ö§³ÖÈı¸ö×Ö¶Î¹ØÏµÓ°Éä
+	$supply->Books=array("classname"=>"æ˜Ÿé™…è§£éœ¸5"); //æ”¯æŒä¸¤ä¸ªè¡¨ä¸¤ä¸ªä¸»é”®ä¹‹é—´äº’è”
+	print_r($supply->save());                       //æ”¯æŒä¸‰ä¸ªå­—æ®µå…³ç³»å½±å°„
 
 	//$supply->where($supply->PRI.">12")->delete();
 	//$supply->save();
 	$books=M("booktype");
 	//M("booktype")->where($books->PRI.">12")->delete();
-        $supply->Books=array("classname"=>"ĞÇ¼Ê½â°Ô21");//¸÷ÖÖ²åÈëÊı¾İ·½Ê½
-	$supply->Books=array("classname"=>"ĞÇ¼Ê½â°Ô22");
-	$supply->Books=array("0"=>array("classname"=>"ĞÇ¼Ê½â°Ô88"),2=>array("classname"=>"ĞÇ¼Ê½â°Ô98"));
+        $supply->Books=array("classname"=>"æ˜Ÿé™…è§£éœ¸21");//å„ç§æ’å…¥æ•°æ®æ–¹å¼
+	$supply->Books=array("classname"=>"æ˜Ÿé™…è§£éœ¸22");
+	$supply->Books=array("0"=>array("classname"=>"æ˜Ÿé™…è§£éœ¸88"),2=>array("classname"=>"æ˜Ÿé™…è§£éœ¸98"));
 	print_r($supply->data);
 	$supply->copyRecord()->save();
 
 	  /*
-	  * updateÎªÖ¸¶¨×Ö¶Î¸üĞÂ£¬²»ÏñsaveÊ²Ã´¶¼¸üĞÂ
+	  * updateä¸ºæŒ‡å®šå­—æ®µæ›´æ–°ï¼Œä¸åƒsaveä»€ä¹ˆéƒ½æ›´æ–°
 	  * $supply->update('fields,fields');
 	  * $supply->update(array('fields'=>"aaabbb","fields2"=>8888));
-	  * $supply->update(array('fields'=>"aaabbb","fields2"=>8888),true); //true±íÊ¾¸üĞÂµ½$supply->data
-	  * $supply->update($Books); //¹ØÁª¸üĞÂ $BooksÊÇM¶ÔÏñ,±íÊ¾¸üĞÂµ½$supply->data
-	  * $books ÎªÀà¶ÔÏó£¬record½«»á¸ÄÎª¶ÔÏñµÄ¡£
+	  * $supply->update(array('fields'=>"aaabbb","fields2"=>8888),true); //trueè¡¨ç¤ºæ›´æ–°åˆ°$supply->data
+	  * $supply->update($Books); //å…³è”æ›´æ–° $Booksæ˜¯Må¯¹åƒ,è¡¨ç¤ºæ›´æ–°åˆ°$supply->data
+	  * $books ä¸ºç±»å¯¹è±¡ï¼Œrecordå°†ä¼šæ”¹ä¸ºå¯¹åƒçš„ã€‚
 	  * $supply->update($books,true); 
 	  * $supply->update('fields,fields',array("aa","bbb"));
 	  */
 
-	$books->get(246)->up(); //È¡Ò»¸öÖµ
-	$books->classname="¿ª·¢ÓÎÏ·¹¤Òµ"; //¸üĞÂ×Ö¶Î
-	$supply->update($books);  //¹ØÁª±£´æ
+	$books->get(246)->up(); //å–ä¸€ä¸ªå€¼
+	$books->classname="å¼€å‘æ¸¸æˆå·¥ä¸š"; //æ›´æ–°å­—æ®µ
+	$supply->update($books);  //å…³è”ä¿å­˜
 
 
-        Ä£ĞÍÎÄ¼şÅäÖÃ ¿ÉÒÔ¿´µ½ĞÂ¹ØÁª£¬Ê¹ÓÃĞÂµÄsqlÎÄ¼şÖØĞÂ´´½¨Êı¾İ¿â
+        æ¨¡å‹æ–‡ä»¶é…ç½® å¯ä»¥çœ‹åˆ°æ–°å…³è”ï¼Œä½¿ç”¨æ–°çš„sqlæ–‡ä»¶é‡æ–°åˆ›å»ºæ•°æ®åº“
 	<?php 
 	class supplyModel extends supplyBase{ 
 	  var $mapper=array("Books"=>array("map"=>"ManyhasMany","TargetModel"=>"booktype","localFiled"=>"typeid","targetFiled"=>"typeid","localFiled2"=>"bookid","targetFiled2"=>"bookid","localFiled3"=>"supplyid","targetFiled3"=>"supplyid"));
@@ -265,37 +265,37 @@ inc.ini.php
 	} 
 	?>
 
-config/inc.ini.phpÎÄ¼şËµÃ÷
-	ÔÚ±¾ÎÄ¼ş¿ÉÒÔÉèÖÃÊı¾İ¿âÁ´½Ó
+config/inc.ini.phpæ–‡ä»¶è¯´æ˜
+	åœ¨æœ¬æ–‡ä»¶å¯ä»¥è®¾ç½®æ•°æ®åº“é“¾æ¥
 	/*
-	*pdoÁ´½Ó ¶àÉÙ×Ô¼ºÌî,Ö÷´Ó¿ÉÒÔÒ»Ñù
-	* key ÎªÕıÔò±í´ïÊ½ ^web_¿ªÍ·µÄ±í£¬Ê¹ÓÃµÄÁ´½Ó masterÎªÖ÷Á´½Ó ²åÈë ĞŞ¸ÄµÈ slavesÎªselectµÈ²Ù×÷
+	*pdoé“¾æ¥ å¤šå°‘è‡ªå·±å¡«,ä¸»ä»å¯ä»¥ä¸€æ ·
+	* key ä¸ºæ­£åˆ™è¡¨è¾¾å¼ ^web_å¼€å¤´çš„è¡¨ï¼Œä½¿ç”¨çš„é“¾æ¥ masterä¸ºä¸»é“¾æ¥ æ’å…¥ ä¿®æ”¹ç­‰ slavesä¸ºselectç­‰æ“ä½œ
 	*/
 	$pdoconn=array(
 	  'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"),
 					   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")),
 			   "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8"))
 		);
-	//ÊÓÍ¼ÉèÖÃ,Ä¬ÈÏÎª¿ÕÊ¹ÓÃ×Ô´øphpÄ£°å
+	//è§†å›¾è®¾ç½®,é»˜è®¤ä¸ºç©ºä½¿ç”¨è‡ªå¸¦phpæ¨¡æ¿
 	/*
-	*  php×Ô´øÄ£°åÒâË¼ÊÇÔÚÄ£°åÖĞÊ¹ÓÃphp´úÂëforeach(): endforeach if(): else: endifÕâ¼¸ÖÖ±êÇ©µ±È»Ò²¿ÉÒÔÊ¹ÓÃphp´úÂë
-	*  Î´À´°æ±¾ÊÓÍ¼½«½«È«²¿ÊÇphp±êÇ©
+	*  phpè‡ªå¸¦æ¨¡æ¿æ„æ€æ˜¯åœ¨æ¨¡æ¿ä¸­ä½¿ç”¨phpä»£ç foreach(): endforeach if(): else: endifè¿™å‡ ç§æ ‡ç­¾å½“ç„¶ä¹Ÿå¯ä»¥ä½¿ç”¨phpä»£ç 
+	*  æœªæ¥ç‰ˆæœ¬è§†å›¾å°†å°†å…¨éƒ¨æ˜¯phpæ ‡ç­¾
 	*  foreach($row as $key=>$value):
-	*  ÔÚÕâÀï·Åhtml´úÂë»ò×öÀàËÆSmarty¸³Öµ
+	*  åœ¨è¿™é‡Œæ”¾htmlä»£ç æˆ–åšç±»ä¼¼Smartyèµ‹å€¼
 	*  endforeach;
-	*  ½áÊø±êÇ© endif;£¬endwhile; endfor; endforeach; ÒÔ¼° endswitch;¡£ 
+	*  ç»“æŸæ ‡ç­¾ endif;ï¼Œendwhile; endfor; endforeach; ä»¥åŠ endswitch;ã€‚ 
 	*/
-	//$config['view']="Smarty"; //¿ÉÒÔÊ¹ÓÃSmarty×÷ÎªÊÓÍ¼
-	//$config['plugin']=$config["frameworkpath"]."lib";     //²å¼şËùÔÚÄ¿Â¼£¬¿ÉÄÜ»á×Ô¶¯ËÑÑ°Ä¿Â¼
+	//$config['view']="Smarty"; //å¯ä»¥ä½¿ç”¨Smartyä½œä¸ºè§†å›¾
+	//$config['plugin']=$config["frameworkpath"]."lib";     //æ’ä»¶æ‰€åœ¨ç›®å½•ï¼Œå¯èƒ½ä¼šè‡ªåŠ¨æœå¯»ç›®å½•
 	//$config['frameworklib']=array("Smarty"=>$config["frameworkpath"]."lib/Smarty/Smarty.class.php",
-	//                    "SendMail"=>$config["frameworkpath"]."lib/Mail/SendMail.php");//ÀàËùÔÚµÄÎÄ¼ş Õâ¾ßÅäÖÃ¿ÉÒÔÁíÍâ·ÅÒ»¸öµØ·½
-	//ÅäÖÃÂ·ÓÉ¹æÔòloginÎªÂ·ÓÉÄ£ĞÍ ruleÎª¹æÔò ³É¹¦ºótargetÉèÖÃ conditions rule×Ô¶¨Òå¹æÔò¶ÔÓ¦Îª:id
+	//                    "SendMail"=>$config["frameworkpath"]."lib/Mail/SendMail.php");//ç±»æ‰€åœ¨çš„æ–‡ä»¶ è¿™å…·é…ç½®å¯ä»¥å¦å¤–æ”¾ä¸€ä¸ªåœ°æ–¹
+	//é…ç½®è·¯ç”±è§„åˆ™loginä¸ºè·¯ç”±æ¨¡å‹ ruleä¸ºè§„åˆ™ æˆåŠŸåtargetè®¾ç½® conditions ruleè‡ªå®šä¹‰è§„åˆ™å¯¹åº”ä¸º:id
 	//$config["routermaps"]=array("login",array("rule"=>'/login/:id',
 	//		                                    "target"=>array('controller' => 'auth', 'action' => 'login'),
 	//		                                    "conditions"=>array('id' => '[\d]{1,8}')));
-	//Ã¿¸öproject¿ÉÒÔÅäÖÃ ÄÚºË¼ÓÇ°ÎÄ¼şprecore.ini.php  ÄÚºË¼ÓºóÎÄ¼ş aftercore.ini.php ÆäÖĞprecore.ini.phpÎÄ¼şÊÇÔÚinc.ini.php(Ò²ÊÇ±¾ÎÄ¼ş)ºóÃæ¼ÓµÄ£¬ÕâÑù¿ÉÒÔ³åµÖÕâ¸öÎÄ¼şÉèÖÃ
+	//æ¯ä¸ªprojectå¯ä»¥é…ç½® å†…æ ¸åŠ å‰æ–‡ä»¶precore.ini.php  å†…æ ¸åŠ åæ–‡ä»¶ aftercore.ini.php å…¶ä¸­precore.ini.phpæ–‡ä»¶æ˜¯åœ¨inc.ini.php(ä¹Ÿæ˜¯æœ¬æ–‡ä»¶)åé¢åŠ çš„ï¼Œè¿™æ ·å¯ä»¥å†²æŠµè¿™ä¸ªæ–‡ä»¶è®¾ç½®
 	//
-µ¥¶ÀÊ¹ÓÃÊı¾İ¿âÀà£¬ÓĞÊ±ºòÄã²»ÏëÊ¹ÓÃ¿ò¼Ü,ÕâÑù¿ÉÒÔ°Ñ±¾ÄÚºË¼ÓÄãµÄÏÖÔÚÏÖÓĞµÄÏîÄ¿ÖĞÁË
+å•ç‹¬ä½¿ç”¨æ•°æ®åº“ç±»ï¼Œæœ‰æ—¶å€™ä½ ä¸æƒ³ä½¿ç”¨æ¡†æ¶,è¿™æ ·å¯ä»¥æŠŠæœ¬å†…æ ¸åŠ ä½ çš„ç°åœ¨ç°æœ‰çš„é¡¹ç›®ä¸­äº†
 framework.php
         /*only user modelclass
 	*$dispaths=C("router")->setMaps($config["routermaps"])->start();
@@ -306,35 +306,35 @@ framework.php
 	*	 $view->display(R($dispaths->controller)->view($dispaths->action));
 	*}
 	*/
-±¾ÄÚºË»á×Ô¶¯»º´æÆğÀ´
-	»º´æÎÄ¼ş´æ·ÅÔÚ
-	cache/core.cache.phpÎÄ¼ş¾ÍÊÇ»º´æÎÄ¼ş
+æœ¬å†…æ ¸ä¼šè‡ªåŠ¨ç¼“å­˜èµ·æ¥
+	ç¼“å­˜æ–‡ä»¶å­˜æ”¾åœ¨
+	cache/core.cache.phpæ–‡ä»¶å°±æ˜¯ç¼“å­˜æ–‡ä»¶
 
-testprojectÊÇÏîÄ¿Ä¿Â¼
-	±¾Ä¿Â¼ÊÇwww¸ù
-	Ã¿¸öÏîÄ¿¶¼ÓĞ×Ô¼ºµÄ 
-	 config ÅäÖÃÎÄ¼şÄ¿Â¼ precore.ini.php  aftercore.ini.php
-	 model  ±¾ÏîÄ¿Ä£ĞÍÎÄ¼ş
-	 router ±¾ÏîÄ¿Â·ÓÉÎÄ¼ş
-	 view   ÊÓÍ¼ÎÄ¼ş¿ÉÒÔ°´Â·ÓÉÄ¿Â¼´æ·Å
-	 class  ±¾ÏîÄ¿Ê¹ÓÃµÄÆÕÍ¨ÀàÎÄ¼ş
-	 lib    ´æ·ÅÀà¿âÎÄ¼ş»ò²å¼ş
-	µÈÄ¿Â¼
+testprojectæ˜¯é¡¹ç›®ç›®å½•
+	æœ¬ç›®å½•æ˜¯wwwæ ¹
+	æ¯ä¸ªé¡¹ç›®éƒ½æœ‰è‡ªå·±çš„ 
+	 config é…ç½®æ–‡ä»¶ç›®å½• precore.ini.php  aftercore.ini.php
+	 model  æœ¬é¡¹ç›®æ¨¡å‹æ–‡ä»¶
+	 router æœ¬é¡¹ç›®è·¯ç”±æ–‡ä»¶
+	 view   è§†å›¾æ–‡ä»¶å¯ä»¥æŒ‰è·¯ç”±ç›®å½•å­˜æ”¾
+	 class  æœ¬é¡¹ç›®ä½¿ç”¨çš„æ™®é€šç±»æ–‡ä»¶
+	 lib    å­˜æ”¾ç±»åº“æ–‡ä»¶æˆ–æ’ä»¶
+	ç­‰ç›®å½•
 
-×Ô¶¯Éú³ÉÊı¾İ¿â±íÄ£ĞÍ·½·¨
-     	 //µÚÒ»´ÎÊ¹ÓÃÇë¼ÓÉÏ±íÃû"www_channel"ÕâÑù¾Í»á×Ô¶¯Éú³ÉchannelÄ£ĞÍÁË£¬
-	 //Éú³ÉÔÚmodelÄ¿Â¼ÏÂÃæÒ»¸öÊÇchannelBase.class.phpºÍchannelModel.class.php½áÎ²µÄÁ½¸öÎÄ¼ş
+è‡ªåŠ¨ç”Ÿæˆæ•°æ®åº“è¡¨æ¨¡å‹æ–¹æ³•
+     	 //ç¬¬ä¸€æ¬¡ä½¿ç”¨è¯·åŠ ä¸Šè¡¨å"www_channel"è¿™æ ·å°±ä¼šè‡ªåŠ¨ç”Ÿæˆchannelæ¨¡å‹äº†ï¼Œ
+	 //ç”Ÿæˆåœ¨modelç›®å½•ä¸‹é¢ä¸€ä¸ªæ˜¯channelBase.class.phpå’ŒchannelModel.class.phpç»“å°¾çš„ä¸¤ä¸ªæ–‡ä»¶
 	 //$channel=M("channel","www_channel");
-	 //Èç¹ûÒÑÉú³É¹ı¾Í²»ÓÃ±íÃûÁË£¬Ö»ÓĞµÚÒ»´ÎÓÃ»òÊı¾İ¿â¸üĞÂÁËĞèÒªË¢ĞÂ²ÅÊ¹ÓÃ±íÃû£¬ÇĞ¼Ç
-	 //Ê¹ÓÃÒ»´ÎºóÈç¹ûÕıÈ·µÄÄÇÃ´Éú³ÉÁËÁ½¸öÎÄ¼ş£¬ÓÚÊÇ¸Ï½ô°Ñ$channel=M("channel","www_channel");¸ÄÎª
-	 //$channel=M("channel"); ÕâÑù¾Í¿ÉÒÔÁË²»»áÔÙÈ¥Éú³ÉÄÇ¸öBase.class.phpÎÄ¼ş
-	 //Èç¹ûÎÒ°ÑÊı¾İ¿â±í¸ÄÁËÒ»ÏÂÌí¼Ó»òÉ¾³ı×Ö¶Î
-	 //$channel=M("channel","www_channel");ÔÙ¼ÓÉÏ±íÃûÔÙÈ¥Ë¢ĞÂÒ»ÏÂÄÇ¸öBase.class.phpÎÄ¼ş
-	 //È»ºóÔÙ¸Ä»ØÀ´$channel=M("channel");
-	 //ÕıÊ½·¢²¼Ê±ºòÎÒÃÇmodelÄ¿Â¼ÏÂÒÑÓĞËùÓĞÊı¾İ¿â±íÄ£ĞÍÎÄ¼şÁËËùÒÔÎÒÃÇ²»»áÔÙÊ¹ÓÃ$channel=M("channel","www_channel");¼Ó±íÃûÁË
-	 //ÓĞµã¶ßàÂ£¬ÒâË¼ÊÇmodelÏÂÃæÓĞÎÄ¼şÁË¾Í²»Òª¼Ó±íÃûÁË
+	 //å¦‚æœå·²ç”Ÿæˆè¿‡å°±ä¸ç”¨è¡¨åäº†ï¼Œåªæœ‰ç¬¬ä¸€æ¬¡ç”¨æˆ–æ•°æ®åº“æ›´æ–°äº†éœ€è¦åˆ·æ–°æ‰ä½¿ç”¨è¡¨åï¼Œåˆ‡è®°
+	 //ä½¿ç”¨ä¸€æ¬¡åå¦‚æœæ­£ç¡®çš„é‚£ä¹ˆç”Ÿæˆäº†ä¸¤ä¸ªæ–‡ä»¶ï¼Œäºæ˜¯èµ¶ç´§æŠŠ$channel=M("channel","www_channel");æ”¹ä¸º
+	 //$channel=M("channel"); è¿™æ ·å°±å¯ä»¥äº†ä¸ä¼šå†å»ç”Ÿæˆé‚£ä¸ªBase.class.phpæ–‡ä»¶
+	 //å¦‚æœæˆ‘æŠŠæ•°æ®åº“è¡¨æ”¹äº†ä¸€ä¸‹æ·»åŠ æˆ–åˆ é™¤å­—æ®µ
+	 //$channel=M("channel","www_channel");å†åŠ ä¸Šè¡¨åå†å»åˆ·æ–°ä¸€ä¸‹é‚£ä¸ªBase.class.phpæ–‡ä»¶
+	 //ç„¶åå†æ”¹å›æ¥$channel=M("channel");
+	 //æ­£å¼å‘å¸ƒæ—¶å€™æˆ‘ä»¬modelç›®å½•ä¸‹å·²æœ‰æ‰€æœ‰æ•°æ®åº“è¡¨æ¨¡å‹æ–‡ä»¶äº†æ‰€ä»¥æˆ‘ä»¬ä¸ä¼šå†ä½¿ç”¨$channel=M("channel","www_channel");åŠ è¡¨åäº†
+	 //æœ‰ç‚¹å“†å—¦ï¼Œæ„æ€æ˜¯modelä¸‹é¢æœ‰æ–‡ä»¶äº†å°±ä¸è¦åŠ è¡¨åäº†
 
-LEFTJOIN ²éÑ¯·½Ê½
+LEFTJOIN æŸ¥è¯¢æ–¹å¼
 
 	   $booktype=M("booktype");
 	   //$booktype->selectSupply("address,title");
@@ -343,53 +343,53 @@ LEFTJOIN ²éÑ¯·½Ê½
 
 
 
-ÏÂÔØºó
-°ÑdataÄ¿Â¼ÏÂtestmysql.sqlÎÄ¼şµ¼ÈëÊı¾İ¿â×ö²âÊÔ
-°ÑÊı¾İ¿â ÓÃ»§ÃûºÍÃÜÂëºÍÊı¾İ¿âÃû³Æ
-framework/config/inc.ini.php ÀïÃæĞŞ¸Ä
+ä¸‹è½½å
+æŠŠdataç›®å½•ä¸‹testmysql.sqlæ–‡ä»¶å¯¼å…¥æ•°æ®åº“åšæµ‹è¯•
+æŠŠæ•°æ®åº“ ç”¨æˆ·åå’Œå¯†ç å’Œæ•°æ®åº“åç§°
+framework/config/inc.ini.php é‡Œé¢ä¿®æ”¹
 
 PHP code
 
-    /* *pdoÁ´½Ó ¶àÉÙ×Ô¼ºÌî,Ö÷´Ó¿ÉÒÔÒ»Ñù * key ÎªÕıÔò±í´ïÊ½ ^web_¿ªÍ·µÄ±í£¬Ê¹ÓÃµÄÁ´½Ó */ $config['pdoconn']=array( 'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")), "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")) ) );
+    /* *pdoé“¾æ¥ å¤šå°‘è‡ªå·±å¡«,ä¸»ä»å¯ä»¥ä¸€æ · * key ä¸ºæ­£åˆ™è¡¨è¾¾å¼ ^web_å¼€å¤´çš„è¡¨ï¼Œä½¿ç”¨çš„é“¾æ¥ */ $config['pdoconn']=array( 'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")), "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8")) ) );
 
 
-ÉèÖÃºÃÁ´½Óºó
-¿ÉÒÔ·ÃÎÊormtest.phpÁË
+è®¾ç½®å¥½é“¾æ¥å
+å¯ä»¥è®¿é—®ormtest.phpäº†
 http://localhost/queryphp/ormtest.php
 
-¿´µ½Êä³öÊı¾İ¿âÄÚÈİÁË
+çœ‹åˆ°è¾“å‡ºæ•°æ®åº“å†…å®¹äº†
 
 
-¿´¿´ormtest.php
-ÓĞÊ²Ã´ÄÚÈİ
-
-PHP code
-
-    //²úÆ·»·¾³Ê¹ÓÃ(Product) //$projectenv="product"; $projectenv="product"; $config["webprojectpath"]=dirname(__FILE__)."/"; $config["webprojectname"]=strlen($_SERVER['SCRIPT_FILENAME'])."projectname"; //¸ù¾İÏîÄ¿À´»º´æ,ËùÒÔ×îºÃÒ»¸öÍøÕ¾²»ÒªÒ»Ñù include($config["webprojectpath"]."framework/queryorm.php");
-
-
-
-Ô­À´Ö»°üº¬Ò»¸öqueryorm.phpÎÄ¼ş¾Í¿ÉÒÔÁË
-ÎÒÃÇ¿ÉÒÔÔÚÎÒÃÇÏÖÔÚµÄÏîÄ¿»ò³ÌĞòÖĞ°üº¬Õâ¸öÎÄ¼ş¾Í¿ÉÒÔÁË
+çœ‹çœ‹ormtest.php
+æœ‰ä»€ä¹ˆå†…å®¹
 
 PHP code
 
-    $supply=M("supply"); //±íÊ¾Éú³ÉÒ»¸öÊı¾İ¿âÄ£ĞÍ $supply->get(3,4); //±íÊ¾È¡µÃÁ½ÌõÖ÷¼üÎª3 4µÄÁ½Ìõ¼ÇÂ¼ print_r($supply->record); array ( 0 => array ( 'supplyid' => '3', 'typeid' => '1', 'bookid' => '410', 'userid' => '0', 'total' => '0', 'isView' => 'Y', 'author' => '', 'linkname' => '', 'phone' => '', 'isPic' => 'N', 'mobile' => '13800138000', 'address' => 'ÉÏµØÕ¾', 'email' => '', 'msn' => '', 'qq' => '', 'title' => 'ssssssss', 'dest' => '', 'picurl' => '', 'srcpri' => '0.00', 'outpri' => '0.00', 'per' => '0.0', 'press' => '', 'adddate' => '2007-10-06', 'content' => 'ssssssssssss', ), 1 => array ( 'supplyid' => '4', 'typeid' => '2', 'bookid' => '0', 'userid' => '0', 'total' => '0', 'isView' => 'Y', 'author' => '', 'linkname' => '', 'phone' => '', 'isPic' => '', 'mobile' => '', 'address' => 'Ìì½òºÓ¶«', 'email' => '', 'msn' => '', 'qq' => '', 'title' => '±êÌâ', 'dest' => '', 'picurl' => '', 'srcpri' => '0.00', 'outpri' => '0.00', 'per' => '0.0', 'press' => '', 'adddate' => '2007-10-06', 'content' => 'ÄÚÈİ', ), ) $supply->up();//edit 3 ±à¼­¸Õ²ÅÄÇÁ½Ìõ¼ÇÂ¼µÚÒ»ĞĞ¼ÇÂ¼ÄÚÈİ //upÖ´ĞĞºó $supply->data¾ÍÓĞÊı¾İÁË //ÓĞµãÀàËÆ$result[0];Ñù×Ó //Èç¹ûÔÙupÒ»´Î¾ÍÊÇ$result[1] Èç¹û×îºóÃ»ÓĞÁË¾Í»á±ä³É¿ÕÁË //µ±È»Ò²¿ÉÒÔ $rowobj=$supply->getObjRecord(); $row=$supply->getRecord(); //ÕâÁ½¸ö¶¼ÊÇÈ¡µÃ$supply->record; //È¡»ØËùÓĞrecordÊı¾İ
+    //äº§å“ç¯å¢ƒä½¿ç”¨(Product) //$projectenv="product"; $projectenv="product"; $config["webprojectpath"]=dirname(__FILE__)."/"; $config["webprojectname"]=strlen($_SERVER['SCRIPT_FILENAME'])."projectname"; //æ ¹æ®é¡¹ç›®æ¥ç¼“å­˜,æ‰€ä»¥æœ€å¥½ä¸€ä¸ªç½‘ç«™ä¸è¦ä¸€æ · include($config["webprojectpath"]."framework/queryorm.php");
 
 
 
-ÏÖÔÚÎÒÔÚÊı¾İ¿âÖĞÌí¼ÓÁËÒ»¸öinfo±íÔõÃ´°ì
-¼ÙÉèÔÚÊı¾İ¿âÖĞÌí¼ÓÒ»¸öinfo±í×Ö¶ÎÒ²ÉèÖÃºÃÁË
-ÄÇÃ´ÎÒÃÇÀ´Éú³ÉinfoÊı¾İ¿âÄ£ĞÍ
+åŸæ¥åªåŒ…å«ä¸€ä¸ªqueryorm.phpæ–‡ä»¶å°±å¯ä»¥äº†
+æˆ‘ä»¬å¯ä»¥åœ¨æˆ‘ä»¬ç°åœ¨çš„é¡¹ç›®æˆ–ç¨‹åºä¸­åŒ…å«è¿™ä¸ªæ–‡ä»¶å°±å¯ä»¥äº†
 
-ÎÒÃÇÔÚ³ÌĞòÖĞĞ´Ò»¾ä
+PHP code
+
+    $supply=M("supply"); //è¡¨ç¤ºç”Ÿæˆä¸€ä¸ªæ•°æ®åº“æ¨¡å‹ $supply->get(3,4); //è¡¨ç¤ºå–å¾—ä¸¤æ¡ä¸»é”®ä¸º3 4çš„ä¸¤æ¡è®°å½• print_r($supply->record); array ( 0 => array ( 'supplyid' => '3', 'typeid' => '1', 'bookid' => '410', 'userid' => '0', 'total' => '0', 'isView' => 'Y', 'author' => '', 'linkname' => '', 'phone' => '', 'isPic' => 'N', 'mobile' => '13800138000', 'address' => 'ä¸Šåœ°ç«™', 'email' => '', 'msn' => '', 'qq' => '', 'title' => 'ssssssss', 'dest' => '', 'picurl' => '', 'srcpri' => '0.00', 'outpri' => '0.00', 'per' => '0.0', 'press' => '', 'adddate' => '2007-10-06', 'content' => 'ssssssssssss', ), 1 => array ( 'supplyid' => '4', 'typeid' => '2', 'bookid' => '0', 'userid' => '0', 'total' => '0', 'isView' => 'Y', 'author' => '', 'linkname' => '', 'phone' => '', 'isPic' => '', 'mobile' => '', 'address' => 'å¤©æ´¥æ²³ä¸œ', 'email' => '', 'msn' => '', 'qq' => '', 'title' => 'æ ‡é¢˜', 'dest' => '', 'picurl' => '', 'srcpri' => '0.00', 'outpri' => '0.00', 'per' => '0.0', 'press' => '', 'adddate' => '2007-10-06', 'content' => 'å†…å®¹', ), ) $supply->up();//edit 3 ç¼–è¾‘åˆšæ‰é‚£ä¸¤æ¡è®°å½•ç¬¬ä¸€è¡Œè®°å½•å†…å®¹ //upæ‰§è¡Œå $supply->dataå°±æœ‰æ•°æ®äº† //æœ‰ç‚¹ç±»ä¼¼$result[0];æ ·å­ //å¦‚æœå†upä¸€æ¬¡å°±æ˜¯$result[1] å¦‚æœæœ€åæ²¡æœ‰äº†å°±ä¼šå˜æˆç©ºäº† //å½“ç„¶ä¹Ÿå¯ä»¥ $rowobj=$supply->getObjRecord(); $row=$supply->getRecord(); //è¿™ä¸¤ä¸ªéƒ½æ˜¯å–å¾—$supply->record; //å–å›æ‰€æœ‰recordæ•°æ®
+
+
+
+ç°åœ¨æˆ‘åœ¨æ•°æ®åº“ä¸­æ·»åŠ äº†ä¸€ä¸ªinfoè¡¨æ€ä¹ˆåŠ
+å‡è®¾åœ¨æ•°æ®åº“ä¸­æ·»åŠ ä¸€ä¸ªinfoè¡¨å­—æ®µä¹Ÿè®¾ç½®å¥½äº†
+é‚£ä¹ˆæˆ‘ä»¬æ¥ç”Ÿæˆinfoæ•°æ®åº“æ¨¡å‹
+
+æˆ‘ä»¬åœ¨ç¨‹åºä¸­å†™ä¸€å¥
 $supply=M("info");
-¾Í¿ÉÒÔ×Ô¶¯Éú³ÉÁËinfoÊı¾İ¿âÄ£ĞÍÁË
-¿ÉÒÔÔÚ
-framework/modelÄ¿Â¼ÏÂÃæ¿´µ½¶àÁËÁ½¸öÎÄ¼ş
+å°±å¯ä»¥è‡ªåŠ¨ç”Ÿæˆäº†infoæ•°æ®åº“æ¨¡å‹äº†
+å¯ä»¥åœ¨
+framework/modelç›®å½•ä¸‹é¢çœ‹åˆ°å¤šäº†ä¸¤ä¸ªæ–‡ä»¶
 infoModel.class.php infoBase.class.php
-infoBase.class.php  ÊÇÊı¾İ¿â±íµÄ»ù±¾ĞÅÏ¢£¬Õâ¸ö²»ÓÃÀí
-infoModel.class.php ÊÇÄ£ĞÍÎÄ¼ş¿ÉÒÔÔÚÕâÀïÌí¼ÓÆäÊµ·½·¨ ±ÈÈç->setpassword($pwd);
+infoBase.class.php  æ˜¯æ•°æ®åº“è¡¨çš„åŸºæœ¬ä¿¡æ¯ï¼Œè¿™ä¸ªä¸ç”¨ç†
+infoModel.class.php æ˜¯æ¨¡å‹æ–‡ä»¶å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ å…¶å®æ–¹æ³• æ¯”å¦‚->setpassword($pwd);
 
 PHP code
 
@@ -397,114 +397,114 @@ PHP code
 
  
              
-ÊÇ²»ÊÇºÜ¼òµ¥
-µ«ÊÇÈç¹ûÎÒµÄ±íÊÇwww_info±íÔõÃ´°ìÄØ£¬ÕâÖÖ¾ÍÊÇ¼ÓÁËÇ°ê¡µÄ±í
-ÎÒµÄÄ£ĞÍ×Ü²»ÄÜÓĞÇ°ê¡°É
-¿´¿´documentÀïÃæÎÄµµËµÃ÷
-    //µÚÒ»´ÎÊ¹ÓÃÇë¼ÓÉÏ±íÃû"www_channel"ÕâÑù¾Í»á×Ô¶¯Éú³ÉchannelÄ£ĞÍÁË£¬
-//Éú³ÉÔÚmodelÄ¿Â¼ÏÂÃæÒ»¸öÊÇchannelBase.class.phpºÍchannelModel.class.php½áÎ²µÄÁ½¸öÎÄ¼ş
+æ˜¯ä¸æ˜¯å¾ˆç®€å•
+ä½†æ˜¯å¦‚æœæˆ‘çš„è¡¨æ˜¯www_infoè¡¨æ€ä¹ˆåŠå‘¢ï¼Œè¿™ç§å°±æ˜¯åŠ äº†å‰è¾çš„è¡¨
+æˆ‘çš„æ¨¡å‹æ€»ä¸èƒ½æœ‰å‰è¾å§
+çœ‹çœ‹documenté‡Œé¢æ–‡æ¡£è¯´æ˜
+    //ç¬¬ä¸€æ¬¡ä½¿ç”¨è¯·åŠ ä¸Šè¡¨å"www_channel"è¿™æ ·å°±ä¼šè‡ªåŠ¨ç”Ÿæˆchannelæ¨¡å‹äº†ï¼Œ
+//ç”Ÿæˆåœ¨modelç›®å½•ä¸‹é¢ä¸€ä¸ªæ˜¯channelBase.class.phpå’ŒchannelModel.class.phpç»“å°¾çš„ä¸¤ä¸ªæ–‡ä»¶
 //$channel=M("channel","www_channel");
-//Èç¹ûÒÑÉú³É¹ı¾Í²»ÓÃ±íÃûÁË£¬Ö»ÓĞµÚÒ»´ÎÓÃ»òÊı¾İ¿â¸üĞÂÁËĞèÒªË¢ĞÂ²ÅÊ¹ÓÃ±íÃû£¬ÇĞ¼Ç
-//Ê¹ÓÃÒ»´ÎºóÈç¹ûÕıÈ·µÄÄÇÃ´Éú³ÉÁËÁ½¸öÎÄ¼ş£¬ÓÚÊÇ¸Ï½ô°Ñ$channel=M("channel","www_channel");¸ÄÎª
-//$channel=M("channel"); ÕâÑù¾Í¿ÉÒÔÁË²»»áÔÙÈ¥Éú³ÉÄÇ¸öBase.class.phpÎÄ¼ş
-//Èç¹ûÎÒ°ÑÊı¾İ¿â±í¸ÄÁËÒ»ÏÂÌí¼Ó»òÉ¾³ı×Ö¶Î
-//$channel=M("channel","www_channel");ÔÙ¼ÓÉÏ±íÃûÔÙÈ¥Ë¢ĞÂÒ»ÏÂÄÇ¸öBase.class.phpÎÄ¼ş
-//È»ºóÔÙ¸Ä»ØÀ´$channel=M("channel");
-//ÕıÊ½·¢²¼Ê±ºòÎÒÃÇmodelÄ¿Â¼ÏÂÒÑÓĞËùÓĞÊı¾İ¿â±íÄ£ĞÍÎÄ¼şÁËËùÒÔÎÒÃÇ²»»áÔÙÊ¹ÓÃ$channel=M("channel","www_channel");¼Ó±íÃûÁË
-//ÓĞµã¶ßàÂ£¬ÒâË¼ÊÇmodelÏÂÃæÓĞÎÄ¼şÁË¾Í²»Òª¼Ó±íÃûÁË
+//å¦‚æœå·²ç”Ÿæˆè¿‡å°±ä¸ç”¨è¡¨åäº†ï¼Œåªæœ‰ç¬¬ä¸€æ¬¡ç”¨æˆ–æ•°æ®åº“æ›´æ–°äº†éœ€è¦åˆ·æ–°æ‰ä½¿ç”¨è¡¨åï¼Œåˆ‡è®°
+//ä½¿ç”¨ä¸€æ¬¡åå¦‚æœæ­£ç¡®çš„é‚£ä¹ˆç”Ÿæˆäº†ä¸¤ä¸ªæ–‡ä»¶ï¼Œäºæ˜¯èµ¶ç´§æŠŠ$channel=M("channel","www_channel");æ”¹ä¸º
+//$channel=M("channel"); è¿™æ ·å°±å¯ä»¥äº†ä¸ä¼šå†å»ç”Ÿæˆé‚£ä¸ªBase.class.phpæ–‡ä»¶
+//å¦‚æœæˆ‘æŠŠæ•°æ®åº“è¡¨æ”¹äº†ä¸€ä¸‹æ·»åŠ æˆ–åˆ é™¤å­—æ®µ
+//$channel=M("channel","www_channel");å†åŠ ä¸Šè¡¨åå†å»åˆ·æ–°ä¸€ä¸‹é‚£ä¸ªBase.class.phpæ–‡ä»¶
+//ç„¶åå†æ”¹å›æ¥$channel=M("channel");
+//æ­£å¼å‘å¸ƒæ—¶å€™æˆ‘ä»¬modelç›®å½•ä¸‹å·²æœ‰æ‰€æœ‰æ•°æ®åº“è¡¨æ¨¡å‹æ–‡ä»¶äº†æ‰€ä»¥æˆ‘ä»¬ä¸ä¼šå†ä½¿ç”¨$channel=M("channel","www_channel");åŠ è¡¨åäº†
+//æœ‰ç‚¹å“†å—¦ï¼Œæ„æ€æ˜¯modelä¸‹é¢æœ‰æ–‡ä»¶äº†å°±ä¸è¦åŠ è¡¨åäº†
 
-ÄÇÃ´ÎÒÃÇÊ¹ÓÃ$info=M("info","www_info");¾Í¿ÉÒÔÉú³ÉÁË
-framework/modelÄ¿Â¼ÏÂÃæ infoModel.class.php infoBase.class.php
-É¾³ı °Ñ·ÃÎÊÒ»´Î
+é‚£ä¹ˆæˆ‘ä»¬ä½¿ç”¨$info=M("info","www_info");å°±å¯ä»¥ç”Ÿæˆäº†
+framework/modelç›®å½•ä¸‹é¢ infoModel.class.php infoBase.class.php
+åˆ é™¤ æŠŠè®¿é—®ä¸€æ¬¡
 http://localhost/queryphp/ormtest.php
 
-ÊÇ²»ÊÇÓÖÉú³ÉÁËÁ½¸öÎÄ¼ş¸ú¸Õ²ÅÒ»Ñù
+æ˜¯ä¸æ˜¯åˆç”Ÿæˆäº†ä¸¤ä¸ªæ–‡ä»¶è·Ÿåˆšæ‰ä¸€æ ·
 infoBase.class.php
-var $tablename='www_info'; //Õâ¸ö²ÅÊÇ±íÃû
+var $tablename='www_info'; //è¿™ä¸ªæ‰æ˜¯è¡¨å
 
 
-ÏÂÃæËµËµÔõÃ´¾ÍÓÃ²Ù×÷Êı¾İ¾İ¿âÁË
+ä¸‹é¢è¯´è¯´æ€ä¹ˆå°±ç”¨æ“ä½œæ•°æ®æ®åº“äº†
 $supply->where($supply->pkidkey().">12")->delete();
-±íÊ¾É¾³ıÖ÷¼ü´óÓÚ12µÄ
-ÏÖÔÚÎÒÃÇ×öÏÂ²éÑ¯
+è¡¨ç¤ºåˆ é™¤ä¸»é”®å¤§äº12çš„
+ç°åœ¨æˆ‘ä»¬åšä¸‹æŸ¥è¯¢
 $supply->whereuseridANDbookid(12,9)->fetch();
-±íÊ¾ÒªÈ¡µÃuserid=12 and bookid=9¼ÇÂ¼
+è¡¨ç¤ºè¦å–å¾—userid=12 and bookid=9è®°å½•
 
 $supply->whereuseridORbookid(12,9)->fetch();
-±íÊ¾ÒªÈ¡µÃuserid=12 OR bookid=9¼ÇÂ¼
+è¡¨ç¤ºè¦å–å¾—userid=12 OR bookid=9è®°å½•
 
 $supply->whereuseridIN(12,9)->fetch();
-±íÊ¾ÒªÈ¡µÃuserid IN (12,9)¼ÇÂ¼
+è¡¨ç¤ºè¦å–å¾—userid IN (12,9)è®°å½•
 
         $supply->up(0);
-$supply->address="±±¾©º£µíÇø";
+$supply->address="åŒ—äº¬æµ·æ·€åŒº";
 $supply->update("address");
-        ĞŞ¸Ä$supply->record[0]ÖĞ¼ÇÂ¼
-        ÎÒÃÇÖ»¸üĞÂaddress×Ö¶Î
+        ä¿®æ”¹$supply->record[0]ä¸­è®°å½•
+        æˆ‘ä»¬åªæ›´æ–°addresså­—æ®µ
        
-        ÎÒÃÇÏë¸´ÖÆÒ»ĞĞ
-        ÄÇÃ´»¹ÊÇ²Ù×÷¸Õ²ÅÄÇ¸ö $supply->up(0);
-        ÒòÎªÊı¾İ»¹ÁôÔÚ$supply->dataÖĞ
-        ÎÒÃÇ¸´ÖÆÒ»¸ö
+        æˆ‘ä»¬æƒ³å¤åˆ¶ä¸€è¡Œ
+        é‚£ä¹ˆè¿˜æ˜¯æ“ä½œåˆšæ‰é‚£ä¸ª $supply->up(0);
+        å› ä¸ºæ•°æ®è¿˜ç•™åœ¨$supply->dataä¸­
+        æˆ‘ä»¬å¤åˆ¶ä¸€ä¸ª
         $supply->copyRecord()->save();
-        ÕâÑù¾Í¿ÉÒÔĞÂ²åÈëÊı¾İÁË
-        copyRecord()×÷ÓÃÊÇ°ÑdataÖĞÊı¾İÖ÷¼üÉ¾³ı£¬Ã»ÓĞÖ÷¼ü±£´æÄÇÃ´»áÒÔ²å·Å·½Ê½ 
+        è¿™æ ·å°±å¯ä»¥æ–°æ’å…¥æ•°æ®äº†
+        copyRecord()ä½œç”¨æ˜¯æŠŠdataä¸­æ•°æ®ä¸»é”®åˆ é™¤ï¼Œæ²¡æœ‰ä¸»é”®ä¿å­˜é‚£ä¹ˆä¼šä»¥æ’æ”¾æ–¹å¼ 
 
 
 
-ĞÂÓ¦ÓÃ£¬¹ØÁª²éÑ¯
+æ–°åº”ç”¨ï¼Œå…³è”æŸ¥è¯¢
 
 PHP code
 
     $supply=M("supply"); 
 $supply->get(3,4)->up(); 
-//°Ñ3ÉèÖÃÎª±à¼­×´Ì¬ 
+//æŠŠ3è®¾ç½®ä¸ºç¼–è¾‘çŠ¶æ€ 
 $books=M("booktype"); 
 $books->get(411)->up(); 
-//È¡µÃidÎª411µÄĞĞ ²¢ÉèÖÃÎª±à¼­×´Ì¬ 
+//å–å¾—idä¸º411çš„è¡Œ å¹¶è®¾ç½®ä¸ºç¼–è¾‘çŠ¶æ€ 
 $info=M("info")->limit(1)->fetch()->up(); 
-//È¡µÃinfoÒ»ĞĞ¼ÇÂ¼²¢ÉèÖÃ±à¼­×´Ì¬ 
+//å–å¾—infoä¸€è¡Œè®°å½•å¹¶è®¾ç½®ç¼–è¾‘çŠ¶æ€ 
 $supply->Books($books)->Infos($info)->fetch(); 
-//¹ØÁª²éÑ¯ 
-//ÓĞµãÀàËÆÕâÑù×Ó 
+//å…³è”æŸ¥è¯¢ 
+//æœ‰ç‚¹ç±»ä¼¼è¿™æ ·å­ 
 where("bookid='".$books->bookid."' and typeid='".$infos->infoid."'")->fetch();
- //µ±È»ÕâÑùÒ²ĞĞ Ö»ÒªÉèÖÃÁË$books,$infosÓĞÊı¾İÎª±à¼­×´Ì¬ºó 
-$supply->Books()->Infos()->fetch(); //ÊÇÒ»ÑùµÄ¡£ 
+ //å½“ç„¶è¿™æ ·ä¹Ÿè¡Œ åªè¦è®¾ç½®äº†$books,$infosæœ‰æ•°æ®ä¸ºç¼–è¾‘çŠ¶æ€å 
+$supply->Books()->Infos()->fetch(); //æ˜¯ä¸€æ ·çš„ã€‚ 
 print_r($supply->getRecord());
 
 
 
-Ò²ÓĞÒ»Ğ©ĞÂµÄwhereÌõ¼şÉèÖÃ·½·¨
+ä¹Ÿæœ‰ä¸€äº›æ–°çš„whereæ¡ä»¶è®¾ç½®æ–¹æ³•
 
 PHP code
 
-    //$supply->findBySupplyidDY("12"); where supplyid>'12' //DY±íÊ¾´óÓÚ //AND|OR|LIKE|DY|DD|XY|XD|BD|ISNULL|NOTNULL|IN|NOTIN|NOTEQ|EQ 
-//             > >= <  <= !=                         != = //¶ÔÓ¦µÄ·ûºÅ
+    //$supply->findBySupplyidDY("12"); where supplyid>'12' //DYè¡¨ç¤ºå¤§äº //AND|OR|LIKE|DY|DD|XY|XD|BD|ISNULL|NOTNULL|IN|NOTIN|NOTEQ|EQ 
+//             > >= <  <= !=                         != = //å¯¹åº”çš„ç¬¦å·
  //$supply->whereuseridORbookid(12,9); 
 where userid='12' OR bookid='9'
- //ÏñÓÃ»§µÇÂ¼Ê±ºò²éÑ¯¾­³£ÓÃµ½ 
+ //åƒç”¨æˆ·ç™»å½•æ—¶å€™æŸ¥è¯¢ç»å¸¸ç”¨åˆ° 
 //$supply->whereUseridANDBookid(12,9);
  where userid='12' AND bookid='9'
  //$supply->findBybookidORuseridINaddress(12,array(77,56,8,9),'cname');
  where bookid='12' OR userid IN (77,56,8,9) AND address='cname'
 
 
-È¥³ıindex.php²âÊÔ
+å»é™¤index.phpæµ‹è¯•
 
-C:\WINDOWS\system32\drivers\etc\hostsÎÄ¼şÌí¼ÓÒ»ĞĞ
-ÄÚÈİÈçÏÂ
+C:\WINDOWS\system32\drivers\etc\hostsæ–‡ä»¶æ·»åŠ ä¸€è¡Œ
+å†…å®¹å¦‚ä¸‹
 127.0.0.1       localhost
 192.168.0.10	www.app.com
 
-192.168.0.10µÄÊÇÄã×Ô¼ºapacheÊ¹ÓÃµÄIP,¾ÍÊÇÏÂÃæ<VirtualHost *:80>
-*ºÅÖĞµÄIP£¬·´Ö¤ÄÜ·ÃÎÊÄãµÄ±¾µØÍø¿¨¾Í¿ÉÒÔÁË
+192.168.0.10çš„æ˜¯ä½ è‡ªå·±apacheä½¿ç”¨çš„IP,å°±æ˜¯ä¸‹é¢<VirtualHost *:80>
+*å·ä¸­çš„IPï¼Œåè¯èƒ½è®¿é—®ä½ çš„æœ¬åœ°ç½‘å¡å°±å¯ä»¥äº†
 
 http://www.app.com/queryphp/project/index.php/default/index
-ÅäÖÃºóÏ£Íû¿ÉÒÔ±ä³ÉÕâÑù×Ó
+é…ç½®åå¸Œæœ›å¯ä»¥å˜æˆè¿™æ ·å­
 http://www.app.com/queryphp/project/default/index.html
-¼ÇµÃÔÚinc.ini.phpÎÄ¼şÀïÃæ¼Ó¶àÒ»ĞĞ
- $config['html']='.html'; »ò°ÑÇ°ÃæÄÇ¸ö//È¥µô£¬ÕâÑù¾Í¿ÉÒÔÁË
-ĞéÄâÖ÷»úÅäÖÃ²âÊÔ£¬AllowOverride FileInfo ½«»áÊ¹ÓÃ.htaccessÅäÖÃ
+è®°å¾—åœ¨inc.ini.phpæ–‡ä»¶é‡Œé¢åŠ å¤šä¸€è¡Œ
+ $config['html']='.html'; æˆ–æŠŠå‰é¢é‚£ä¸ª//å»æ‰ï¼Œè¿™æ ·å°±å¯ä»¥äº†
+è™šæ‹Ÿä¸»æœºé…ç½®æµ‹è¯•ï¼ŒAllowOverride FileInfo å°†ä¼šä½¿ç”¨.htaccessé…ç½®
 <VirtualHost *:80>
     <Directory "D:/work">
         Order allow,deny
@@ -516,8 +516,8 @@ http://www.app.com/queryphp/project/default/index.html
 </VirtualHost>
 
 
-.htaccessÎÄ¼ş ·ÅÔÚprojectÄ¿Â¼ÏÂÃæ ¾ÍÊÇÃ¿¸öÏîÄ¿Ä¿Â¼ÏÂÃæ£¬ÕâÑù¾Í»á·ÃÎÊÍ¬¼¶Ä¿Â¼
-index.phpÎÄ¼ş
+.htaccessæ–‡ä»¶ æ”¾åœ¨projectç›®å½•ä¸‹é¢ å°±æ˜¯æ¯ä¸ªé¡¹ç›®ç›®å½•ä¸‹é¢ï¼Œè¿™æ ·å°±ä¼šè®¿é—®åŒçº§ç›®å½•
+index.phpæ–‡ä»¶
 
   RewriteEngine On
 
@@ -540,60 +540,60 @@ index.phpÎÄ¼ş
 
 
 ------------------------------------------------------------
-³ÌĞòÖĞÊ¹ÓÃurl_for()·½Ê½
+ç¨‹åºä¸­ä½¿ç”¨url_for()æ–¹å¼
 
 
-Ä£°åÖĞÊ¾Ê¾Àı ÎÒÃÇ»¹ÊÇÒÔCURD·½Ê½ 
+æ¨¡æ¿ä¸­ç¤ºç¤ºä¾‹ æˆ‘ä»¬è¿˜æ˜¯ä»¥CURDæ–¹å¼ 
 
-    <td><a href="<?php echo url_for("curd/edit/id/".$value['bookid'])?>">±à¼­</a></td>
-    <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'])?>">É¾³ı</a></td>
+    <td><a href="<?php echo url_for("curd/edit/id/".$value['bookid'])?>">ç¼–è¾‘</a></td>
+    <td><a href="<?php echo url_for("curd/delete/id/".$value['bookid'])?>">åˆ é™¤</a></td>
 
-ÏÂÔØºóÔÚ²¢ÔÚapacheÉèÖÃwww.app.com ÔÚc:/windows/system
+ä¸‹è½½ååœ¨å¹¶åœ¨apacheè®¾ç½®www.app.com åœ¨c:/windows/system
 http://www.app.com/queryphp/project/curd/index
 
-ÊÇ²»ÊÇ¿ÉÒÔÏÔÊ¾ÄÚÈİÁË
+æ˜¯ä¸æ˜¯å¯ä»¥æ˜¾ç¤ºå†…å®¹äº†
 
 
-Èç¹ûÏÔÊ¾ÁË ÔÚframework\config\inc.ini.php ÎÄ¼şÖĞ°ÑÏÂÃæÕâĞĞÄÚÈİÈ¥µô×¢ÊÍ
-//$config['html']='.html';//¿ªÆô.html½áÎ²url
+å¦‚æœæ˜¾ç¤ºäº† åœ¨framework\config\inc.ini.php æ–‡ä»¶ä¸­æŠŠä¸‹é¢è¿™è¡Œå†…å®¹å»æ‰æ³¨é‡Š
+//$config['html']='.html';//å¼€å¯.htmlç»“å°¾url
 
 
-http://www.app.com/queryphp/project/curd/index.html ·ÃÎÊ
-ÊÇ²»ÊÇ¿ÉÒÔ¿´µ½ÄÚÈİÁË
+http://www.app.com/queryphp/project/curd/index.html è®¿é—®
+æ˜¯ä¸æ˜¯å¯ä»¥çœ‹åˆ°å†…å®¹äº†
 
-ËùÓĞÁ´½Ó¶¼´ø.html½áÎ²ÁË¡£ÄÇÎÒÃÇÓĞÊ±ºòÏë²»Òª.html½áÎ²ÔõÃ´°ì
-<a href="<?php echo url_for("curd/delete/id/".$value['bookid'],true)?>">É¾³ı</a>
+æ‰€æœ‰é“¾æ¥éƒ½å¸¦.htmlç»“å°¾äº†ã€‚é‚£æˆ‘ä»¬æœ‰æ—¶å€™æƒ³ä¸è¦.htmlç»“å°¾æ€ä¹ˆåŠ
+<a href="<?php echo url_for("curd/delete/id/".$value['bookid'],true)?>">åˆ é™¤</a>
 
-url_for(url,true);·½Ê½ ±íÊ¾²»Òªhtml½áÎ²
-É¾³ı»á±ä³ÉÕâÑù×Ó
+url_for(url,true);æ–¹å¼ è¡¨ç¤ºä¸è¦htmlç»“å°¾
+åˆ é™¤ä¼šå˜æˆè¿™æ ·å­
 http://www.app.com/queryphp/project/curd/delete/id/2
 
 
 
 
-Êı¾İ¿â·ÖÒ³ÀàÊ¹ÓÃ
+æ•°æ®åº“åˆ†é¡µç±»ä½¿ç”¨
 
          $pager=C("pager");
-         //setPager(total,pagenum,'page');ÉèÖÃ$_GET page±äÁ¿
+         //setPager(total,pagenum,'page');è®¾ç½®$_GET pageå˜é‡
          //setPager(total,pagenum);
 	$pager->setPager(100,10,'page');
-        //¿ÉÒÔÊ¹ÓÃ$booktype->count();È¡µÃ×ÜÊı
-        //ÏêÏ¸¿´curdRouter.class.phpÎÄ¼ş
-        //È¡µÃµ¼º½html ÎÒÃÇÒª´«ÈëurlÆäÖĞÊ¹ÓÃ:page´úÌæ¸úÉÏÃæsetPager()²ÎÊıÖĞ page Ò»ÖÂ
-        //$pager->getLinks()  È¡µÃ·ÖÒ³Êı×é
+        //å¯ä»¥ä½¿ç”¨$booktype->count();å–å¾—æ€»æ•°
+        //è¯¦ç»†çœ‹curdRouter.class.phpæ–‡ä»¶
+        //å–å¾—å¯¼èˆªhtml æˆ‘ä»¬è¦ä¼ å…¥urlå…¶ä¸­ä½¿ç”¨:pageä»£æ›¿è·Ÿä¸Šé¢setPager()å‚æ•°ä¸­ page ä¸€è‡´
+        //$pager->getLinks()  å–å¾—åˆ†é¡µæ•°ç»„
         //$pager->getLinks(5)
 	/*
-	*È¡µÃÁ´½ÓÊı×é
-	*·µ»Øarray(1,2,3,4,5,6)ÕâÑùµÄÊı×é
+	*å–å¾—é“¾æ¥æ•°ç»„
+	*è¿”å›array(1,2,3,4,5,6)è¿™æ ·çš„æ•°ç»„
 	*foreach($pager->getLinks() as $page)
 	*echo url_for("/model/action/page/").$page;
 	*/
        
         $pager->$pager->getBar(url_for("model/action/page/:page"));
 	/*
-	*È¡µÃ´øurlÁ´½ÓÊı×é
-	*key=>value·½Ê½
-	*·µ»Øarray(1=>url,2=>url,3=>url,4=>url)ÕâÑùµÄÊı×é
+	*å–å¾—å¸¦urlé“¾æ¥æ•°ç»„
+	*key=>valueæ–¹å¼
+	*è¿”å›array(1=>url,2=>url,3=>url,4=>url)è¿™æ ·çš„æ•°ç»„
 	*foreach($pager->getBar(url_for("model/action/page/:page")) as $key=>$page)
 	*echo "<a href=".$page.">".$key."</a>";
 	*/
@@ -602,41 +602,41 @@ http://www.app.com/queryphp/project/curd/delete/id/2
 	echo("page:".$pager->offset().":");
 
 
-¿âÀàÎÄ¼şÊ¹ÓÃ ºº×Ö×ªÆ´Òô
+åº“ç±»æ–‡ä»¶ä½¿ç”¨ æ±‰å­—è½¬æ‹¼éŸ³
 	$pinyin=C("zh2pinyin");
-	echo $pinyin->T("¿ªÔ´Ó²¼şÄÜ·ñ Ïñ¿ªÔ´Èí¼şÒ»ÑùÁ÷ĞĞ"); 
-        echo $pinyin->T("¿ªÔ´Ó²¼şÄÜ·ñ Ïñ¿ªÔ´Èí¼şÒ»ÑùÁ÷ĞĞ",true); //true±íÊ¾É¾³ıÖĞ¼ä¿Õ¸ñ 
-        echo $pinyin->T("¿ªÔ´Ó²¼şÄÜ·ñÏñ    ¿ªÔ´Èí¼şÒ»ÑùÁ÷ĞĞ");
+	echo $pinyin->T("å¼€æºç¡¬ä»¶èƒ½å¦ åƒå¼€æºè½¯ä»¶ä¸€æ ·æµè¡Œ"); 
+        echo $pinyin->T("å¼€æºç¡¬ä»¶èƒ½å¦ åƒå¼€æºè½¯ä»¶ä¸€æ ·æµè¡Œ",true); //trueè¡¨ç¤ºåˆ é™¤ä¸­é—´ç©ºæ ¼ 
+        echo $pinyin->T("å¼€æºç¡¬ä»¶èƒ½å¦åƒ    å¼€æºè½¯ä»¶ä¸€æ ·æµè¡Œ");
 
 
-Éú³ÉÎÄ×ÖË®Ó¡Í¼Æ¬
+ç”Ÿæˆæ–‡å­—æ°´å°å›¾ç‰‡
 
-C("waterimg")->createWaterPng("Ë®Ó¡¿ªÊ¼");
-Ä¬ÈÏÉú³ÉconfigÄ¿Â¼ÏÂÃæ
-configÀïÃæÓĞÒ»¸öwaterfont.TTF×ÖÌåÊÇË®×ÖÌå
+C("waterimg")->createWaterPng("æ°´å°å¼€å§‹");
+é»˜è®¤ç”Ÿæˆconfigç›®å½•ä¸‹é¢
+configé‡Œé¢æœ‰ä¸€ä¸ªwaterfont.TTFå­—ä½“æ˜¯æ°´å­—ä½“
 
 
 
-×Ô¶¯Éú³Éhtml·½·¨
+è‡ªåŠ¨ç”Ÿæˆhtmlæ–¹æ³•
 framework\config\inc.ini.php
 /*
-*ÍøÕ¾¾²Ì¬»¯¿ªÊ¼£¬¿ÉÒÔ×öseoÓÅ»¯
+*ç½‘ç«™é™æ€åŒ–å¼€å§‹ï¼Œå¯ä»¥åšseoä¼˜åŒ–
 **/
-$config['html']='.html';//¿ªÆô.html½áÎ²url
-$config['realhtml']="/html"; //¿ªÆô³¬¼¶»º´æÄ¿Â¼£¬Èç¹ûµÚÒ»´Î·ÃÎÊÃ»ÓĞhtmlÒ³Ãæ×Ô¶¯²úÉúhtmlÒ³Ãæ£¬µÚ¶ş´Î·ÃÎÊÊ±ºò¾ÍÊÇ¾²Ì¬»¯ÁË
-$config['htmlcache']=array("class"=>"sitehtml","method"=>"realhtml"); //Éú³ÉhtmlÎÄ¼şÀàºÍ·½·¨,²»ÉèÖÃ½«²»»áÉú³ÉhtmlÒ³Ãæ,´«Èë²ÎÊıÎª$content,$pathinfo;
+$config['html']='.html';//å¼€å¯.htmlç»“å°¾url
+$config['realhtml']="/html"; //å¼€å¯è¶…çº§ç¼“å­˜ç›®å½•ï¼Œå¦‚æœç¬¬ä¸€æ¬¡è®¿é—®æ²¡æœ‰htmlé¡µé¢è‡ªåŠ¨äº§ç”Ÿhtmlé¡µé¢ï¼Œç¬¬äºŒæ¬¡è®¿é—®æ—¶å€™å°±æ˜¯é™æ€åŒ–äº†
+$config['htmlcache']=array("class"=>"sitehtml","method"=>"realhtml"); //ç”Ÿæˆhtmlæ–‡ä»¶ç±»å’Œæ–¹æ³•,ä¸è®¾ç½®å°†ä¸ä¼šç”Ÿæˆhtmlé¡µé¢,ä¼ å…¥å‚æ•°ä¸º$content,$pathinfo;
 /*
-*ÍøÕ¾¾²Ì¬»¯½áÊø
+*ç½‘ç«™é™æ€åŒ–ç»“æŸ
 **/  
 
-µ±urlµØÖ·ÊÇindex.phpÊ±ºò½«²»»áÉú³Éhtml
+å½“urlåœ°å€æ˜¯index.phpæ—¶å€™å°†ä¸ä¼šç”Ÿæˆhtml
 
 http://www.app.com/project/html/curd/index/page/2.html
-µ±Ã»ÓĞindex.phpÊ±ºò»á×Ô¶¯Éú³Éhtml
-Éú³ÉhtmlÎÄ¼ş»áÔÚ$config['realhtml']Ä¿Â¼ÀïÃæ
-Èç¹ûÒª¸üĞÂÇëÉ¾³ıÀïÃæµÄhtmlÄÚÈİ
+å½“æ²¡æœ‰index.phpæ—¶å€™ä¼šè‡ªåŠ¨ç”Ÿæˆhtml
+ç”Ÿæˆhtmlæ–‡ä»¶ä¼šåœ¨$config['realhtml']ç›®å½•é‡Œé¢
+å¦‚æœè¦æ›´æ–°è¯·åˆ é™¤é‡Œé¢çš„htmlå†…å®¹
 
-apacheÅäÖÃ
+apacheé…ç½®
 <VirtualHost *:80>
     <Directory "D:/work/queryphp">
         Order allow,deny
@@ -646,4 +646,4 @@ apacheÅäÖÃ
   DocumentRoot "D:/work/queryphp"
   ServerName "www.app.com"
 </VirtualHost>
-°Ñ¿ò¼Ü½âÑ¹µ½queryphpÄ¿Â¼
+æŠŠæ¡†æ¶è§£å‹åˆ°queryphpç›®å½•

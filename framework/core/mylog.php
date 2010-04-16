@@ -1,9 +1,9 @@
 <?php
 class mylog extends Exception {
-    // ÖØ¶¨Òå¹¹ÔìÆ÷Ê¹ message ±äÎª±ØÐë±»Ö¸¶¨µÄÊôÐÔ
+    // é‡å®šä¹‰æž„é€ å™¨ä½¿ message å˜ä¸ºå¿…é¡»è¢«æŒ‡å®šçš„å±žæ€§
     public function __construct($message, $code = 0) {
-        // ×Ô¶¨ÒåµÄ´úÂë
-        // È·±£ËùÓÐ±äÁ¿¶¼±»ÕýÈ·¸³Öµ
+        // è‡ªå®šä¹‰çš„ä»£ç 
+        // ç¡®ä¿æ‰€æœ‰å˜é‡éƒ½è¢«æ­£ç¡®èµ‹å€¼
         parent::__construct($message, $code);
 		ob_start();
 		print_r($GLOBALS); 

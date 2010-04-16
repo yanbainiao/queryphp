@@ -1,8 +1,16 @@
 <?php
+ 
 class defaultRouter extends controller{
   function index()
   {
     echo "hello world!";
+	$array1 = array("a" => "green", "b" => "brown","www"=>array("aa"=>"8888"), "c" => "blue", "red");
+$array2 = array("a" => "green", "yellow", "red");
+$result_array = array_intersect($array1, $array2);
+echo "<pre>";
+print_r($result_array);
+print_r(MY()->array_multi2single($array1));
+echo "</pre>";
 		  echo "<pre>";
 		  /*$this->assign("ssss","aa");
 	$this->hhh="88";

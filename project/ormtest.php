@@ -35,7 +35,7 @@ include("../framework/queryorm.php");
 
     $books->Infos(array("myname"=>"关联保存3","myage"=>"87"))->save();
  }
-   echo highlight_file("D:/work/queryphp/project/router/curdRouter.class.php");
+  // echo highlight_file("D:/work/queryphp/project/router/curdRouter.class.php");
    //echo highlight_file(__FILE__);
   // phpinfo();
    echo "<pre>";
@@ -68,13 +68,14 @@ $info=M("info")->limit(1)->get(1)->edit();
 //我们先看看已有对象数据
 print_r($books->getData());
 print_r($info->getData());
-$ss=$supply->Books($books)->Infos($info)->fetch('user'); 
+//$ss=$supply->Books($books)->Infos($info)->fetch(); 
 //echo($supply->querySQL());
-$user->show();
-var_export($ss);
-$int = '1234';
-/*** validate the integer ***/
-echo filter_var($int, FILTER_VALIDATE_INT);
+//$supply->wheresupplyidDYbookidXY(1,5)->orderby(" desc")->limit(10,20)->fetch();
+//echo $supply->querySQL();
+
+$books->selectbooktype("bookid,classname")->selectsupply("address,title")->leftjoin("supply")->joinon("supply.bookid=booktype.bookid")->where('bookid',404)->fetch();
+
+echo $supply->querySQL();
 //print_r($supply->getRecord());
 
 //var_export($user->fetchAll(PDO::FETCH_CLASS, 'user'));

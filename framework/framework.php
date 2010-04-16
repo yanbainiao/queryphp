@@ -1,5 +1,5 @@
 <?php
-//$iscacheconfig Èç¹û¶¨ÒåÁË¾ÍÊÇ»º´æ£¬²»¶¨Òå¾Í²»Ê¹ÓÃ»º´æ
+//$iscacheconfig å¦‚æžœå®šä¹‰äº†å°±æ˜¯ç¼“å­˜ï¼Œä¸å®šä¹‰å°±ä¸ä½¿ç”¨ç¼“å­˜
 $config["frameworkpath"]=dirname(__FILE__)."/";
 if(isset($iscacheconfig)&&$projectenv=='product'&&file_exists($config["frameworkpath"]."cache/".$config["webprojectname"]."config.cache.php"))
 {
@@ -57,12 +57,12 @@ if(!isset($isreadconfig)&&file_exists($config["webprojectpath"]."config/aftercor
 	   if(file_exists($config["frameworkpath"]."cache/".$config["webprojectname"]."config.cache.php"))
 	   unlink($config["frameworkpath"]."cache/".$config["webprojectname"]."config.cache.php");
 	}
-//Èç¹ûÖ»ÏëÊ¹ÓÃÊý¾Ý¿âÁ´½ÓÄÇÃ´×¢ÏúÏÂÃæ´úÂë¾Í¿ÉÒÔÁË
+//å¦‚æžœåªæƒ³ä½¿ç”¨æ•°æ®åº“é“¾æŽ¥é‚£ä¹ˆæ³¨é”€ä¸‹é¢ä»£ç å°±å¯ä»¥äº†
 $dispaths=C("router")->setMaps($config["routermaps"])->start();
 $view=C("view");
 $router=R($dispaths->controller);
 if (method_exists($router,$dispaths->action)) {
-    //È¨ÏÞ¼ì²é
+    //æƒé™æ£€æŸ¥
 	$ispass=false;	
     if(method_exists($router,"isAcl"))
     {
@@ -82,22 +82,22 @@ if (method_exists($router,$dispaths->action)) {
 	    if(method_exists($router,"noAcl"))
 		{
 		  $viewmodel=$router->noAcl($mask);
-		}else{
+		}elseif(is_object($acl)){
 		  $acl->noAcl($mask);
 		}
 	}else{
 		//call_user_func(array($router,$dispaths->action));
-		//¼ì²éÓÐÃ»ÓÐÒªÇ°ÖÃÖ´ÐÐ·½·¨
+		//æ£€æŸ¥æœ‰æ²¡æœ‰è¦å‰ç½®æ‰§è¡Œæ–¹æ³•
 		if (method_exists($router,"pre_".$dispaths->action)) {
 		  $viewmodel=$router->{"pre_".$dispaths->action}();
 		}
 		if($viewmodel!==false) $viewmodel=$router->{$dispaths->action}();
-		//¼ì²éÓÐÃ»ÓÐÒªºóÖÃÖ´ÐÐ·½·¨
+		//æ£€æŸ¥æœ‰æ²¡æœ‰è¦åŽç½®æ‰§è¡Œæ–¹æ³•
 		if(method_exists($router,"after_".$dispaths->action)) {
 		   $router->{"after_".$dispaths->action}();
 		}
 	}
-	//Èç¹û$viewmodelÓÐÖµ¾ÍÊ¹ÓÃ$viewmodelÖÐµÄÖµÉèÖÃÊÓÍ¼
+	//å¦‚æžœ$viewmodelæœ‰å€¼å°±ä½¿ç”¨$viewmodelä¸­çš„å€¼è®¾ç½®è§†å›¾
 	if(false!==$viewmodel&&'ajax'!=$viewmodel)
 	{
 		 $view->display(R($dispaths->controller)->view($dispaths->action));
