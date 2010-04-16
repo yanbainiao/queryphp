@@ -1,32 +1,32 @@
-ÅäÖÃ
-framework/config/inc.ini.php ÀïÃæµÄÊý¾Ý¿âÁ´½Ó
+ï»¿é…ç½®
+framework/config/inc.ini.php é‡Œé¢çš„æ•°æ®åº“é“¾æŽ¥
 
 
-·ÃÎÊ test.php »òindex.phpÎÄ¼þ
+è®¿é—® test.php æˆ–index.phpæ–‡ä»¶
 
-ÄÇÃ´»áÄ¬ÈÏ·ÃÎÊ framework/router 
-ÀïÃæµÄdefaultRouter.class.phpÎÄ¼þindex·½·¨
-index.php/default/index ·½Ê½
+é‚£ä¹ˆä¼šé»˜è®¤è®¿é—® framework/router 
+é‡Œé¢çš„defaultRouter.class.phpæ–‡ä»¶indexæ–¹æ³•
+index.php/default/index æ–¹å¼
 
-ÏÖÔÚÄãÇå¿ÕdefaultRouter.class.php index·½·¨ÄÚÈÝ
+çŽ°åœ¨ä½ æ¸…ç©ºdefaultRouter.class.php indexæ–¹æ³•å†…å®¹
 
 
-×Ô¶¯Éú³ÉÊý¾Ý¿â±íÄ£ÐÍ·½·¨
-     	 //µÚÒ»´ÎÊ¹ÓÃÇë¼ÓÉÏ±íÃû"www_channel"ÕâÑù¾Í»á×Ô¶¯Éú³ÉchannelÄ£ÐÍÁË£¬
-	 //Éú³ÉÔÚmodelÄ¿Â¼ÏÂÃæÒ»¸öÊÇchannelBase.class.phpºÍchannelModel.class.php½áÎ²µÄÁ½¸öÎÄ¼þ
+è‡ªåŠ¨ç”Ÿæˆæ•°æ®åº“è¡¨æ¨¡åž‹æ–¹æ³•
+     	 //ç¬¬ä¸€æ¬¡ä½¿ç”¨è¯·åŠ ä¸Šè¡¨å"www_channel"è¿™æ ·å°±ä¼šè‡ªåŠ¨ç”Ÿæˆchannelæ¨¡åž‹äº†ï¼Œ
+	 //ç”Ÿæˆåœ¨modelç›®å½•ä¸‹é¢ä¸€ä¸ªæ˜¯channelBase.class.phpå’ŒchannelModel.class.phpç»“å°¾çš„ä¸¤ä¸ªæ–‡ä»¶
 	 //$channel=M("channel","www_channel");
-	 //Èç¹ûÒÑÉú³É¹ý¾Í²»ÓÃ±íÃûÁË£¬Ö»ÓÐµÚÒ»´ÎÓÃ»òÊý¾Ý¿â¸üÐÂÁËÐèÒªË¢ÐÂ²ÅÊ¹ÓÃ±íÃû£¬ÇÐ¼Ç
-	 //Ê¹ÓÃÒ»´ÎºóÈç¹ûÕýÈ·µÄÄÇÃ´Éú³ÉÁËÁ½¸öÎÄ¼þ£¬ÓÚÊÇ¸Ï½ô°Ñ$channel=M("channel","www_channel");¸ÄÎª
-	 //$channel=M("channel"); ÕâÑù¾Í¿ÉÒÔÁË²»»áÔÙÈ¥Éú³ÉÄÇ¸öBase.class.phpÎÄ¼þ
-	 //Èç¹ûÎÒ°ÑÊý¾Ý¿â±í¸ÄÁËÒ»ÏÂÌí¼Ó»òÉ¾³ý×Ö¶Î
-	 //$channel=M("channel","www_channel");ÔÙ¼ÓÉÏ±íÃûÔÙÈ¥Ë¢ÐÂÒ»ÏÂÄÇ¸öBase.class.phpÎÄ¼þ
-	 //È»ºóÔÙ¸Ä»ØÀ´$channel=M("channel");
-	 //ÕýÊ½·¢²¼Ê±ºòÎÒÃÇmodelÄ¿Â¼ÏÂÒÑÓÐËùÓÐÊý¾Ý¿â±íÄ£ÐÍÎÄ¼þÁËËùÒÔÎÒÃÇ²»»áÔÙÊ¹ÓÃ$channel=M("channel","www_channel");¼Ó±íÃûÁË
-	 //ÓÐµã¶ßàÂ£¬ÒâË¼ÊÇmodelÏÂÃæÓÐÎÄ¼þÁË¾Í²»Òª¼Ó±íÃûÁË
+	 //å¦‚æžœå·²ç”Ÿæˆè¿‡å°±ä¸ç”¨è¡¨åäº†ï¼Œåªæœ‰ç¬¬ä¸€æ¬¡ç”¨æˆ–æ•°æ®åº“æ›´æ–°äº†éœ€è¦åˆ·æ–°æ‰ä½¿ç”¨è¡¨åï¼Œåˆ‡è®°
+	 //ä½¿ç”¨ä¸€æ¬¡åŽå¦‚æžœæ­£ç¡®çš„é‚£ä¹ˆç”Ÿæˆäº†ä¸¤ä¸ªæ–‡ä»¶ï¼ŒäºŽæ˜¯èµ¶ç´§æŠŠ$channel=M("channel","www_channel");æ”¹ä¸º
+	 //$channel=M("channel"); è¿™æ ·å°±å¯ä»¥äº†ä¸ä¼šå†åŽ»ç”Ÿæˆé‚£ä¸ªBase.class.phpæ–‡ä»¶
+	 //å¦‚æžœæˆ‘æŠŠæ•°æ®åº“è¡¨æ”¹äº†ä¸€ä¸‹æ·»åŠ æˆ–åˆ é™¤å­—æ®µ
+	 //$channel=M("channel","www_channel");å†åŠ ä¸Šè¡¨åå†åŽ»åˆ·æ–°ä¸€ä¸‹é‚£ä¸ªBase.class.phpæ–‡ä»¶
+	 //ç„¶åŽå†æ”¹å›žæ¥$channel=M("channel");
+	 //æ­£å¼å‘å¸ƒæ—¶å€™æˆ‘ä»¬modelç›®å½•ä¸‹å·²æœ‰æ‰€æœ‰æ•°æ®åº“è¡¨æ¨¡åž‹æ–‡ä»¶äº†æ‰€ä»¥æˆ‘ä»¬ä¸ä¼šå†ä½¿ç”¨$channel=M("channel","www_channel");åŠ è¡¨åäº†
+	 //æœ‰ç‚¹å“†å—¦ï¼Œæ„æ€æ˜¯modelä¸‹é¢æœ‰æ–‡ä»¶äº†å°±ä¸è¦åŠ è¡¨åäº†
 
 
-ÆäËüÇë¿´documentÎÄµµ
-Éú³ÉËùÓÐÄ£ÐÍ
+å…¶å®ƒè¯·çœ‹documentæ–‡æ¡£
+ç”Ÿæˆæ‰€æœ‰æ¨¡åž‹
   	    $user=M("member")->query("SHOW TABLES");
 		foreach($tables as $k=>$v)
 	    {

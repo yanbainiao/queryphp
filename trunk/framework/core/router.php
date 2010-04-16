@@ -12,21 +12,21 @@ class Router {
   public $fixpath;
   public function __construct() {
 	self::getPathInfo();
-	//È¥µô¾²Ì¬Ä¿Â¼
+	//å»æ‰é™æ€ç›®å½•
 	if(isset($GLOBALS['config']['realhtml']))
 	{
-	  //Ïû³ıpathÖĞ¾²Ì¬»º´æÄ¿Â¼
+	  //æ¶ˆé™¤pathä¸­é™æ€ç¼“å­˜ç›®å½•
 	  if(strncasecmp($_SERVER['PATH_INFO'],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
 	  $_SERVER['PATH_INFO']=substr($_SERVER['PATH_INFO'],strlen($GLOBALS['config']['realhtml']));
 	  if(strncasecmp($_SERVER["REQUEST_URI"],$_SERVER["SCRIPT_NAME"],strlen($_SERVER["SCRIPT_NAME"]))==0){
-	    $this->isScript=true;//´øÓĞindex.phpµÄ
+	    $this->isScript=true;//å¸¦æœ‰index.phpçš„
         $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($_SERVER["SCRIPT_NAME"]));
-		//ÏÈÇĞ¿ª¿ªÊ¼Ä¿Â¼£¬É¾³ıhtmlÄ¿Â¼È»ºóÔÙ×é×°ÆğÀ´
+		//å…ˆåˆ‡å¼€å¼€å§‹ç›®å½•ï¼Œåˆ é™¤htmlç›®å½•ç„¶åå†ç»„è£…èµ·æ¥
         if(strncasecmp($_SERVER["REQUEST_URI"],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
 	     $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($GLOBALS['config']['realhtml']));
        $_SERVER["REQUEST_URI"]=$_SERVER["SCRIPT_NAME"].$_SERVER["REQUEST_URI"];
 	  }
-      //ÖØĞ´Ê±ºòÃ»ÓĞindex.php£¬È¥µôÖĞ¼ähtmlÄ¿Â¼ ÕâÑù¶¯Ì¬¿ÉÒÔ²»Ê¹ÓÃhtmlÄ¿Â¼
+      //é‡å†™æ—¶å€™æ²¡æœ‰index.phpï¼Œå»æ‰ä¸­é—´htmlç›®å½• è¿™æ ·åŠ¨æ€å¯ä»¥ä¸ä½¿ç”¨htmlç›®å½•
 	  if(0!==strrpos($_SERVER["SCRIPT_NAME"],"/"))
 	  {
 		  $this->fixpath=substr($_SERVER["SCRIPT_NAME"],0,strrpos($_SERVER["SCRIPT_NAME"],"/"));
@@ -37,7 +37,7 @@ class Router {
 		  }
       }
 	  //echo(substr($_SERVER["REQUEST_URI"],0,strlen(substr($_SERVER["SCRIPT_NAME"],0,strrpos($_SERVER["SCRIPT_NAME"],"/")))));
-	  //Èç¹ûÃ»ÓĞPATHÄ¿Â¼
+	  //å¦‚æœæ²¡æœ‰PATHç›®å½•
 	  if(strncasecmp($_SERVER["REQUEST_URI"],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
 	  $_SERVER["REQUEST_URI"]=substr($_SERVER["REQUEST_URI"],strlen($GLOBALS['config']['realhtml']));
 	  if(strncasecmp($_SERVER["REDIRECT_URL"],$GLOBALS['config']['realhtml'],strlen($GLOBALS['config']['realhtml']))==0)
@@ -68,7 +68,7 @@ class Router {
   {
 	 $paths = explode("/",trim($_SERVER['PATH_INFO'],'/'));
      $controller=array_shift($paths);
-     if(!empty($controller)){
+     if(!empty($controller)){		 
 	   $this->urlcontroller=false;
 	   $rule=$this->RuleCheck($controller);	   
 	 }else{
@@ -107,7 +107,7 @@ class Router {
 			 $this->id = null;	   
 		 }else{
 		   	 $this->controller=$controller;
-		     if($this->action==null) $this->action=array_shift($paths);
+		     if($this->action==null) $this->action=empty($paths)?$GLOBALS['config']['defaultindex']:array_shift($paths);
 		 }
 	 }
 	 if(is_numeric($paths[0])) { $this->id=array_shift($paths); $_GET['id']=$this->id; }
@@ -241,7 +241,7 @@ class Router {
 			$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
 			}
         }
-		    //ÊÇ·ñ´øÓĞ¾²Ì¬ÎÄ¼ş½áÎ²ĞÎÊ½
+		    //æ˜¯å¦å¸¦æœ‰é™æ€æ–‡ä»¶ç»“å°¾å½¢å¼
 			if(isset($GLOBALS['config']['html'])&&$GLOBALS['config']['html']!='')
 			if(substr($path,-strlen($GLOBALS['config']['html']))==$GLOBALS['config']['html'])
 			{

@@ -445,6 +445,11 @@ function __autoload($class_name) {
 	  require_once P("frameworkpath")."lib/".$class_name.'.class.php';
 	  return;
 	}
+	if(file_exists(P("webprojectpath")."lib/".$class_name.'.class.php'))
+	{		   
+	  require_once P("webprojectpath")."lib/".$class_name.'.class.php';
+	  return;
+	}
 	if(file_exists(P("frameworkpath").$class_name.'.php'))
 	{		   
 	  require_once P("frameworkpath").$class_name.'.php';

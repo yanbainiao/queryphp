@@ -2,7 +2,7 @@
 class uploadRouter extends controller{
   function index()
   {
-	 echo highlight_file(__FILE__);
+
   }
   function webimages()
   {

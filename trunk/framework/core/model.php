@@ -301,12 +301,12 @@ class Model
   /*
   *生成一个空的data
   *也可以返回一个空的小对像 
-  *$this->getObjFields 返回一个空的数组对象
+  *$this->getFields(true); 返回一个空的数组对象
   */
 public  function newRecord($data=array())
   {    
 	$this->data=array();
-	$this->getDefaultFormField($data);
+	$this->getFillFields($data);
 	if($this->autoid) unset($this->data[$this->PRI]);
 	return $this;
   }
@@ -359,7 +359,7 @@ public  function newRecord($data=array())
 		$mname=$this->mapper[$m]['TargetModel'];
 		foreach($v as $key=>$value)
 		{ 
-		  $value=M($mname)->getDefaultFormField($value);
+		  $value=M($mname)->getFillFields($value);
 		  $fields=$this->gettargetPRIFields($m,$this->PRI);
 		  $this->maparray[$m][$key][$fields]=$this->pkid();
 		  $value[$fields]=$this->pkid();
@@ -948,7 +948,12 @@ public  function newRecord($data=array())
   */
   function orderby($name)
   {
-	$this->sql['orderby']=" order by ".$this->getFixSQL($name).$name;
+	if(!preg_match("|\w(\s)\w|",$name)){ 
+	  $this->sql['orderby']=" order by ".$this->getFixSQL($this->PRI).$this->PRI." ".$name; }
+	else{
+	  $n=explode(" ",trim($name));
+	  $this->sql['orderby']=" order by ".$this->getFixSQL($n[0]).$name; 
+	}
 	return $this;
   }
   function groupby($name)
@@ -1084,18 +1089,8 @@ public  function newRecord($data=array())
 		Return $this;
   }
   /*
-  *取回查询后内容。设置为对象形式
-  */
-  function getObjRecord()
-  {
-	if(count($this->record)>0)
-	{
-      return new ArrayObject($this->record);
-	}
-	return null;    
-  }
-  /*
   *取得已经查询的数据内容
+  *$i=obj 返回obj形式
   */
   function getRecord($i='')
   {
@@ -1103,8 +1098,10 @@ public  function newRecord($data=array())
 	{
       if($i!='')
 	  {	    
-	   if(!is_numeric($i)) $i=intval($i);
-        return $this->record[$i];
+	   if($i===true) return new ArrayObject($this->record);
+	   if(is_numeric($i)){ 
+          return $this->record[$i]; 
+		}
 	  }else
 	    return $this->record;
 	}
@@ -1113,11 +1110,11 @@ public  function newRecord($data=array())
   /*
   *取得编辑数据可以返回对象形式
   */
-  function getData($obj='')
+  function getData($obj=false)
   {
 	if(count($this->data)>0)
 	{
-	  if($obj=='Object'){
+	  if($obj===true){
 		  return new ArrayObject($this->data);       
 	  }elseif(is_array($obj)){
 		  $t=array();
@@ -1172,12 +1169,7 @@ public  function newRecord($data=array())
     
 	if(is_numeric($id))
 	{
-	  if($this->sql['where']=='')
-	  {
-		$this->where($this->PRI."='".$id."'");
-	  }else{
-		$this->whereAnd($this->PRI."='".$id."'");
-	  }	  
+	  $this->whereAnd($this->PRI."='".$id."'");
 	  $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
 	  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
@@ -1218,6 +1210,14 @@ public  function newRecord($data=array())
 		  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
+  }
+  /***
+  *使用缓存
+  *
+  ***/
+  public function cache($cachekey=''){
+  	$this->sql['cachekey']=$cachekey;
+	 return $this;
   }
   /*
   *判断是否有插入更新删除效果
@@ -1385,8 +1385,8 @@ public  function newRecord($data=array())
  public function getDataBaseName()
   {
 	  if(empty($this->databasename)){ 
-		  $this->string="SELECT DATABASE() AS name";
-		  $res=$this->DB['slaves']->query($this->string);
+		  $s="SELECT DATABASE() AS name";
+		  $res=$this->DB['slaves']->query($s);
 		  $database=$res->fetch(PDO::FETCH_ASSOC);  
 		  $this->databasename=$database['name'];
 		  return $database['name'];
@@ -1518,7 +1518,6 @@ public  function newRecord($data=array())
 	 { 
 		 	$this->maps[$mapper]->select($fileds);
             $this->isEnd();
-			echo($this->objpoint);
 		    if(is_array($this->mapper[$mapper]['mapping']))
 			{
 				foreach($this->mapper[$mapper]['mapping'] as $local=>$target)
@@ -1639,14 +1638,17 @@ public  function newRecord($data=array())
   * 返回一个record空对像
   *
   */
- public function getObjFields()
+ public function getFields($obj=false)
   {
-    return new ArrayObject($this->fields);
+    if($obj)
+	 return new ArrayObject($this->fields);
+	else
+	 return $this->fields;
   }
   /*
   *填充一行内容，没有使用默认值填充
   */
- public function getDefaultFormField($data=array())
+ public function getFillFields($data=array())
   {
      $t=array();
 	 foreach($this->fields as $key=>$value)
@@ -1659,7 +1661,7 @@ public  function newRecord($data=array())
   /*
   *从数组中取得表字段的值也跟过滤差不多
   */
- public function getArrayFormField($data='')
+ public function getFormFields($data='')
   {
     if($data=='') $data=$this->data;
 	$t=array();
@@ -1684,10 +1686,10 @@ public  function newRecord($data=array())
 		$this->maparray[$mapper][$mpi][$k]=$v;
 	  }elseif(is_array($v))
 	  {	    
-		$this->maparray[$mapper][]=M($mapmodel)->getArrayFormField($v);
+		$this->maparray[$mapper][]=M($mapmodel)->getFormFields($v);
 	  }elseif(is_object($v))
 	  {
-	    $this->maparray[$mapper][]=M($mapmodel)->getArrayFormField(get_object_vars($v));
+	    $this->maparray[$mapper][]=M($mapmodel)->getFormFields(get_object_vars($v));
 	  }
 	}
 	//处理关联模型

@@ -2,8 +2,8 @@
  /************************************************************
 *Create: UUQ(Huang Ziquan)
 *Date:   2006-11-13
-*Í¼Ïñ´¦ÀíºÍÉú³ÉË®Ó¡µÈ
-* upload(); 1.ÎªÖ¸¶¨´óĞ¡;2ÎªÉú³É²»´óÓÚ,ÓĞÒ»±ßµÈÓÚ£¬75*75Ğ¡Í¼. Ä¬ÈÏÎª×Ô¶¯´óĞ¡ 3ÎªÉú³É¹Ì¶¨´óĞ¡
+*å›¾åƒå¤„ç†å’Œç”Ÿæˆæ°´å°ç­‰
+* upload(); 1.ä¸ºæŒ‡å®šå¤§å°;2ä¸ºç”Ÿæˆä¸å¤§äº,æœ‰ä¸€è¾¹ç­‰äºï¼Œ75*75å°å›¾. é»˜è®¤ä¸ºè‡ªåŠ¨å¤§å° 3ä¸ºç”Ÿæˆå›ºå®šå¤§å°
 	$img=C("img");
 	$img->setInfo(
 		  array("files"=>"upload",
@@ -19,42 +19,42 @@
 	      )->setBasename($_FILES['upload']['name'],true)->init();
 	if($img->upload(1))
 	{
-	  echo("ÉÏ´«³É¹¦");
+	  echo("ä¸Šä¼ æˆåŠŸ");
 	}else{
-	  echo("ÉÏ´«Ê§°Ü");
+	  echo("ä¸Šä¼ å¤±è´¥");
 	  echo $img->message;
 	}
-	'fill_size' Ìá¶¨ÎªĞ¡Í¼´óĞ¡
-	size_ico    Ìá¹©Ö¸¶¨´óĞ¡
-	auto_ico    ×Ô¶¯Ëõ·Å²»´óÓÚico
-	fix_ico     Ìá¶¨´óĞ¡
-	fix_side    ¹Ì¶¨Ò»±ßµ½nzsize´óĞ¡
+	'fill_size' æå®šä¸ºå°å›¾å¤§å°
+	size_ico    æä¾›æŒ‡å®šå¤§å°
+	auto_ico    è‡ªåŠ¨ç¼©æ”¾ä¸å¤§äºico
+	fix_ico     æå®šå¤§å°
+	fix_side    å›ºå®šä¸€è¾¹åˆ°nzsizeå¤§å°
 
 ************************************************************/
 class img {
-    var $upfile;   //ÉÏ´«ÎÄ¼şÃû×Ö
-	var $icopic;   //Ëõ·Å³ÉĞ¡Í¼Æ¬µÄÃû×Ö;
-	var $imgpic;   //´óÍ¼Ãû×Ö
-	var $uploadpath;   //ÉÏ´«Í¼Æ¬´æ·ÅµÄÂ·¾¶
-	var $basename; //»ù±¾Ãû×Ö²»°üÀ¨»¤Õ¹Ãû
-	var $extfile;  //À©Õ¹Ãû
-    var $isup;     //ÊÇ·ñÉÏ´«³É¹¦
+    var $upfile;   //ä¸Šä¼ æ–‡ä»¶åå­—
+	var $icopic;   //ç¼©æ”¾æˆå°å›¾ç‰‡çš„åå­—;
+	var $imgpic;   //å¤§å›¾åå­—
+	var $uploadpath;   //ä¸Šä¼ å›¾ç‰‡å­˜æ”¾çš„è·¯å¾„
+	var $basename; //åŸºæœ¬åå­—ä¸åŒ…æ‹¬æŠ¤å±•å
+	var $extfile;  //æ‰©å±•å
+    var $isup;     //æ˜¯å¦ä¸Šä¼ æˆåŠŸ
 	var $uploadsize;
 	var $icowidth;
 	var $icoheight; //
 	var $imgwidth;
 	var $imgheight; //
-	var $shuiyin;  //Ë®Ó¡
-	var $im;      //Ô­Í¼im
-	var $newim;   //ÁÙÊ±im
-	var $type;    //mimeÀàĞÍ 
-	var $attr;    //Ö±½ÓÏÔÊ¾¸ßºÍ¿í
+	var $shuiyin;  //æ°´å°
+	var $im;      //åŸå›¾im
+	var $newim;   //ä¸´æ—¶im
+	var $type;    //mimeç±»å‹ 
+	var $attr;    //ç›´æ¥æ˜¾ç¤ºé«˜å’Œå®½
 	var $info=array();
 	function __construct()
 	{
 	  $this->isup=false;
 	  $this->shuiyin=false;
-	  $this->icopath=''; //Ğ¡Í¼±£´æÂ·¾¶
+	  $this->icopath=''; //å°å›¾ä¿å­˜è·¯å¾„
 	}
 	function setFiles($upfile){
 		$this->info['name']=$this->safeName($_FILES[$upfile]['name']);
@@ -65,15 +65,15 @@ class img {
 		Return $this;
 	}
 	/*
-	*ÉèÖÃÍ¼Æ¬ÉÏ´«ĞÅÏ¢
-	*icowidth Ğ¡Í¼ĞÅÏ¢
+	*è®¾ç½®å›¾ç‰‡ä¸Šä¼ ä¿¡æ¯
+	*icowidth å°å›¾ä¿¡æ¯
 	*icoheight 
 
-	*fangpath ·½ĞÎÍ¼ĞÅÏ¢
+	*fangpath æ–¹å½¢å›¾ä¿¡æ¯
 	*fangsize  
 
-	*uploadpath ÉÏ´«Ä¿Â¼
-	*files       ÉÏ´«inputÃû
+	*uploadpath ä¸Šä¼ ç›®å½•
+	*files       ä¸Šä¼ inputå
 	*/
 	function setInfo($info=array()) {
 	  if(isset($info['uploadpath']))
@@ -111,7 +111,7 @@ class img {
 	  Return $this;
 	}
 	/*
-	*ÎÄ¼şÃû¹ıÂË£¬°ÑÖĞÎÄ×ªÎªÆ´ÒôÉ¾³ı·Ç·¨×Ö·û
+	*æ–‡ä»¶åè¿‡æ»¤ï¼ŒæŠŠä¸­æ–‡è½¬ä¸ºæ‹¼éŸ³åˆ é™¤éæ³•å­—ç¬¦
 	*/
   static public function safeName($filename) {         
 		$filename=C("zh2pinyin")->T($filename,true);
@@ -119,7 +119,7 @@ class img {
 	  Return $filename;
 	}
 	/*
-	*ÉèÖÃÉú³ÉËõÂÔÍ¼´óĞ¡
+	*è®¾ç½®ç”Ÿæˆç¼©ç•¥å›¾å¤§å°
 	*/
 	function setIco($width,$height) {
 	   $this->icowidth=$width;
@@ -127,7 +127,7 @@ class img {
 	   Return $this;
 	}
 	/*
-	*ÉèÖÃÉú³ÉË®Ó¡
+	*è®¾ç½®ç”Ÿæˆæ°´å°
 	*/
 	function setWater($mask=false) {
 		$this->shuiyin=$mask;
@@ -150,7 +150,7 @@ class img {
 	  Return $this;
 	}
 	/*
-	*Éú³É¹Ì¶¨Á½±ß´óĞ¡µÄĞ¡Í¼
+	*ç”Ÿæˆå›ºå®šä¸¤è¾¹å¤§å°çš„å°å›¾
 	*/
 	function setImgfang($size=75) {
 		$this->fangsize=$size;
@@ -184,7 +184,7 @@ class img {
 		 $this->basename=date("Ymdhis").rand(10,99);
 		 $this->icopic=$this->basename."_ico";
 	    }
-			 //Éè¶¨ÀàĞÍ
+			 //è®¾å®šç±»å‹
        switch($this->info['type'])
 	   {
 	     case 'image/gif':
@@ -214,14 +214,14 @@ class img {
 	}
 	/*
 	*
-	*ÉÏ´«ÓĞ¼¸ÖÖĞÎÊ½
-	* 1 ÊÇ¹Ì¶¨Ò»±ß
-	* 2 È«²¿¹Ì¶¨Ğ¡Í¼
-	* 3 Éú³É¹Ì¶¨´óĞ¡ËõÍ¼µÄ³ÌĞò;
-	* 4 ¸ù¾İ±ÈÀıÉú³ÉÍ¼Æ¬´óĞ¡;
-	* ´óÓÚ5 ÊÇ²»Éú³ÉËõÂÔÍ¼
-	* È±Ê¡ÊÇ×Ô¶¯´óĞ¡£¬²»´óÓÚĞ¡Í¼´óĞ¡
-	* Èç¹ûÖ¸¶¨ÁËÎÄ¼şÃû£¬½«»áÌæ»»µôÔ­À´µÄÎÄ¼ş
+	*ä¸Šä¼ æœ‰å‡ ç§å½¢å¼
+	* 1 æ˜¯å›ºå®šä¸€è¾¹
+	* 2 å…¨éƒ¨å›ºå®šå°å›¾
+	* 3 ç”Ÿæˆå›ºå®šå¤§å°ç¼©å›¾çš„ç¨‹åº;
+	* 4 æ ¹æ®æ¯”ä¾‹ç”Ÿæˆå›¾ç‰‡å¤§å°;
+	* å¤§äº5 æ˜¯ä¸ç”Ÿæˆç¼©ç•¥å›¾
+	* ç¼ºçœæ˜¯è‡ªåŠ¨å¤§å°ï¼Œä¸å¤§äºå°å›¾å¤§å°
+	* å¦‚æœæŒ‡å®šäº†æ–‡ä»¶åï¼Œå°†ä¼šæ›¿æ¢æ‰åŸæ¥çš„æ–‡ä»¶
 	*/
 	function upload($up=array(),$updatename="") {
 	  if(!$this->isup)
@@ -261,13 +261,13 @@ class img {
 					$this->im = imagecreatefrompng($this->imgpic); 
 					break;
 			  }
-			//Èç¹ûÉèÖÃÁËË®Ó¡£¬ÄÇÃ´ËõĞ¡ºÍ·Å´ó¶¼ÓĞË®Ó¡
+			//å¦‚æœè®¾ç½®äº†æ°´å°ï¼Œé‚£ä¹ˆç¼©å°å’Œæ”¾å¤§éƒ½æœ‰æ°´å°
 			if(isset($up['water'])) $this->shuiyin=true;
 			foreach($up as $cutimg)
 		    {			
 				switch($cutimg)
 				{
-				  case 'fix_side': //¹Ì¶¨Ò»±ß´óĞ¡
+				  case 'fix_side': //å›ºå®šä¸€è¾¹å¤§å°
 					$this->Resizenumm();					
 					break;
 				  case 'size_ico':
@@ -285,7 +285,7 @@ class img {
 				 }
 			}
 			/*
-			*Éú³ÉËõĞ¡75*75Í¼
+			*ç”Ÿæˆç¼©å°75*75å›¾
 			*/
 			if(!empty($this->fangsize))
 		    {
@@ -303,7 +303,7 @@ class img {
        Return $this->isup;
 	}
 	/*
-	×Ô¶¯Ëõ·ÅÍ¼Æ¬´óĞ¡
+	è‡ªåŠ¨ç¼©æ”¾å›¾ç‰‡å¤§å°
 	*/
 function ResizeImage(){ 
         if(($this->icowidth && $this->imgwidth > $this->icowidth) || ($this->icoheight && $this->imgheight >$this->icoheight)){ 
@@ -334,7 +334,7 @@ function ResizeImage(){
      } 
     $newwidth = $this->imgwidth * $ratio; 
     $newheight = $this->imgheight * $ratio; 
-	 $newim = imagecreatetruecolor($newwidth, $newheight); //Éú³ÉÕæ²ÊÉ«Í¼Æ¬
+	 $newim = imagecreatetruecolor($newwidth, $newheight); //ç”ŸæˆçœŸå½©è‰²å›¾ç‰‡
 	 imagecopyresampled($newim, $this->im, 0, 0, 0, 0, $newwidth, $newheight, $this->imgwidth,$this->imgheight); 
 	 if($this->shuiyin) $this->shuiyin();
 	 ImageJpeg ($newim,$this->uploadpath.$this->icopic.".jpg",100); 
@@ -344,9 +344,9 @@ function ResizeImage(){
 	} 
 } 
 /*
-* Éú³É640*640 75*75 
+* ç”Ÿæˆ640*640 75*75 
 *
-*Éú³ÉËõ·Åµ½¹Ì¶¨Ò»±ß´ó²»
+*ç”Ÿæˆç¼©æ”¾åˆ°å›ºå®šä¸€è¾¹å¤§ä¸
 */
  function Resizenumm()
  {
@@ -367,7 +367,7 @@ function ResizeImage(){
  }
  /*
  *
- * Éú³É¹Ì¶¨´óĞ¡µÄÍ¼Æ¬
+ * ç”Ÿæˆå›ºå®šå¤§å°çš„å›¾ç‰‡
  *
  */
 function Resizeauto() {
@@ -402,11 +402,11 @@ function Resizeauto() {
 
 	/**
 	*
-	*Ë®Ó¡£¬×îºÃÓÃpng¸ñÊ½£¬¿ÉÒÔÍ¸Ã÷
+	*æ°´å°ï¼Œæœ€å¥½ç”¨pngæ ¼å¼ï¼Œå¯ä»¥é€æ˜
 	*
-	*$this->shuiyinPngurl ¿ÉÒÔÔÚºó¾ÖÉèÖÃÖĞÉèÖÃ
-	*C("waterimg")ÊÇË®Ó¡Àà;
-	* Ã»ÓĞÉèÖÃË®Ó¡ÔÚÄÇÀï£¬ÏÖÔÚ±£ÉèÖÃÔÚÓÒÏÂ½Ç
+	*$this->shuiyinPngurl å¯ä»¥åœ¨åå±€è®¾ç½®ä¸­è®¾ç½®
+	*C("waterimg")æ˜¯æ°´å°ç±»;
+	* æ²¡æœ‰è®¾ç½®æ°´å°åœ¨é‚£é‡Œï¼Œç°åœ¨ä¿è®¾ç½®åœ¨å³ä¸‹è§’
 	*/
 	function shuiyin() { 	
 			$simage1 =imagecreatefrompng(C("waterimg")->getWaterFile());
@@ -424,7 +424,7 @@ function Resizeauto() {
 			imagedestroy($simage1);
 	 }
 /*
-* Éú³É640*640 75*75 
+* ç”Ÿæˆ640*640 75*75 
 *
 */
  function Resizecut($unim=true){
@@ -437,8 +437,8 @@ function Resizeauto() {
 	}
   } 
 /*
-* Éú³É75*75µÄÕı·½ĞÎĞ¡Í¼ 
-*°Ñ´óÓÚ75µÄÍ¼ĞÎ´ÓÖĞ¼äÇĞ³É75*75´óĞ¡
+* ç”Ÿæˆ75*75çš„æ­£æ–¹å½¢å°å›¾ 
+*æŠŠå¤§äº75çš„å›¾å½¢ä»ä¸­é—´åˆ‡æˆ75*75å¤§å°
 */
  function Resizefang($size=75){
   if($this->imgwidth>=$this->imgheight)
@@ -503,7 +503,7 @@ function Resizeauto() {
 	ImageDestroy($newim); 
  }
 /*
-*Éú³É¹Ì¶¨´óĞ¡ËõÍ¼µÄ³ÌĞò;
+*ç”Ÿæˆå›ºå®šå¤§å°ç¼©å›¾çš„ç¨‹åº;
 */ 
  function ResizeIco($x=121,$y=97){
   if($x!=121)
