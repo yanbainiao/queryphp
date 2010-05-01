@@ -17,7 +17,8 @@ $time_start = microtime_float();
 $projectenv="product";
 $config["webprojectpath"]=dirname(__FILE__)."/";
 $config["webprojectname"]=strlen($_SERVER['SCRIPT_FILENAME'])."projectname"; //根据项目来缓存,所以最好一个网站不要一样
-include("../framework/framework.php");
+$config["projecturl"]=dirname($_SERVER["SCRIPT_NAME"])."/";
+include("../../framework/framework.php");
 
 
 /////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@ class acl {
   *权限检查，测试
   *
   */
-  public function aclCheck($router,$action) {
+  public function aclCheck($router,$action='') {
 	 if(!isset($this->acl[$action])){ //如果没有定义方法权限值
        if($this->acl['all']!=0)     //使用方all值
 	   {
@@ -31,7 +31,7 @@ class acl {
 	 if($this->acl[$action]==0){
 		 Return true; //如果设置了$action方法为0说明不用保护，就算all为512也不用保护 
   	 }
-     	if(in_array($this->aclid[$action],MY()->acl))
+     	if(isset($this->aclid[$action])&&in_array($this->aclid[$action],MY()->acl))
 		 {
 		   $this->error=L(" 你没有权限 ");
 		   if(empty($this->error_method)){

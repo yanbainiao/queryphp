@@ -18,7 +18,7 @@ class pager
     }
    public function setPager($total='1', $onepage='1', $pagenumer = '') {
 	    $this->pagesplit=$pagenumer?$pagenumer:'page';
-        $page             = $_GET[$this->pagesplit];
+        $page             = isset($_GET[$this->pagesplit])?$_GET[$this->pagesplit]:1;
         $this->total      = $total;
         $this->onepage    = $onepage;
         $this->total_page =  ceil($total/$onepage);

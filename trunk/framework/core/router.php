@@ -68,6 +68,7 @@ class Router {
   {
 	 $paths = explode("/",trim($_SERVER['PATH_INFO'],'/'));
      $controller=array_shift($paths);
+     $rule=array();
      if(!empty($controller)){		 
 	   $this->urlcontroller=false;
 	   $rule=$this->RuleCheck($controller);	   
@@ -110,7 +111,7 @@ class Router {
 		     if($this->action==null) $this->action=empty($paths)?$GLOBALS['config']['defaultindex']:array_shift($paths);
 		 }
 	 }
-	 if(is_numeric($paths[0])) { $this->id=array_shift($paths); $_GET['id']=$this->id; }
+	 if(isset($paths[0])&&is_numeric($paths[0])) { $this->id=array_shift($paths); $_GET['id']=$this->id; }
 	for($i=0;$i<count($paths);$i++)
 		 $_GET[$paths[$i]]=$paths[++$i];
 	return $this;
@@ -185,13 +186,14 @@ class Router {
   }
   private function getPathInfo()
   {
+	    $path='';
         if(!empty($_SERVER['PATH_INFO'])){
             $pathInfo = $_SERVER['PATH_INFO'];
             if(0 === strpos($pathInfo,$_SERVER['SCRIPT_NAME']))
                 $path = substr($pathInfo, strlen($_SERVER['SCRIPT_NAME']));
             else{
                 $path = $pathInfo;
-			    if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME'])))
+			    if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos(isset($_SERVER["REDIRECT_URL"])?$_SERVER["REDIRECT_URL"]:'',dirname($_SERVER['SCRIPT_NAME'])))
 				{
 				 $path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));                
 				}
@@ -236,7 +238,7 @@ class Router {
                 }
                 reset($_SERVER);
             }
-			if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME'])))
+			if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME']))&&dirname($_SERVER['SCRIPT_NAME'])!='/')
 			{
 			$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
 			}

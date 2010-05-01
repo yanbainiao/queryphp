@@ -20,7 +20,7 @@
 
 		public function __construct() {
 			session_start();
-			if($_SESSION['logined']==true)
+			if(isset($_SESSION['logined'])&&$_SESSION['logined']==true)
 			{
 			  $this->options['logined']=true;
 			  $this->uid=$_SESSION['uid'];

@@ -61,7 +61,7 @@ class controller{
 	  $htmlpath=$GLOBALS['config']["webprojectpath"].$this->htmlpath;
 	  $htmlpath=str_replace("//","/",$htmlpath);
       //看看有没有设置缓存类，没有就不生成，只做html结尾模拟
-	  if(class_exists($GLOBALS['config']['htmlcache']['class']))
+	  if(isset($GLOBALS['config']['htmlcache']['class'])&&class_exists($GLOBALS['config']['htmlcache']['class']))
 	  {
 	    call_user_func(array(C($GLOBALS['config']['htmlcache']['class']),$GLOBALS['config']['htmlcache']['method']),$content,$htmlpath);
 	  }

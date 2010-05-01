@@ -206,7 +206,7 @@ class Model
 	}
 	if(!is_numeric($arg_list[$i]))
 	{
-	  if($arg_list[$i]!='')
+	  if(isset($arg_list[$i]))
 	  {
 		  $fields=$arg_list[$i];
 		  $i=1;
@@ -216,7 +216,7 @@ class Model
 		$t=strtoupper($arg_list[$i]);
 	   if($t=="DESC"||$t=="ASC")
 		{
-		  	if($this->sql['orderby']=='')
+		  	if(empty($this->sql['orderby']))
 		    $this->sql['orderby']=" order by ".$this->PRI." ".$t;
 		}else if($t=="FETCH_OBJ"){
 		  $returnobj=PDO::FETCH_OBJ;
@@ -229,11 +229,11 @@ class Model
 		$pkey=1;
 	$pkey=$this->PRI." IN (".$pkey.")";
 
-    if($this->sql['fields']!='')
+    if(isset($this->sql['fields']))
 	{
 	  $fields=$this->sql['fields'];
 	}
-    if($order=='') $order=$this->sql['orderby'];
+    if(empty($order)) $order=isset($this->sql['orderby'])?$this->sql['orderby']:null;
     $this->string="select ".$fields." from ".$this->tablename." where ".$pkey.$order;	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
@@ -262,7 +262,7 @@ class Model
 		$t=strtoupper($arg_list[$i]);
 	   if($t=="DESC"||$t=="ASC")
 		{
-		  if($this->sql['orderby']=='')
+		  if(empty($this->sql['orderby']))
 		    $this->sql['orderby']=" order by ".$this->PRI." ".$t;
 		}else if($t=="FETCH_OBJ"){
 		  $returnobj=PDO::FETCH_OBJ;
@@ -272,11 +272,19 @@ class Model
 		 $fields=$arg_list[$i];
 	 }
 
-   if($this->sql['where']=='')
+   if(empty($this->sql['where']))
 		$this->sql['where']=" where 1 ";
-    if($this->sql['fields']!='')
+    if(isset($this->sql['fields']))
 	{
 	  $fields=$this->sql['fields'];
+	}
+    if(!isset($this->sql['groupby']))
+	{
+	  $this->sql['groupby']='';
+	}
+    if(!isset($this->sql['orderby']))
+	{
+	  $this->sql['orderby']='';
 	}
     $this->string="select ".$fields." from ".$this->tablename." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
@@ -434,7 +442,7 @@ public  function newRecord($data=array())
 		  { 
 		     $this->setData($arglist[1]);
 		  }
-	   }elseif($arglist[1]==''){ //从data中取值
+	   }elseif(!isset($arglist[1])){ //从data中取值
 	      $sql="";
 		  foreach($filedarray as $value)
 		  {
@@ -443,7 +451,7 @@ public  function newRecord($data=array())
 		  if($sql!='')
 		   {
 	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
-			if($this->sql['where']=='')
+			if(empty($this->sql['where']))
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
 			}
@@ -461,7 +469,7 @@ public  function newRecord($data=array())
 		  if($sql!='')
 		   {
 	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
-			if($this->sql['where']=='')
+			if(empty($this->sql['where']))
 		    {
 			   if(isset($arglist[0][$this->PRI]))
 			   {
@@ -510,7 +518,7 @@ public  function newRecord($data=array())
 		if($mapper=='')		
 		{
           $arrays=get_object_vars($arglist[0]);
-	      $sql="";
+	      $sql='';
 		  foreach($arrays as $key=>$value)
 		  {
 			$sql.=$key."='".$value."',";
@@ -518,7 +526,7 @@ public  function newRecord($data=array())
 		  if($sql!='')
 		   {
 	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
-			if($this->sql['where']=='')
+			if(empty($this->sql['where']))
 		    {
 			   if(isset($arrays[$this->PRI]))
 			   {
@@ -752,7 +760,7 @@ public  function newRecord($data=array())
 		  }
 		  $i++;
 		}
-		if($this->sql['where']!='')
+		if(isset($this->sql['where']))
 		 {
 		   $pkey.=" and ".substr($this->sql['where'],6,-1);
 		 }
@@ -821,8 +829,8 @@ public  function newRecord($data=array())
   */
   function select($name)
   {
-    if($this->sql['fields']=='') $this->sql['fields'].=$name;
-	else $this->sql['fields'].=",".$name;
+    if(isset($this->sql['fields'])) $this->sql['fields'].=",".$name;
+	else $this->sql['fields']=$name;
 	return $this;
   }
   /*
@@ -870,7 +878,7 @@ public  function newRecord($data=array())
 	  $this->sql["fix".$this->modelname.'.']=$this->modelname.".";
 	  $this->sql["fix".M($name)->modelname."."]=M($name)->modelname.".";
 	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
-	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
+	  if(isset($this->sql['joinmodel'])) $this->sql['joinmodel'].="|";
 	  $this->sql['joinmodel']=M($name)->modelname.".";
      $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname." LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
 	}
@@ -964,7 +972,7 @@ public  function newRecord($data=array())
   function where($name,$value='')
   {
 
-    if($this->sql['where']=='') $this->sql['where']=" where ";
+    if(empty($this->sql['where'])) $this->sql['where']=" where ";
 	else $this->sql['where'].=" and ";
 
 	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
@@ -973,7 +981,7 @@ public  function newRecord($data=array())
   }
   function whereIn($name,$value)
   {
-	if($this->sql['where']=='')
+	if(empty($this->sql['where']))
      $this->sql['where']=" where ".$this->getFixSQL($name).$name." IN (".$value.")";
 	else
 	 $this->sql['where'].=" and ".$this->getFixSQL($name).$name." IN (".$value.")";
@@ -981,7 +989,7 @@ public  function newRecord($data=array())
   }
   function whereLike($name,$value)
   {
-	if($this->sql['where']=='')
+	if(empty($this->sql['where']))
      $this->sql['where']=" where ".$this->getFixSQL($name).$name." like '".$value."'";
 	else
 	 $this->sql['where'].=" and ".$this->getFixSQL($name).$name." like '".$value."'";
@@ -989,7 +997,7 @@ public  function newRecord($data=array())
   }
   function whereOr($name,$value='')
   {
-    if($this->sql['where']=='') $this->sql['where']=" where ";
+    if(empty($this->sql['where'])) $this->sql['where']=" where ";
 	else $this->sql['where'].=" OR ";
 	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
 	else $this->sql['where'].=$name;
@@ -997,7 +1005,7 @@ public  function newRecord($data=array())
   }
   function whereAnd($name,$value='')
   {
-    if($this->sql['where']=='') $this->sql['where']=" where ";
+    if(empty($this->sql['where'])) $this->sql['where']=" where ";
 	else $this->sql['where'].=" and ";
 
 	if($value!='') $this->sql['where'].=$this->getFixSQL($name).$name."='".$value."'";
@@ -1017,7 +1025,7 @@ public  function newRecord($data=array())
   {
     if($modelname=='') $modelname=$this->modelname;
 	$fix='';
-	if($this->sql['isjoinleft'])
+	if(isset($this->sql['isjoinleft']))
 	{
 	   $fix=$this->sql["fix".$modelname.'.'];	
 	   if(preg_match ("/".str_replace(".","\.",$fix)."/i",$fields))
@@ -1049,16 +1057,32 @@ public  function newRecord($data=array())
 	}
   }
   /*
+  *查询前处理sql语句
+  */
+  function preSQL() {
+	if(empty($this->sql['from']))
+	{
+	  $this->sql['from']=$this->tablename;
+	}
+	if(!isset($this->sql['where'])) $this->sql['where']=' where 1 ';
+	if(!isset($this->sql['groupby'])) $this->sql['groupby']='';
+	if(!isset($this->sql['orderby'])) $this->sql['orderby']='';  	 
+  }
+  /*
   *取得表的行数，在做列表分页时候经常用到
   *
   */
   function count()
   {
     $pfields=$this->tablename.".*";
-	if($this->sql['from']=='')
+	if(empty($this->sql['from']))
 	{
 	  $this->sql['from']=$this->tablename;
 	}
+	if(!isset($this->sql['where'])) $this->sql['where']=' where 1 ';
+	if(!isset($this->sql['groupby'])) $this->sql['groupby']='';
+	if(!isset($this->sql['orderby'])) $this->sql['orderby']='';
+
 	if(isset($this->types[$this->PRI])) $pfields=$this->tablename.".".$this->PRI;
     $this->string="select count(".$pfields.") as totalnum from ".$this->sql['from']." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
@@ -1201,7 +1225,7 @@ public  function newRecord($data=array())
 	}elseif(is_array($id)){
 	   $this->whereIn($this->PRI,implode(",",$id));	
 	}else{
-	  if($this->sql['where']=='')
+	  if(empty($this->sql['where']))
 	  {
 		$this->where($this->PRI."='".$this->data[$this->PRI]."'");
 	  }
@@ -1281,7 +1305,7 @@ public  function newRecord($data=array())
   */
  public function edit($id=null)
   {
-	if($this->recordend==true){
+	if(isset($this->recordend)&&$this->recordend==true){
 	  $this->data=array();
 	  return $this;
 	}
@@ -1337,20 +1361,23 @@ public  function newRecord($data=array())
   }
  public function fetch($fetchobj='')
   {
-	if($this->sql['fields']!='')
+	if(isset($this->sql['fields']))
 	{
 	  $pfields=$this->sql['fields'];
 	}else{
 	  $pfields="*";
 	}
-	if($this->sql['from']=='')
+	if(empty($this->sql['from']))
 	{
 	  $this->sql['from']=$this->tablename;
 	}
-	if($this->sql['where']=='')
+	if(empty($this->sql['where']))
 	{
       $this->where("1");
 	}
+	if(!isset($this->sql['orderby'])) $this->sql['orderby']='';
+	if(!isset($this->sql['groupby'])) $this->sql['groupby']='';
+	if(!isset($this->sql['limit'])) $this->sql['limit']='';
     $this->string="select ".$pfields." from ".$this->sql['from']." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'].$this->sql['limit'];	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
@@ -1371,7 +1398,10 @@ public  function newRecord($data=array())
 		}else{		    
 		  $this->record=$res->fetchAll($f); 
 		  $this->objpoint=0;
-		  $this->data=$this->record[0];
+		  if(isset($this->record[0]))
+		   $this->data=$this->record[0];
+		  else
+		   $this->data=array();
 		}		
 		return $this;
 	}catch (PDOException $e) 
