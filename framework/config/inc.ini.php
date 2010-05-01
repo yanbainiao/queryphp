@@ -11,7 +11,16 @@ $config['pdoconn']=array(
 			                 "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
 							 "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
 			 ),
-  '^web_'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+ 'user'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+								   "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
+             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+			                 "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
+			 ),
+'supperadmin'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+								   "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
+             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+			                 "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
+			 ),			 '^web_'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
 								   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
 								   "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
 								   "3"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),

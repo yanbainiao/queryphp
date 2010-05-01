@@ -66,6 +66,7 @@ $books->get(911)->edit();
 $info=M("info")->limit(1)->get(1)->edit(); 
 //取得info一行记录并设置编辑状态 
 //我们先看看已有对象数据
+
 print_r($books->getData());
 print_r($info->getData());
 //$ss=$supply->Books($books)->Infos($info)->fetch(); 

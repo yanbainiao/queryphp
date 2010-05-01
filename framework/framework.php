@@ -64,6 +64,7 @@ $router=R($dispaths->controller);
 if (method_exists($router,$dispaths->action)) {
     //权限检查
 	$ispass=false;	
+	$viewmodel='';
     if(method_exists($router,"isAcl"))
     {
 	   $mask=$router->isAcl();

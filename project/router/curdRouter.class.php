@@ -9,7 +9,7 @@ class curdRouter extends controller{
 	   $booktype=M("booktype");
 	   $this->pager=C("pager");//取得分类
 	   $this->pager->setPager($booktype->count(),10,'page');//取得数据总数中，设置每页为10
-	   $this->assign("list",$booktype->orderby("bookid desc")->pager($_GET['page'],10)->fetch()->getRecord());
+	   $this->assign("list",$booktype->orderby("bookid desc")->pager(isset($_GET['page'])?$_GET['page']:1,10)->fetch()->getRecord());
 	}
 	public function create()
 	{

@@ -1,6 +1,17 @@
 <?php
 
-
+/***
+*前台URL函数
+*输出本项目URL地址，根据$_SERVER["SCRIPT_NAME"]去掉index.php或别的文件得出
+***/
+function PU($fix='/') {
+ Return url_project($fix);	
+}
+function url_project($fix='/') {
+  if(!isset($GLOBALS['__PROJECT__']))
+  $GLOBALS['__PROJECT__']=substr($_SERVER["SCRIPT_NAME"],0,strrpos($_SERVER["SCRIPT_NAME"],"/"));
+  Return $GLOBALS['__PROJECT__'].$fix;	
+}
 /*
 *用户对像返回函数
 */
@@ -147,6 +158,7 @@ function pdoconnects($dsn,$connmodel)
 function getConnect($table,$model=null,$connper=0)
 {
 	 $tconn=array();
+	 if(!isset($GLOBALS['pdolinks'])) $GLOBALS['pdolinks']=array();
 	 if(is_array($GLOBALS['config']['pdoconn']))
 	 {
         foreach($GLOBALS['config']['pdoconn'] as $k=>$v)
@@ -179,7 +191,7 @@ function getConnect($table,$model=null,$connper=0)
 		$prand=rand(0,count($GLOBALS['config']['pdoconn']['default']["master"])-1);
 	    $connmodel=md5(json_encode($GLOBALS['config']['pdoconn']['default']["master"][$prand]));
 		$table_fix=$GLOBALS['config']['pdoconn']['default']["master"][$prand]['table_fix'];
-		 if($GLOBALS['pdolinks'][$connmodel]!='')
+		 if(isset($GLOBALS['pdolinks'][$connmodel]))
 		 {
 			$tconn['master']=$GLOBALS['pdolinks'][$connmodel];
 		 }else{
@@ -187,7 +199,7 @@ function getConnect($table,$model=null,$connper=0)
 		 }
         $prand=rand(0,count($GLOBALS['config']['pdoconn']['default']["slaves"])-1);
 		$connmodel=md5(json_encode($GLOBALS['config']['pdoconn']['default']["slaves"][$prand]));
-		 if($GLOBALS['pdolinks'][$connmodel]!='')
+		 if(isset($GLOBALS['pdolinks'][$connmodel]))
 		   $tconn['slaves']=$GLOBALS['pdolinks'][$connmodel];
 		 else
 		 {
@@ -216,7 +228,7 @@ function P($name)
 */
 function I($name)
 {
-  return $GLOBALS['config'][$name];
+  return isset($GLOBALS['config'][$name])?$GLOBALS['config'][$name]:null;
 }
 //J路由跳转
 function J()
