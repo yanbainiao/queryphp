@@ -16,13 +16,13 @@
 class guestbookACL extends acl {
 	public $routername="guestbook";
 	public $aclid=array("all"=>2,"index"=>3);   //权限资源ID,如果登录人员没有拥用这个权限那么其（下面）它值都为0也不能访问方法数组ID rbacid
-	public $roledisable=array(9); //禁用身份id
-	public $pwd=123456;           //密码访问 ACL->noPwd();
-	public $date=array('begin'=>0,'end'=>0);   //允许日期之间
-	public $hours=array('begin'=>0,'end'=>0);  //一日内小时区间
-	public $weeks=array('begin'=>0,'end'=>0);  //一周内周一到周七
-	public $aclgroup=array("create"=>"4,45,8"); //create需要的组才能创建
+	public $pwd=array("all"=>123456);           //密码访问 ACL->noPwd();
+	public $date=array("all"=>array('begin'=>0,'end'=>0),"index"=>array('begin'=>0,'end'=>0));   //允许日期之间
+	public $hours=array("all"=>array('begin'=>0,'end'=>0),"index"=>array('begin'=>0,'end'=>0)); ;  //一日内小时区间
+	public $weeks=array("all"=>array('begin'=>0,'end'=>0),"index"=>array('begin'=>0,'end'=>0)); ;  //一周内周一到周七
+	public $aclgroup=array("create"=>"4,45,8","index"=>"6,9"); //create需要的组才能创建
 	public $aclrole=array("all"=>"6","create"=>"7,95,78"); //create需要的角色才能创建,该组需要ID为6的角色才能访问
+	public $roledisable=array("all"=>array(9),"index"=>array(6)); //禁用身份id
 	public $acl=array("all"=>0,
 		              "index"=>0,    //表列0表示任何人可以访问
 		              "add"=>0,   //删除只登录后删除,当然呆以设置为2或4

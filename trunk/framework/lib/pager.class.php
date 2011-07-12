@@ -110,6 +110,14 @@ class pager
 	   $links[L('最后一页')]=sprintf($this->linkhead,$this->total_page);
 	   Return $links;
    }
+   //返回数字json数组
+  public function arraynum() {
+  	 Return array("total"=>$this->total_page,
+							  "prepage"=>$this->prePage(),
+							  "nextpage"=>$this->nextPage(),
+							  "links"=>$this->getLinks(),
+							  "page"=>$this->page);
+  }
    /*
    *取得整行分页html
    *返回html

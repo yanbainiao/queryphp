@@ -11,11 +11,11 @@
 				   'filepath'=>$filepath))->begin()->output();
 */
 class download {
-	public var $filename;
-	public var $mimetype; //文件编码
-	public var $length;   //文件长度可以使用filename得到
-	public var $browser;
-	public var $filepath;
+	public $filename;
+	public $mimetype; //文件编码
+	public $length;   //文件长度可以使用filename得到
+	public $browser;
+	public $filepath;
 	public function __constructs()
 	{
 	   $this->browser=$_SERVER["HTTP_USER_AGENT"];
@@ -59,11 +59,8 @@ class download {
 			{
 			 $this->length=$length;
 			}elseif($length!=''){
-			 $this->length=filesize($length."/".$file);
-			 $this->filepath=$length;
-			}else{
-			  $this->length=filesize($this->filepath."/".$this->filename); 
-			}
+			 $this->length=filesize($this->filepath."/".$this->filename);
+						}
 		}
 		Return $this;
 	}
@@ -83,18 +80,23 @@ class download {
 		$this->length=$length;
 		Return $this;
 	}
-	public function begin() {
-	    header('Content-Type: '.$mimetype.'; charset=utf-8');
-		$encoded_filename = urlencode($this->filename);
+	public function begin($name='') {
+		if($name=='')
+		{
+		  $name=$this->filename;
+		}
+	    header('Content-Type: '.$this->mimetype.';charset=utf-8');
+		$encoded_filename = rawurlencode($name);
 		$encoded_filename = str_replace("+", "%20", $encoded_filename);
 		if (preg_match("/MSIE/",$this->browser)) {
-			header('Content-Disposition: attachment; filename="' . $encoded_filename . '"');
+			header('Content-Disposition: attachment; filename="' . $encoded_filename. '"');
 		} else if (preg_match("/Firefox/",$this->browser)) {
-			header('Content-Disposition: attachment; filename*="utf8\'\'' . $filename . '"');
+			header('Content-Disposition: attachment; filename*="utf8\'\'' . $name . '"');
 		} else {
-			header('Content-Disposition: attachment; filename="' . $filename . '"');
+			header('Content-Disposition: attachment; filename="' . $name. '"');
 		}
        header("Content-Length: ".$this->length);
+	   Return $this;
 	}
 	public function output($filename='') {
 		if($filename='')

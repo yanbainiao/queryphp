@@ -10,8 +10,18 @@ class controller{
   {
      $this->render=$view;
   }
+  /*
+  * 输出
+  * echo R("aaa")->fetch("router");
+  */
   function fetch($view)
   {
+	//返回本路由类和输出内容
+	if(method_exists($this,$view))
+	{
+	  $this->{$view}();
+	  $view=substr(get_class($this),0,-6)."/".$view;
+	}
     return C("view")->fetch($view);
   }
   function view($view='')

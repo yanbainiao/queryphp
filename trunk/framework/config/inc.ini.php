@@ -1,35 +1,18 @@
 <?php
-
 /*
 *pdo链接 多少自己填,主从可以一样
 * key 为正则表达式 ^web_开头的表，使用的链接
 */
 $config['pdoconn']=array(
-  'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
-             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-			                 "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-							 "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
+  'default'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=psysubject;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+								   "1"=>array("dsn"=>"mysql:dbname=psysubject;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
+             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=psysubject;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+			                 "1"=>array("dsn"=>"mysql:dbname=psysubject;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
 			 ),
- 'user'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
+'r'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
 								   "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
              "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
 			                 "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
-			 ),
-'supperadmin'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
-             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-			                 "1"=>array("dsn"=>"mysql:dbname=rbac;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
-			 ),			 '^web_'=>array("master"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "3"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "4"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "5"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-								   "6"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_")),
-             "slaves"=>array("0"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-			                 "1"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"),
-							 "2"=>array("dsn"=>"mysql:dbname=mallbook;host=localhost;port=3306","username"=>"admin","password"=>"123456","CHARACTER"=>"utf8","table_fix"=>"web_"))
 			 )
 );
 
@@ -61,12 +44,13 @@ $config['language']="zh-CN"; //项目语言可以是en
 //$config['frameworklib']=array("Smarty"=>$config["frameworkpath"]."lib/Smarty/Smarty.class.php",
 //                    "SendMail"=>$config["frameworkpath"]."lib/Mail/SendMail.php");//类所在的文件 这具配置可以另外放一个地方
 //配置路由规则login为路由模型 rule为规则 成功后target设置 conditions rule自定义规则对应为:id
-$config["routermaps"]['login']=array("rule"=>'/login/:id',
+/*$config["routermaps"]['login']=array("rule"=>'/login/:id',
 		                                    "target"=>array('controller' => 'auth', 'action' => 'login'),
 		                                    "conditions"=>array('id' => '[\d]{1,8}'));
 $config["routermaps"]['member']=array("rule"=>'/member/:id',
 		                                    "target"=>array('controller' => 'auth', 'action' => 'login'),
 		                                    "conditions"=>array('id' => '[\d]{1,8}'));
+											*/
 //每个project可以配置 内核加前文件precore.ini.php  内核加后文件 aftercore.ini.php 其中precore.ini.php文件是在inc.ini.php(也是本文件)后面加的，这样可以冲抵这个文件设置
 //
 ?>

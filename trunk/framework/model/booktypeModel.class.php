@@ -1,11 +1,18 @@
 <?php 
 class booktypeModel extends booktypeBase{ 
-  var $mapper=array("Supply"=>array("map"=>"hasMany","TargetModel"=>"supply","mapping"=>array("bookid"=>"bookid")),
-	                "Infos"=>array("map"=>"hasOne",
-	                               "TargetModel"=>"info",
-	                               "mapping"=>array("typeid"=>"typeid")));
- var $maps;
- var $maparray=array();
- 
+   public $modelname='booktype';
+  public $fix='';
+ public $mapper=array();
+ public $maps;
+ public $maparray=array();
+    var $valid=array('add'=>array(
+                                       'classname'=>array(
+
+                                                         'url'=>array('error'=>"url必需填写。")
+
+                                                         )
+
+                                             ));
+
 } 
 ?>

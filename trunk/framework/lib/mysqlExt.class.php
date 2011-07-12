@@ -14,7 +14,13 @@
 
     public function setDB($model,$tablename='') {
       if(empty($tablename)) $tablename=$model;
-	  $this->DB=getConnect($tablename,$model,0);
+	   if(strpos($model,'.'))
+	   {
+		 list($fix,$model)=explode(".",$model);
+	   }else{
+		  $fix=NULL;
+	   }
+	  $this->DB=getConnect($tablename,$model,$this->conn,$fix);
 	  return $this;
     }
 	public function setInfo($database,$username='',$pwd='') {        
@@ -81,6 +87,10 @@
        $this->tableinfo[$tabledst]=str_replace("CREATE TABLE `".$tablesrc."`","CREATE TABLE `".$tabledst."`",$this->tableinfo[$this->table]);
 	   $this->DB['master']->query($this->tableinfo[$tabledst]);
 	   Return $this;
+	}
+	public function fieldTarray()
+	{
+	   
 	}
  }
 ?>

@@ -20,18 +20,31 @@ class Model
    public $ismapper;
    public $isjoinleft;
    public $after;
+   public $effectrow;
    public $before;
-   public function __construct() {
-	   $this->modelname=substr(get_class($this),0,-5);
-	   $this->DB=getConnect($this->getTableName(),$this->modelname,$this->conn);	   
+   public function __construct($g=null) {
+	   $this->DB=getConnect($this->getTableName(),$this->getModelName(),$this->conn,$g);	   
 	   return $this;
+   }
+   //修正得到的model如果有fix时候M("c.cms");这样可以使用M($obj->getModel());
+   public function getModel() {
+		Return $this->fix.".".$this->modelname;
+   }
+   public function getModelName() {
+   		Return $this->modelname;
    }
   /*
   *手工切换数据库链接
   */
   public function switchDB($model)
   {
-	  $this->DB=getConnect($this->tablename,$model,$this->conn);
+   if(strpos($model,'.'))
+   {
+	 list($this->fix,$model)=explode(".",$model);
+   }else{
+      $this->fix=NULL;
+   }
+	  $this->DB=getConnect($this->getTableName(),$this->getModelName(),$this->conn,$this->fix);
 	  return $this;
   }
   /*
@@ -141,9 +154,9 @@ class Model
 
   public function __get($name)
   {
-    if(isset($this->data[strtolower($name)]))
+    if(isset($this->data[strtolower($name)])||isset($this->data[$name]))
 	{
-	  return $this->data[strtolower($name)];
+	  return isset($this->data[strtolower($name)])?$this->data[strtolower($name)]:$this->data[$name];
 	}elseif(isset($this->mapper[$name])){	  
 	  if(method_exists($this,$this->mapper[$name]['map'])) {
 		call_user_func(array($this,$this->mapper[$name]['map']),$name);
@@ -155,8 +168,10 @@ class Model
 	  {
 		$this->objpoint=0;
 	    $this->edit(0);
-        if(isset($this->data[strtolower($name)]))
-			return $this->data[strtolower($name)];
+		if(isset($this->data[strtolower($name)])||isset($this->data[$name]))
+			{
+			  return isset($this->data[strtolower($name)])?$this->data[strtolower($name)]:$this->data[$name];
+			}
 	  }
 	  return null;
 	}
@@ -177,11 +192,125 @@ class Model
 
  public function __isset($name)
   {
-    return isset($this->data[strtolower($name)]);
+    if(isset($this->data[strtolower($name)])){
+	 Return true;
+	}elseif(isset($this->data[$name])){
+	 Return true;
+	}else{
+	 Return false;
+	}
   }
   private function __unset($name)
   {
-    unset($this->data[strtolower($name)]);
+   if(isset($this->data[strtolower($name)])){
+	 unset($this->data[strtolower($name)]);
+	}else{
+	 unset($this->data[$name]);
+	}	
+  }
+  /*
+  * 提取数组列
+  * key 为操作值
+  * kk为处理键 如果为null是返回key这一列数据。
+  * 如getCols(array('name','agentid'),
+  *           array('uid','companyid'));
+  */
+  public function getCols($key,$kk=null) {
+  	if(count($this->record)>0)
+	{
+	  $c=array(); 
+	  if(is_array($kk)){
+		//返回$kk作为键值的数组
+ 		$key=array_combine($kk,$key); 
+		foreach($this->record as $v)
+		{
+			foreach($key as $k=>$val)
+			{
+			 if(isset($v[$k]))
+			 {
+				$c[$val][$v[$k]]=$v[$val];				
+			 }
+			}
+		}
+		Return $c;
+	  }elseif($kk==null) {
+        //返回无键数组
+		foreach($this->record as $v)
+		{
+			foreach($key as $k)
+			{
+			 if(isset($v[$k]))
+			 {
+				$c[$k][]=$v[$k];				
+			 }
+			}
+		}	
+		Return $c;	
+      }else{
+	    if($kk==true) $kk=",";
+        //返回无键数组
+		foreach($this->record as $v)
+		{
+			foreach($key as $k)
+			{
+			 if(isset($v[$k]))
+			 {
+				$c[$k].=$kk.$v[$k];				
+			 }
+			}
+		}	
+		if(is_array($c))
+		{
+		  //去掉第一个分隔符
+		  foreach($c as $k=>$v)
+		  {
+		    $c[$k]=substr($v,1);
+		  }
+		}
+		Return $c;	
+	  }
+	}
+	Return null;
+  }
+  /*
+  *取得数据结果一列
+  *$key要取回的字段key
+  *$p表示 true 为数组形式
+  *		  false 为字符组合 $kk为字符间隔
+  * $kk 表示 取得当前数组里面的值作为字段key 如果$p为false
+  * 表示是间隔
+  *$user->getCol('uid',false);array()
+  *->fetch()->getCol("uid"); "33,22"
+  *$user->getCol("isMar",true,'uid'); $col[$row['uid']]=$row['isMar'];
+  */
+  public function getCol($key,$p=true,$kk=null) {
+	if(count($this->record)>0)
+	{
+      if($p){
+		$c=array(); 
+	  }else {
+      	$c='';
+		if(!$kk) $kk=",";
+      }
+	  foreach($this->record as $v)
+	  {
+	    if(isset($v[$key]))
+		{
+			if($p){
+			  if($kk){
+			    $c[$v[$kk]]=$v[$key];
+			  }else{
+			    $c[]=$v[$key];
+			  }
+			}else {
+			  $c.=$kk.$v[$key];
+			}
+	    }
+	  }
+	  if(!$p) $c=substr($c,1);
+	  Return $c;
+	}
+	Return null;
   }
   /*
   * 到得一个ID record(一行)
@@ -234,7 +363,7 @@ class Model
 	  $fields=$this->sql['fields'];
 	}
     if(empty($order)) $order=isset($this->sql['orderby'])?$this->sql['orderby']:null;
-    $this->string="select ".$fields." from ".$this->tablename." where ".$pkey.$order;	
+    $this->string="select ".$fields." from `".$this->tablename."` where ".$pkey.$order;	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
@@ -286,7 +415,7 @@ class Model
 	{
 	  $this->sql['orderby']='';
 	}
-    $this->string="select ".$fields." from ".$this->tablename." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $this->string="select ".$fields." from `".$this->tablename."` ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$res=$this->DB['slaves']->query($this->string);	
 		$this->record=$res->fetchAll($returnobj); 
@@ -314,7 +443,7 @@ class Model
 public  function newRecord($data=array())
   {    
 	$this->data=array();
-	$this->getFillFields($data);
+	if(!empty($data)) $this->getFillFields($data);
 	if($this->autoid) unset($this->data[$this->PRI]);
 	return $this;
   }
@@ -425,7 +554,7 @@ public  function newRecord($data=array())
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
+	        $this->string="UPDATE `".$this->tablename."` set ".substr($sql,0,-1);
 			if($this->sql['where']=='')
 		    {
 			   if(isset($arglist[1][$this->PRI]))
@@ -450,7 +579,7 @@ public  function newRecord($data=array())
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
+	        $this->string="UPDATE `".$this->tablename."` set ".substr($sql,0,-1);
 			if(empty($this->sql['where']))
 		    {
 			   $this->where($this->PRI."='".$this->data[$this->PRI]."'");
@@ -468,7 +597,7 @@ public  function newRecord($data=array())
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
+	        $this->string="UPDATE `".$this->tablename."` set ".substr($sql,0,-1);
 			if(empty($this->sql['where']))
 		    {
 			   if(isset($arglist[0][$this->PRI]))
@@ -486,34 +615,37 @@ public  function newRecord($data=array())
 			  }
 		   }
 	 }elseif(is_object($arglist[0]))
-	 {
-	    $objectname=get_class($arglist[0]);
-		$objectname=substr($objectname,0,-5);
+	 {	   
 		$mapper='';
-		//关联更新
-		if(count($this->mapper)>0&&$objectname!='')
-		{
-		  $localfields='';
-		  foreach($this->mapper as $k=>$v)
-		  {
-		    if($v['TargetModel']==$objectname)
+		if(method_exists($arglist[0],getModel))
+		 {
+			$objectname='';
+			$objectname=$arglist[0]->getModel();
+		    //关联更新
+			if(count($this->mapper)>0&&$objectname!='')
 			{
-			  $mapper=$k;
-              $this->objsaveper($mapper);
-			  $t=$this->setMapperToData($mapper)->getlocalPRIFields($mapper,M($objectname)->PRI);
-			  if($t!='')
-			    $localfields.=$t.",";
+			  $localfields='';
+			  foreach($this->mapper as $k=>$v)
+			  {
+				if($v['TargetModel']==$objectname)
+				{
+				  $mapper=$k;
+				  $this->objsaveper($mapper);
+				  $t=$this->setMapperToData($mapper)->getlocalPRIFields($mapper,M($objectname)->PRI);
+				  if($t!='')
+					$localfields.=$t.",";
+				}
+			  }
+			  if($mapper!='')
+			  {
+				 if($localfields!='')
+				 {	 
+				   $localfields=substr($localfields,0,-1);
+				   $this->update($localfields);
+				 }
+			  }
 			}
-		  }
-          if($mapper!='')
-		  {
-			 if($localfields!='')
-			 {	 
-			   $localfields=substr($localfields,0,-1);
-			   $this->update($localfields);
-			 }
-		  }
-		}
+		}//
 		//if(in_array())
 		if($mapper=='')		
 		{
@@ -525,7 +657,7 @@ public  function newRecord($data=array())
 		  }
 		  if($sql!='')
 		   {
-	        $this->string="UPDATE ".$this->tablename." set ".substr($sql,0,-1);
+	        $this->string="UPDATE `".$this->tablename."` set ".substr($sql,0,-1);
 			if(empty($this->sql['where']))
 		    {
 			   if(isset($arrays[$this->PRI]))
@@ -666,11 +798,11 @@ public  function newRecord($data=array())
 	    $this->setData($id);
 		if(isset($this->data[$this->PRI])) $pkey=$this->PRI."='".$this->pkid()."'";
 	 }elseif(is_object($id)){
-		 if($id->modelname!=$this->modelname&&count($this->mapper)>0)
+		 if($id->getModel()!=$this->getModel()&&count($this->mapper)>0)
 	     {
 			foreach($this->mapper as $k=>$v)
 			{
-			  if($id->modelname==$v['TargetModel'])
+			  if($id->getModel()==$v['TargetModel'])
 			  {
                    $this->objsaveper($k);
 			       array_push($saveafter,$k);
@@ -747,7 +879,7 @@ public  function newRecord($data=array())
 		$pkey=true;
 	  }else
 	  {
-		$this->string="UPDATE ".$this->tablename." set ";
+		$this->string="UPDATE `".$this->tablename."` set ";
 		$i=0;
 		foreach($this->data as $key=>$value)
 		{
@@ -799,6 +931,7 @@ public  function newRecord($data=array())
   {
     $this->data=array();
 	$this->setData($data);
+	Return $this;
   }
   /*
   *返回主键值
@@ -814,7 +947,7 @@ public  function newRecord($data=array())
   function newSQL()
   {
     $this->sql=array();
-	$this->effectrow=false;
+	$this->effectrow=0;
 	return $this;
   }
   /*
@@ -840,7 +973,7 @@ public  function newRecord($data=array())
   function from($name='')
   {
     if($name==''){ 
-	   $this->sql['from']=$this->tablename;
+	   $this->sql['from']="`".$this->tablename."`";
 	}else{		
 		if(M($name)->getTableName()!=$this->tablename)
 		{
@@ -851,9 +984,9 @@ public  function newRecord($data=array())
 		  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 		  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 		  $this->sql['joinmodel']=M($name)->modelname.".";
-		  $this->sql['from']=$this->getDataBaseName().".".$this->tablename." as ".$this->modelname.",".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+		  $this->sql['from']="`".$this->getDataBaseName().".".$this->tablename."` as `".$this->modelname."`,`".M($name)->getDataBaseName().".".M($name)->getTableName()."` as ".M($name)->modelname;
 		}else
-		  $this->sql['from']=$this->tablename;
+		  $this->sql['from']="`".$this->tablename."`";
 	}
 	return $this;
   }
@@ -871,7 +1004,7 @@ public  function newRecord($data=array())
 	  $this->sql[M($name)->modelname."."]=M($name)->modelname.".";
 	  if($this->sql['joinmodel']!='') $this->sql['joinmodel'].="|";
 	  $this->sql['joinmodel']=M($name)->modelname.".";
-	  $this->sql['from'].=" LEFT JOIN ".M($name)->getDataBaseName().".".M($name)->getTableName()." as ".M($name)->modelname;
+	  $this->sql['from'].=" LEFT JOIN `".M($name)->getDataBaseName().".".M($name)->getTableName()."` as ".M($name)->modelname;
 	}else{
 	  $this->sql['isjoinleft']=true;
 	  $this->sql[$this->modelname.'.']=$this->tablename.".";
@@ -889,7 +1022,7 @@ public  function newRecord($data=array())
   */
   function joinon($name,$modelname='')
   {
-	$this->sql['from']=$this->sql['from']." ON ".$name;
+	$this->sql['from']="`".$this->sql['from']."` ON ".$name;
 	return $this;
   }
   /*
@@ -947,7 +1080,7 @@ public  function newRecord($data=array())
 		  }
 	  }
     if($str!='') $name=$str;
-	$this->sql['from']=$this->sql['from']." ON ".$name;
+	$this->sql['from']="`".$this->sql['from']."` ON ".$name;
 	return $this;
   }
   /*
@@ -1043,7 +1176,7 @@ public  function newRecord($data=array())
 	{
 	$fix=$num>0?'+':'-';
 	$num=abs($num);
-    $this->string="update ".$this->tablename." set "."`$colname`=`$colname`".$fix.$num." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
+    $this->string="update `".$this->tablename."` set "."`$colname`=`$colname`".$fix.$num." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'];	
 	try{
 		$this->effectrow=$this->DB['master']->exec($this->string);
 		$this->sql=array();
@@ -1062,7 +1195,7 @@ public  function newRecord($data=array())
   function preSQL() {
 	if(empty($this->sql['from']))
 	{
-	  $this->sql['from']=$this->tablename;
+	  $this->sql['from']="`".$this->tablename."`";
 	}
 	if(!isset($this->sql['where'])) $this->sql['where']=' where 1 ';
 	if(!isset($this->sql['groupby'])) $this->sql['groupby']='';
@@ -1077,7 +1210,7 @@ public  function newRecord($data=array())
     $pfields=$this->tablename.".*";
 	if(empty($this->sql['from']))
 	{
-	  $this->sql['from']=$this->tablename;
+	  $this->sql['from']="`".$this->tablename."`";
 	}
 	if(!isset($this->sql['where'])) $this->sql['where']=' where 1 ';
 	if(!isset($this->sql['groupby'])) $this->sql['groupby']='';
@@ -1194,7 +1327,7 @@ public  function newRecord($data=array())
 	if(is_numeric($id))
 	{
 	  $this->whereAnd($this->PRI."='".$id."'");
-	  $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
+	  $this->string="DELETE from `".$this->tablename."` ".$this->sql['where'].$this->sql['limit'];
 	  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
@@ -1205,8 +1338,7 @@ public  function newRecord($data=array())
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
 	}elseif(is_object($id)){
-		$objectname=get_class($id);
-		$objectname=substr($objectname,0,-5);
+		$objectname=$id->getModel();
 		$mapper='';
 		//关联删除
 		if(count($this->mapper)>0&&$objectname!='')
@@ -1224,16 +1356,33 @@ public  function newRecord($data=array())
 		}
 	}elseif(is_array($id)){
 	   $this->whereIn($this->PRI,implode(",",$id));	
-	}else{
+	}
+	  //如果没有参数时候删除主键值，并限制为一条,防止清空表数据
 	  if(empty($this->sql['where']))
 	  {
-		$this->where($this->PRI."='".$this->data[$this->PRI]."'");
+		if(isset($this->data[$this->PRI])){
+		$this->where($this->PRI."='".$this->data[$this->PRI]."'")->limit(1);
+		}else{
+		  $this->sql=array();
+		  return $this;
+		}
 	  }
-	}
-	      $this->string="DELETE from ".$this->tablename." ".$this->sql['where'].$this->sql['limit'];
+	
+	      $this->string="DELETE from `".$this->tablename."` ".$this->sql['where'].$this->sql['limit'];
 		  $this->sql=array();
 		  $this->effectrow=$this->DB['master']->exec($this->string);
 		  return $this;
+  }
+  /*
+  *
+  *
+  */
+  public function validData($vkey) {
+  	 $v=C("valid");
+	 Return $v->validData($this,$vkey);
+  }
+  public function showError() {
+  	Return C("valid")->getError();
   }
   /***
   *使用缓存
@@ -1248,7 +1397,7 @@ public  function newRecord($data=array())
   */
  public function isEffect()
   {
-    if($this->effectrow>1) return  $this->effectrow;
+    if($this->effectrow>0) return  $this->effectrow;
 	else false;
   }
   /*
@@ -1369,7 +1518,7 @@ public  function newRecord($data=array())
 	}
 	if(empty($this->sql['from']))
 	{
-	  $this->sql['from']=$this->tablename;
+	  $this->sql['from']="`".$this->tablename."`";
 	}
 	if(empty($this->sql['where']))
 	{
@@ -1380,7 +1529,7 @@ public  function newRecord($data=array())
 	if(!isset($this->sql['limit'])) $this->sql['limit']='';
     $this->string="select ".$pfields." from ".$this->sql['from']." ".$this->sql['where'].$this->sql['groupby'].$this->sql['orderby'].$this->sql['limit'];	
 	try{
-		$res=$this->DB['slaves']->query($this->string);	
+		$res=$this->DB['slaves']->query($this->string);
 		if($fetchobj=='FETCH_OBJ')
 		{
 		   $f=PDO::FETCH_OBJ;
@@ -1395,8 +1544,11 @@ public  function newRecord($data=array())
 		  Return $res->fetchAll(PDO::FETCH_INTO);
 		}elseif($fetchobj!=''&&class_exists($fetchobj,false)){
 		  Return $res->fetchAll(PDO::FETCH_CLASS,$fetchobj);
-		}else{		    
-		  $this->record=$res->fetchAll($f); 
+		}else{		
+		  if($res)
+			$this->record=$res->fetchAll($f); 
+		  else
+			$this->record=array();
 		  $this->objpoint=0;
 		  if(isset($this->record[0]))
 		   $this->data=$this->record[0];
@@ -1438,17 +1590,16 @@ public  function newRecord($data=array())
  public function selectFileds($fields,$modelname)
   {
      $tablename=M($modelname)->getTableName();
-	 $modelname=M($modelname)->modelname;
 	 $fields=explode(",",$fields);
 	 $selectfiled='';
      $numargs=count($fields);
 	 for ($i = 0; $i < $numargs; $i++) {
-        $selectfiled.=$modelname.".".$fields[$i].",";
+        $selectfiled.=$tablename.".".$fields[$i].",";
      }
 	 if($selectfiled!='')
 	   $selectfiled=substr($selectfiled, 0, -1);
 	 else
-	   $selectfiled=$modelname.".*";
+	   $selectfiled=$tablename.".*";
 	 $this->select($selectfiled);
 	 return $this;
   }
@@ -1923,10 +2074,10 @@ public  function newRecord($data=array())
 	}
 	if(strtolower(substr($name,0,3))=='get')
 	{
-	  $str=strtolower(substr($name,3));
-      if(isset($this->types[$str]))
+	  $str=substr($name,3);
+      if(isset($this->types[strtolower($str)]))
 	  {
-		return $this->data[$str];
+		return $this->data[$str]?$this->data[$str]:$this->data[strtolower($str)];
 	  }
 	}
 	if(substr($name,0,5)=='where')

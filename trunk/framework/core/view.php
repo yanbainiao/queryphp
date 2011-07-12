@@ -1,6 +1,7 @@
 <?php
 class view{
-  var $vvar=array();
+  public $vvar=array();
+  public $theme;
   protected $content;
   public function assign($name,$value=''){
         if(is_array($name)) {
@@ -11,6 +12,7 @@ class view{
         }else {
             $this->vvar[$name] = $value;
         }
+		Return $this;
     }
     public function get($name){
         if(isset($this->vvar[$name]))
@@ -22,12 +24,17 @@ class view{
 	public function display($viewfile='index',$display=true)
 	{
        $this->content=$this->fetch($viewfile);
-	   //ÊÓÍ¼×ÔÉí¹ýÂËÊä³öÄÚÈÝ
+	   //è§†å›¾è‡ªèº«è¿‡æ»¤è¾“å‡ºå†…å®¹
 	   $this->filter();
-	   //Ê¹ÓÃÂ·ÓÉÀà¹ýÂËÊä³öÄÚÈÝ,¾ÍÊÇÃ¿¸öÂ·ÓÉ¿ÉÒÔ×Ô¶¨ÒåÊä³öÄÚÈÝ¹ýÂË
+	   //ä½¿ç”¨è·¯ç”±ç±»è¿‡æ»¤è¾“å‡ºå†…å®¹,å°±æ˜¯æ¯ä¸ªè·¯ç”±å¯ä»¥è‡ªå®šä¹‰è¾“å‡ºå†…å®¹è¿‡æ»¤
 	   if(method_exists(R(C("router")->controller),"view_filter"))
 	   {
 	     $this->content=call_user_func(array(R(C("router")->controller),"view_filter"),$this->content);
+	   }
+	   //å®šä¹‰é™æ€ç”Ÿæˆæ–¹å¼
+	   if(isset($config['htmlcache']))
+	   {
+	     
 	   }
 	   if($display===true){
 		   echo $this->content;
@@ -38,9 +45,12 @@ class view{
     public function fetch($viewfile='',$display=false)
     {
 	    $content ="";
-		if(I("view")=='')
+		if(!I("view"))
 		{
-			if(file_exists(P("webprojectpath")."view/".$viewfile.".php"))
+			//æ£€æŸ¥æœ‰æ²¡æœ‰è‡ªå·±è®¾ç½®çš„ä¸»é¢˜
+			if(isset($GLOBALS['config']['theme'])&&file_exists($GLOBALS['config']['theme']."/".$viewfile.".php"))
+			   $viewfile=$GLOBAL['config']['theme']."/".$viewfile.".php";
+			elseif(file_exists(P("webprojectpath")."view/".$viewfile.".php"))
 			   $viewfile=P("webprojectpath")."view/".$viewfile.".php";
 			elseif(file_exists(P("webprojectpath")."view/".C("router")->controller."/".$viewfile.".php"))
 			   $viewfile=P("webprojectpath")."view/".C("router")->controller."/".$viewfile.".php";
