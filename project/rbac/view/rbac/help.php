@@ -1,0 +1,1 @@
+<img src="<?php echo url_project();?>images/rbac-1.jpg">

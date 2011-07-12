@@ -1,8 +1,11 @@
 ﻿配置
 framework/config/inc.ini.php 里面的数据库链接
 
+如果用到字体请把字体拷到config目录，现在字体已经置空了
 
 访问 test.php 或index.php文件
+比如rbac访问在
+http://www.xxx.com/project/rbac/rbac/index
 
 那么会默认访问 framework/router 
 里面的defaultRouter.class.php文件index方法

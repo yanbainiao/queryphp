@@ -1,15 +1,15 @@
 <?php 
  class booktypeBase extends model{ 
-   var $tablename='booktype';
- var $PRI='bookid';
- var $autoid=true;
- var $fields=array (
+   public $tablename='booktype';
+ public $PRI='bookid';
+ public $autoid=true;
+ public $fields=array (
   'bookid' => NULL,
   'supplyid' => '',
   'classname' => '',
   'typeid' => '',
 );
- var $types=array (
+ public $types=array (
   'bookid' => 'int(6)',
   'supplyid' => 'int(8)',
   'classname' => 'varchar(40)',

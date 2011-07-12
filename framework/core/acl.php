@@ -1,5 +1,4 @@
 <?php
-
 /*
 *访问控制基类，可以在router里面继承
 *
@@ -9,11 +8,14 @@ class acl {
   public $acldb=false;          //是否动态访问权限数据库
   public $aclid=array("all"=>0);
   public $pwd='';
-  public $date=array('begin'=>0,'end'=>0);
-  public $hours=array('begin'=>0,'end'=>0);
-  public $weeks=array('begin'=>0,'end'=>0);
-  public $roledisable=array(); //禁用表列
+  public $date=array();
+  public $hours=array();
+  public $weeks=array();
+  public $aclgroup=array(); //create需要的组才能创建
+  public $aclrole=array(); //create需要的角色才能创建,该组需要ID为6的角色才能访问
+  public $roledisable=array(); //禁用身份id
   public $error_method='';
+  public $ca='';//当前正在验证的方法
   /*
   *权限检查，测试
   *
@@ -31,8 +33,12 @@ class acl {
 	 if($this->acl[$action]==0){
 		 Return true; //如果设置了$action方法为0说明不用保护，就算all为512也不用保护 
   	 }
-     	if(isset($this->aclid[$action])&&in_array($this->aclid[$action],MY()->acl))
+	 $this->ca=$action;//保存当前action
+	//echo $action."|".$this->aclid[$action];
+	 //print_r(MY()->acl);
+     	if(isset($this->aclid[$action])&&!in_array($this->aclid[$action],MY()->acl))
 		 {
+
 		   $this->error=L(" 你没有权限 ");
 		   if(empty($this->error_method)){
 			  $this->error_method='noPassport';
@@ -91,7 +97,7 @@ class acl {
 	  */
 	  if($this->acl[$action]&8)
 	  {
-	     if(count(array_diff(explode(",",$this->aclrole['all'].",".$this->aclrole[$action]),MY()->group))==0)
+	     if(count(array_diff(explode(",",$this->aclrole[$action]),MY()->role))==0)
 		 {
 		   $mask=$mask+8;
 		 }else {
@@ -106,7 +112,7 @@ class acl {
 	  *
 	  ***/
 	  if($this->acl[$action]&16) {
-	  	if(count(array_intersect($this->roledisable,array_merge(MY()->array_multi2single(MY()->grouprole),MY()->role)))==0) {
+	  	if(is_array($this->roledisable[$action])&&count(array_intersect($this->roledisable[$action],array_merge(MY()->array_multi2single(MY()->grouprole),MY()->role)))==0) {
 	  		$mask=$mask+16;
 	  	}else {
 		 	$this->error.=L(" 你的身份被禁止访问 ");
@@ -165,7 +171,7 @@ class acl {
 	  *
 	  ***/
 	  if($this->acl[$action]&256) {
-	  	if(!empty($this->pwd)&&($this->pwd==MY()->modelpwd||$this->pwd==trim($_POST['requestpwd'])))
+	  	if(!empty($this->pwd[$action])&&($this->pwd[$action]==trim($_POST['requestpwd'])))
 		{
 		  $mask=$mask+256;
 		}else {
@@ -206,7 +212,7 @@ class acl {
   ***/
   public function checkVisitWeeks() {
   	$now=date("N");
-	if($this->weeks['begin']<=$now&&$now<=$this->weeks['end'])
+	if($this->weeks[$this->ca]['begin']<=$now&&$now<=$this->weeks[$this->ca]['end'])
 	Return true;
 	else {
 		Return false;
@@ -218,7 +224,7 @@ class acl {
   ***/
   public function checkVisitHours() {
   	$now=date("H");
-	if($this->hours['begin']<=$now&&$now<=$this->hours['end'])
+	if($this->hours[$this->ca]['begin']<=$now&&$now<=$this->hours[$this->ca]['end'])
 	Return true;
 	else {
 		Return false;
@@ -230,7 +236,7 @@ class acl {
   ***/
   public function checkVisitDate() {
   	$now=time();
-	if(strtotime($this->date['begin'])<$now&&$now<strtotime($this->date['end']))
+	if(strtotime($this->date[$this->ca]['begin'])<$now&&$now<strtotime($this->date[$this->ca]['end']))
 	Return true;
 	else {
 		Return false;

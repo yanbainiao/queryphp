@@ -4,15 +4,15 @@ class sendmailRouter extends controller{
   {
 	try {
 		$mail =C('PHPMailer');
-		$address = "88888@163.com";
+		$address = "huang@163.com";
 		$mail->IsSMTP(); // set mailer to use SMTP
-		$mail->Host = "ssl://smtp.gmail.com"; // specify main and backup server
-		$mail->Port = 465;
+		$mail->Host = "smtp.126.com"; // specify main and backup server
+		$mail->Port = 25;
 		$mail->SMTPAuth = true; // turn on SMTP authentication
-		$mail->Username = "8888"; // SMTP username
-		$mail->Password = "***"; // SMTP password
+		$mail->Username = "topce@126.com"; // SMTP username
+		$mail->Password = "*****"; // SMTP password
 
-		$mail->From = "8888@gmail.com";
+		$mail->From = "topce@126.com";
 		$mail->FromName = "邮件测试";
 		$mail->AddAddress("$address", "");
 		//$mail->AddAddress(""); // name is optional

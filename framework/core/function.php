@@ -1,8 +1,7 @@
 <?php
-
 /***
-*Ç°Ì¨URLº¯Êı
-*Êä³ö±¾ÏîÄ¿URLµØÖ·£¬¸ù¾İ$_SERVER["SCRIPT_NAME"]È¥µôindex.php»ò±ğµÄÎÄ¼şµÃ³ö
+*å‰å°URLå‡½æ•°
+*è¾“å‡ºæœ¬é¡¹ç›®URLåœ°å€ï¼Œæ ¹æ®$_SERVER["SCRIPT_NAME"]å»æ‰index.phpæˆ–åˆ«çš„æ–‡ä»¶å¾—å‡º
 ***/
 function PU($fix='/') {
  Return url_project($fix);	
@@ -13,7 +12,7 @@ function url_project($fix='/') {
   Return $GLOBALS['__PROJECT__'].$fix;	
 }
 /*
-*ÓÃ»§¶ÔÏñ·µ»Øº¯Êı
+*ç”¨æˆ·å¯¹åƒè¿”å›å‡½æ•°
 */
 function MY() {
 	if(isset($GLOBALS['myUser']))
@@ -23,11 +22,15 @@ function MY() {
 	$GLOBALS['myUser']=new myUser();
 	return $GLOBALS['myUser'];
 }
+//è¾“å‡ºé¡µå¤´
+function sendHeader($c='utf-8') {
+	header("Content-type: text/html; charset=".$c);
+}
 /*
-*Ìø×ªº¯Êı
+*è·³è½¬å‡½æ•°
 */
 function redirect($url,$msg,$second=0,$o=true) {
-	header("Content-type: text/html; charset=utf-8");
+	sendHeader();
     $str='<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="refresh" content="'.$second.';URL='.$url.'"></head><body>'.$msg.'</body></html>';
 	if($o){
 	  echo $str;exit;
@@ -35,7 +38,7 @@ function redirect($url,$msg,$second=0,$o=true) {
    Return $str;
 }
 /*
-*È¨ÏŞ¿ØÖÆº¯Êı
+*æƒé™æ§åˆ¶å‡½æ•°
 */
 function ACL($acl) {
    if(isset($GLOBALS[$acl."ACL"]))
@@ -49,23 +52,31 @@ function ACL($acl) {
 		}elseif(file_exists(P("modelpath")."router/acl/".$acl."ACL.class.php")){
 		   require_once P("modelpath")."router/acl/".$acl."ACL.class.php";	
 		}else{
+		  if (is_dir(P("webprojectpath")."../")) {
+				if ($dh = opendir($dir)) {
+					while (($file = readdir($dh)) !== false) {
+						echo "filename: $file : filetype: " . filetype($dir . $file) . "\n";
+					}
+					closedir($dh);
+				}
+			}
 		  Return false;
 		}	
 
      $t=$acl."ACL";
-	 $GLOBALS[$acl."DM"]=new $t();
-	 return $GLOBALS[$acl."DM"];
+	 $GLOBALS[$acl."ACL"]=new $t();
+	 return $GLOBALS[$acl."ACL"];
 }
 /*
-*ÓïÑÔÏÔÊ¾¿ÉÒÔ×Ô¶¯ÏÔÊ¾Ä¿±êÓïÑÔ
-*Ä¬ÈÏÊÇI('systemlanuage');
-*ĞèÒª×ª»»ÓïÑÔÊÇI('language');
+*è¯­è¨€æ˜¾ç¤ºå¯ä»¥è‡ªåŠ¨æ˜¾ç¤ºç›®æ ‡è¯­è¨€
+*é»˜è®¤æ˜¯I('systemlanuage');
+*éœ€è¦è½¬æ¢è¯­è¨€æ˜¯I('language');
 */
 function L($str,$model='') {
 	if(I('language')!=I('systemlanuage'))
 	{
 		 /*
-		 *ÔÚÕâÀïÈ¡µÃ»º´æ·­Òë½á¹ûÃ»ÓĞ¾Í·­Òë
+		 *åœ¨è¿™é‡Œå–å¾—ç¼“å­˜ç¿»è¯‘ç»“æœæ²¡æœ‰å°±ç¿»è¯‘
 		 */
 		$url = 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=' .
 			urlencode($str) . 
@@ -77,11 +88,11 @@ function L($str,$model='') {
 		{
 			$t = $j->responseData->translatedText;
 			 /*
-			 *ÔÚÕâÀï¿ªÊ¼×ö·­ÒëºÃµÄÎÄ±¾»º´æ
+			 *åœ¨è¿™é‡Œå¼€å§‹åšç¿»è¯‘å¥½çš„æ–‡æœ¬ç¼“å­˜
 			 */
 			 
 			 /*
-			 *½áÊø·­ÒëºÃµÄÎÄ¼ş»º´æ;
+			 *ç»“æŸç¿»è¯‘å¥½çš„æ–‡ä»¶ç¼“å­˜;
 			 */
 			 Return $t;
 		}
@@ -90,41 +101,47 @@ function L($str,$model='') {
 }
 
 /*
-*ÊÓÍ¼º¯Êı
+*è§†å›¾å‡½æ•°
 */
 function V() {
 	Return new view();
 }
 /*
-* ÎÄ¼şÃû°²È«´¦Àí
+* æ–‡ä»¶åå®‰å…¨å¤„ç†
 */
 function filepath_safe($name) {
     $except = array('\\',' ', '..', ':', '*', '?', '"', '<', '>', '|');
     return str_replace($except,'', $name);
 } 
 /*
-* ÎÄ¼şÃû°²È«´¦Àí
+* æ–‡ä»¶åå®‰å…¨å¤„ç†
 */
 function filename_safe($name) {
     $except = array('\\', '/', ':', '*', '?', '"', '<', '>', '|');
     return str_replace($except, '', $name);
 } 
 /*
-*¼ÓÈëÀà¿â
+*åŠ å…¥ç±»åº“
 */
 function import($libpath)
 {
    if(preg_match("|^@lib|i",$libpath))
    {
-     $libpath=str_replace(".","/",substr($libpath,4)).".class.php";
-	 if(checkrequire(P("webprojectpath")."lib".$libpath)) return true;
-	 if(checkrequire(P("frameworkpath")."lib".$libpath)) return true;
+     $p=str_replace(".","/",substr($libpath,4)).".class.php";
+	 if(checkrequire(P("webprojectpath")."lib".$p)) return true;
+	 if(checkrequire(P("frameworkpath")."lib".$p)) return true;
    }
    if(preg_match("|^@plugin|i",$libpath))
    {
-     $libpath=str_replace(".","/",substr($libpath,4)).".class.php";
-     if(checkrequire(P("webprojectpath")."plugin".$libpath)) return true;
-	 if(checkrequire(P("frameworkpath")."plugin".$libpath)) return true;
+     $p=str_replace(".","/",substr($libpath,7)).".class.php";
+     if(checkrequire(P("webprojectpath")."plugin".$p)) return true;
+	 if(checkrequire(P("frameworkpath")."plugin".$p)) return true;
+   }
+   if(preg_match("|^@plugin|i",$libpath))
+   {
+     $p=str_replace(".","/",substr($libpath,7)).".php";
+     if(checkrequire(P("webprojectpath")."plugin".$p)) return true;
+	 if(checkrequire(P("frameworkpath")."plugin".$p)) return true;
    }
 }
 /*
@@ -141,7 +158,7 @@ function checkrequire($files)
   }
 }
 /*
-*Êı¾İ¿âÁ´½ÓÉú³É
+*æ•°æ®åº“é“¾æ¥ç”Ÿæˆ
 */
 function pdoconnects($dsn,$connmodel)
 {    
@@ -153,22 +170,54 @@ function pdoconnects($dsn,$connmodel)
     }
 }
 /*
-*Êı¾İ¿âÁ´½Ó´¦Àí
+*æ•°æ®åº“é“¾æ¥å¤„ç†
 */
-function getConnect($table,$model=null,$connper=0)
+function getConnect($table,$model=null,$connper=0,$conn=null)
 {
 	 $tconn=array();
 	 if(!isset($GLOBALS['pdolinks'])) $GLOBALS['pdolinks']=array();
-	 if(is_array($GLOBALS['config']['pdoconn']))
+	 
+	 //ç›´æ¥è¿”å›æ¨¡å‹é“¾æ¥
+	 /*
+	 *  M("s.user");
+	 *  s.è¡¨ç¤ºä½¿ç”¨æ•°æ®åº“é“¾æ¥æ•°ç»„çš„keyå€¼ useræ˜¯æ¨¡å‹
+	 *  å¦‚:é…ç½®æ–‡ä»¶inc.ini.php
+	 *  $config['pdoconn']=array(
+	 *	'default'=>array("master"=>array //default æ˜¯é»˜è®¤ç¼ºçœé“¾æ¥
+	 *	's'=>array("master"=>array  //sç»„é“¾æ¥é›†åˆ,å› ä¸ºæœ‰äº›æ•°æ®åº“æ²¡æœ‰å‰è¾æ¯ä¸ªæ¨¡å‹è¦é…ç½®ä¸€ä¸ªé“¾æ¥å¾ˆéº»çƒ¦
+	 */
+	 if($conn!=null&&isset($GLOBALS['config']['pdoconn'][$conn]))
+	 {
+		$prand=rand(0,count($GLOBALS['config']['pdoconn'][$conn]["master"])-1);
+		$connmodel=md5(json_encode($GLOBALS['config']['pdoconn'][$conn]["master"][$prand]));
+		$table_fix=$GLOBALS['config']['pdoconn'][$conn]["master"][$prand]['table_fix'];
+		 if(isset($GLOBALS['pdolinks'][$connmodel]))
+		   $tconn['master']=$GLOBALS['pdolinks'][$connmodel];
+		 else
+		 {
+		   $tconn['master']=pdoconnects($GLOBALS['config']['pdoconn'][$conn]["master"][$prand],$connmodel);
+		 }
+		$prand=rand(0,count($GLOBALS['config']['pdoconn'][$conn]["slaves"])-1);
+		$connmodel=md5(json_encode($GLOBALS['config']['pdoconn'][$conn]["slaves"][$prand]));
+		 if(isset($GLOBALS['pdolinks'][$connmodel]))
+		   $tconn['slaves']=$GLOBALS['pdolinks'][$connmodel];
+		 else
+		 {
+		   $tconn['slaves']=pdoconnects($GLOBALS['config']['pdoconn'][$conn]["slaves"][$prand],$connmodel);
+		 }
+	 }
+	 
+	 //æ­£åˆ™å»æŸ¥è¯¢æ•°æ®åº“é“¾æ¥
+	 if(empty($tconn)&&is_array($GLOBALS['config']['pdoconn']))
 	 {
         foreach($GLOBALS['config']['pdoconn'] as $k=>$v)
 		{
-		  if($k==$model||preg_match("|".$k."|i",$table)||preg_match("|".$k."|i",$model))
+		  if(strlen($k)>3&&($k==$model||preg_match("|".$k."|i",$table)||preg_match("|".$k."|i",$model)))
 		  {
 			 $prand=rand(0,count($v["master"])-1);
 			 $connmodel=md5(json_encode($v["master"][$prand]));
 			 $table_fix=$v["master"][$prand]['table_fix'];
-			 if($GLOBALS['pdolinks'][$connmodel]!='')
+			 if(isset($GLOBALS['pdolinks'][$connmodel]))
 			   $tconn['master']=$GLOBALS['pdolinks'][$connmodel];
 			 else
 			 {
@@ -176,7 +225,7 @@ function getConnect($table,$model=null,$connper=0)
 			 }
 			$prand=rand(0,count($v["slaves"])-1);
 			$connmodel=md5(json_encode($v["slaves"][$prand]));
-			 if($GLOBALS['pdolinks'][$connmodel]!='')
+			 if(isset($GLOBALS['pdolinks'][$connmodel]))
 			   $tconn['slaves']=$GLOBALS['pdolinks'][$connmodel];
 			 else
 			 {
@@ -208,15 +257,15 @@ function getConnect($table,$model=null,$connper=0)
 	 }
 	 if($connper==1)
 	 {
-	   return array('master'=>$tconn['master'],'slaves'=>$tconn['slaves'],'table_fix'=>$table_fix);//¸ù¾İ$model·µ»ØÖ÷´Ó¾Í¿ÉÒÔÁË
+	   return array('master'=>$tconn['master'],'slaves'=>$tconn['slaves'],'table_fix'=>$table_fix);//æ ¹æ®$modelè¿”å›ä¸»ä»å°±å¯ä»¥äº†
 	 }else if($connper==0)
 	 {
-	   return array('master'=>$tconn['master'],'slaves'=>$tconn['master'],'table_fix'=>$table_fix);//¸ù¾İ$model·µ»ØÖ÷´Ó¾Í¿ÉÒÔÁË
+	   return array('master'=>$tconn['master'],'slaves'=>$tconn['master'],'table_fix'=>$table_fix);//æ ¹æ®$modelè¿”å›ä¸»ä»å°±å¯ä»¥äº†
 	 }
      
 }
 /*
-*P()È¡Â·¾¶º¯Êı£¬±ÈÈçlib plugin model view class
+*P()å–è·¯å¾„å‡½æ•°ï¼Œæ¯”å¦‚lib plugin model view class
 */
 function P($name)
 {
@@ -224,13 +273,13 @@ function P($name)
  else return $GLOBALS['config']["frameworkpath"];
 }
 /*
-*$config['key']Öµ´æÈ¡;
+*$config['key']å€¼å­˜å–;
 */
 function I($name)
 {
   return isset($GLOBALS['config'][$name])?$GLOBALS['config'][$name]:null;
 }
-//JÂ·ÓÉÌø×ª
+//Jè·¯ç”±è·³è½¬
 function J()
 {
    $arg = func_get_args();
@@ -267,8 +316,8 @@ function J()
 	}
 }
 /*
-*DMÊÇdatamodelÊı¾İÄ£ĞÍÀà
-*¾ÍÊÇÌáÊı¾İ¼¯ºÏÀà
+*DMæ˜¯datamodelæ•°æ®æ¨¡å‹ç±»
+*å°±æ˜¯ææ•°æ®é›†åˆç±»
 */
 function DM($newc) {
    if(isset($GLOBALS[$newc."DM"]))
@@ -287,7 +336,7 @@ function DM($newc) {
 	 return $GLOBALS[$newc."DM"];
 
 }
-//C´´½¨Àà
+//Cåˆ›å»ºç±»
 function C($class=null)
 {
    if($class==null) return null;
@@ -299,7 +348,7 @@ function C($class=null)
 	 return $GLOBALS[$class."class"];
    }
 }
-//RÎª´´½¨Router
+//Rä¸ºåˆ›å»ºRouter
 function R($router=null)
 {
    if($router==null) return null;
@@ -307,122 +356,118 @@ function R($router=null)
    if(isset($GLOBALS[$router]))
    {
      return $GLOBALS[$router];
-   }else{
-	 try{
-        $GLOBALS[$router]=new $router();
-	  }catch (PDOException $e) 
-      {
-        echo $e->getMessage();
-      }
-	 return $GLOBALS[$router];
+   }else{     
+	 return $GLOBALS[$router]=new $router();
    }
 }
-//MÎªµ÷ÓÃÀà¿âÄ£ĞÍ£¬µÚÒ»´Î¾Í¿ªÊ¼Éú³ÉÎÄ¼şÁË
+//Mä¸ºè°ƒç”¨ç±»åº“æ¨¡å‹ï¼Œç¬¬ä¸€æ¬¡å°±å¼€å§‹ç”Ÿæˆæ–‡ä»¶äº†
 function M($modelname=null,$tablename=null)
 {
+   $conn='';
+   $fix='';
+   if(strpos($modelname,'.'))
+   {
+	 list($conn,$modelname)=explode(".",$modelname);
+	 $fix=$conn."_";
+   }
+
    if($modelname==null) return null;
-   $table=$modelname."Model";
+   $table=$fix.$modelname;
    if(isset($GLOBALS[$table]))
    {
      return $GLOBALS[$table];
    }else{
 	 if(!empty($tablename))
 	   {
-		 initModelclass($modelname."Base",$tablename);
+		 initModelclass($modelname,$tablename,$conn);
 	   }
-     $GLOBALS[$table]=new $table();
+//å¦‚æœæ˜¯æ–°çš„æ¨¡å‹æ£€æŸ¥æ¨¡å‹æ–‡ä»¶
+//æ³¨æ„å…ˆåŒ…å«è¿™ä¸ªæ–‡ä»¶
+		   if(!file_exists(P("modelpath")."model/".$table.'Base.class.php')&&!file_exists(P("webprojectpath")."model/".$table.'Base.class.php'))
+			{			   
+			   initModelclass($modelname,$tablename,$conn);	
+			   clearstatcache();
+			}		
+			if(file_exists(P("webprojectpath")."model/".$table.'Base.class.php'))
+			{	
+			   require_once P("webprojectpath")."model/".$table.'Base.class.php';		
+			}elseif(file_exists(P("modelpath")."model/".$table.'Base.class.php')){
+			   require_once P("modelpath")."model/".$table.'Base.class.php';	
+			}
 
-	 return $GLOBALS[$table];
+		if(file_exists(P("webprojectpath")."model/".$table."Model.class.php"))
+		{
+		   require_once P("webprojectpath")."model/".$table."Model.class.php";
+		}elseif(file_exists(P("modelpath")."model/".$table."Model.class.php")){
+		   require_once P("modelpath")."model/".$table."Model.class.php";	
+		}else{	
+           $newmodelstr="<?php \nclass ".$table."Model extends ".$table."Base{ \n ";
+		   $newmodelstr.="  public \$modelname='".$modelname."';\n";
+		   $newmodelstr.="  public \$fix='".$conn."';\n";
+		   $newmodelstr.=" public \$mapper=array();\n";
+		   $newmodelstr.=" public \$maps;\n";
+		   $newmodelstr.=" public \$maparray=array();\n";
+           $newmodelstr.=" \n} \n?>";
+		   file_put_contents(P("modelpath")."model/".$table.'Model.class.php',$newmodelstr);
+
+		   require_once P("modelpath")."model/".$table.'Model.class.php';
+		}
+				   //ä¹Ÿæ£€æŸ¥ä¸‹åŸºç±»ä¿¡æ¯
+	 $modelname=$table."Model";
+     return $GLOBALS[$table]=new $modelname($conn);
    }
 }
-//³õÊ¼»¯»ù±¾ÀàÎÄ¼ş£¬ÎÄ¼ş¸ñÊ½¸ù¾İmysqlÊı¾İ¿â×Ô¶¯°Ñ½á¹¹Ğ´½øÈ¥
-function initModelclass($modelname,$tablename=null)
+//åˆå§‹åŒ–åŸºæœ¬ç±»æ–‡ä»¶ï¼Œæ–‡ä»¶æ ¼å¼æ ¹æ®mysqlæ•°æ®åº“è‡ªåŠ¨æŠŠç»“æ„å†™è¿›å»
+function initModelclass($modelname,$tablename=null,$conn=null)
 {
-   $fix=substr($modelname,-4);
    if($tablename==null) $tablename=$modelname;
-   if($fix=="Base") $modelname=substr($modelname,0,-4);
-   $string="DESCRIBE ".$tablename;	
+   $string="DESCRIBE `".$tablename."`";	
    
-   $DB=getConnect($tablename,$modelname);
+   $DB=getConnect($tablename,$modelname,0,$conn);
 	try{
-	    $res=$DB['master']->query($string);
-        $mate =$res->fetchAll(PDO::FETCH_ASSOC);  
+		$res=$DB['master']->query($string);
+	    $mate =$res->fetchAll(PDO::FETCH_ASSOC);  
 	} catch (PDOException $e) 
         {
            echo $e->getMessage();
         }
    if(is_array($mate))
 	 {
-	   $newmodelstr="<?php \n class ".$modelname."Base extends model{ \n ";
+	   //ç”ŸæˆåŸºç±»
+	   if($conn){ $table=$conn."_".$modelname;
+	   }else{ $table=$modelname; }
+	   $newmodelstr="<?php \n class ".$table."Base extends model{ \n ";
 	   $fields=array();
        $types=array();
-	   $newmodelstr.="  var \$tablename='".$tablename."';";
+	   $newmodelstr.="  public \$tablename='".$tablename."';";
 	   foreach($mate as $key=>$value)
 	   {
 		  $value['Field']=strtolower($value['Field']);
 	      if($value['Key']=='PRI')
 		   {
-             $newmodelstr.="\n var \$PRI='".$value['Field']."';";
+             $newmodelstr.="\n public \$PRI='".$value['Field']."';";
 	         if($value['Extra']=='auto_increment')
 			   {
-			     $newmodelstr.="\n var \$autoid=true;";
+			     $newmodelstr.="\n public \$autoid=true;";
 			   }else{
-			     $newmodelstr.="\n var \$autoid=false;";
+			     $newmodelstr.="\n public \$autoid=false;";
 			   }
 		   }
 		  $fields[$value['Field']]=$value['Default'];
 		  $types[$value['Field']]=$value['Type'];
 	   }
-	   $newmodelstr.="\n var \$fields=".var_export($fields,true).";";
-	   $newmodelstr.="\n var \$types=".var_export($types,true).";";
+	   $newmodelstr.="\n public \$fields=".var_export($fields,true).";";
+	   $newmodelstr.="\n public \$types=".var_export($types,true).";";
 	   $newmodelstr.="\n}\n?>";
 	 }
-	 file_put_contents(P("modelpath")."model/".$modelname.'Base.class.php',$newmodelstr);
+	 file_put_contents(P("modelpath")."model/".$table.'Base.class.php',$newmodelstr);
 }
 /*
-* ×Ô¶¯¼ÓÔØÀà
+* è‡ªåŠ¨åŠ è½½ç±»
 */
 function __autoload($class_name) {
-    $fix=substr($class_name,-5);
-	if($fix=='Model'){ //Ä£ĞÍÀàºóê¡£¬Ö÷ÒªÊÇÎªÁËnewµ½·ÇmodelÀà
-		$newc=substr($class_name,0,-5);		
-		if(file_exists(P("webprojectpath")."model/".$class_name.".class.php"))
-		{
-		   require_once P("webprojectpath")."model/".$class_name.".class.php";
-		   return;
-		}elseif(file_exists(P("modelpath")."model/".$class_name.".class.php")){
-		   require_once P("modelpath")."model/".$class_name.".class.php";	
-		   return;
-		}else{		   
-           $newmodelstr="<?php \nclass ".$newc."Model extends ".$newc."Base{ \n ";
-		   $newmodelstr.=" var \$mapper=array();\n";
-		   $newmodelstr.=" var \$maps;\n";
-		   $newmodelstr.=" var \$maparray=array();\n";
-           $newmodelstr.=" \n} \n?>";
-		   file_put_contents(P("modelpath")."model/".$newc.'Model.class.php',$newmodelstr);
-		   require_once P("modelpath")."model/".$newc.'Model.class.php';
-		   return;//¼Ó·µ»Ø×Ô¶¯ÍË³öÕâ¸öº¯Êı
-		}
-	}	
-	$fix=substr($class_name,-4);
-	if($fix=='Base'){ //Ä£ĞÍ»ù±¾Àà
-		$newc=substr($class_name,0,-4);
-		if(!file_exists(P("modelpath")."model/".$newc.'Base.class.php')&&!file_exists(P("webprojectpath")."model/".$newc.'Base.class.php'))
-		{		   
-		   initModelclass($newc);	
-		   clearstatcache();
-		}		
-		if(file_exists(P("webprojectpath")."model/".$newc.'Base.class.php'))
-		{		   
-		   require_once P("webprojectpath")."model/".$newc.'Base.class.php';		
-		   return;
-		}elseif(file_exists(P("modelpath")."model/".$newc.'Base.class.php')){
-		   require_once P("modelpath")."model/".$newc.'Base.class.php';	
-		   return;
-		}
-	}
 	$fix=substr($class_name,-6);
-	if($fix=='Router'){ //Â·ÓÉÎÄ¼ş
+	if($fix=='Router'){ //è·¯ç”±æ–‡ä»¶
 		$newc=substr($class_name,0,-6);
 		if(file_exists(P("webprojectpath")."router/".$newc."Router.class.php"))
 		{
@@ -467,7 +512,7 @@ function __autoload($class_name) {
 	  require_once P("frameworkpath").$class_name.'.php';
 	  return;
 	}
-	if(is_array($GLOBALS['config']['frameworklib']))
+	if(isset($GLOBALS['config']['frameworklib'])&&is_array($GLOBALS['config']['frameworklib']))
 	{
 	  foreach($GLOBALS['config']['frameworklib'] as $k=>$v)
 	  {
@@ -477,11 +522,27 @@ function __autoload($class_name) {
 		}
 	  }
 	}
+
+   if(isset($GLOBALS['config']['searchlib'])&&is_array($GLOBALS['config']['searchlib']))
+	{		
+	  foreach($GLOBALS['config']['searchlib'] as $v)
+	  {
+		 $t = new RecursiveDirectoryIterator($v);
+         foreach(new RecursiveIteratorIterator($t) as $file) {
+		   if(preg_match("@".$class_name."\.(class\.)?php$@i",$file)){ require_once $file; return; }
+		}
+	  }
+	}
+	throw new mylog(' autoload ['.$class_name.' no exists]',3002);
 }
 /*
-* URLº¯Êı£¬¿ÉÄÜÒª¿¼ÂÇµ½ruleMapsÉèÖÃµÄ ÒòÎªµØÖ·ÏÔÊ¾ÊÇ±ğÃû
-* ¶ÁÈ¡ruleMaps ºÍ³õÊ¼´«ÈëµÄ$controller
+* URLå‡½æ•°ï¼Œå¯èƒ½è¦è€ƒè™‘åˆ°ruleMapsè®¾ç½®çš„ å› ä¸ºåœ°å€æ˜¾ç¤ºæ˜¯åˆ«å
+* è¯»å–ruleMaps å’Œåˆå§‹ä¼ å…¥çš„$controller
 */
+function U() {
+	$arg_list = func_get_args();
+	Return call_user_func_array('url_for',$arg_list);	
+}
 function url_for()
 {
   $arg_list = func_get_args();
@@ -506,7 +567,7 @@ function url_for()
 	   $url='';
        $url=$_SERVER["SCRIPT_NAME"].$u;
 	}else{
-	  //Èç¹ûÊÇ¶¯Ì¬Ê¹ÓÃ$_SERVER["SCRIPT_NAME"]
+	  //å¦‚æœæ˜¯åŠ¨æ€ä½¿ç”¨$_SERVER["SCRIPT_NAME"]
 	  if($_SERVER["PATH_INFO"]=='/'&&!isset($GLOBALS['config']['html']))
 	  {
 	   $url=$_SERVER["SCRIPT_NAME"]."/".$arg_list[0];	   
@@ -519,7 +580,7 @@ function url_for()
 		  {
 		  }else{
 		   $url.=$GLOBALS['config']['html'];
-		   //°Ñ¾²Ì¬Ä¿Â¼²¹ÉÏ
+		   //æŠŠé™æ€ç›®å½•è¡¥ä¸Š
 		   if(isset($GLOBALS['config']['realhtml']))
 		   {
 			   $url=substr($_SERVER["REQUEST_URI"],0,strrpos($_SERVER["REQUEST_URI"],$_SERVER["PATH_INFO"])).$GLOBALS['config']['realhtml']."/".$arg_list[0].$GLOBALS['config']['html'];

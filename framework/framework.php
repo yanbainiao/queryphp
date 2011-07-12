@@ -1,6 +1,7 @@
 <?php
 //$iscacheconfig 如果定义了就是缓存，不定义就不使用缓存
 $config["frameworkpath"]=dirname(__FILE__)."/";
+$config['searchlib']=array();
 if(isset($iscacheconfig)&&$projectenv=='product'&&file_exists($config["frameworkpath"]."cache/".$config["webprojectname"]."config.cache.php"))
 {
   $config=array_merge(include($config["frameworkpath"]."cache/".$config["webprojectname"]."config.cache.php"),$config);
@@ -65,9 +66,10 @@ if (method_exists($router,$dispaths->action)) {
     //权限检查
 	$ispass=false;	
 	$viewmodel='';
-    if(method_exists($router,"isAcl"))
+    if(method_exists($router,"isAcl")||ACL($dispaths->controller))
     {
-	   $mask=$router->isAcl();
+	   if(method_exists($router,"isAcl"))
+		$mask=$router->isAcl();
 	   if(empty($mask)) $mask=$dispaths->controller;	   
        if($acl=ACL($mask))
 		{
@@ -84,26 +86,39 @@ if (method_exists($router,$dispaths->action)) {
 		{
 		  $viewmodel=$router->noAcl($mask);
 		}elseif(is_object($acl)){
-		  $acl->noAcl($mask);
+		  $viewmodel=$acl->noAcl($mask);
 		}
-	}else{
-		//call_user_func(array($router,$dispaths->action));
+		if(!empty($viewmodel))
+		{
+			echo $view->fetch($viewmodel);
+		}
+	}else{	
+		
+		$viewmodel='';
+		//检查有没有要前置执行方法
+		if (method_exists($router,"_pre")) {
+		  $ispass=true;
+		  $ispass=$router->_pre($dispaths->action);
+		}
 		//检查有没有要前置执行方法
 		if (method_exists($router,"pre_".$dispaths->action)) {
-		  $viewmodel=$router->{"pre_".$dispaths->action}();
+		  $ispass=true;
+		  $ispass=$router->{"pre_".$dispaths->action}();
 		}
-		if($viewmodel!==false) $viewmodel=$router->{$dispaths->action}();
+		if(empty($ispass)) $viewmodel=$router->{$dispaths->action}();
 		//检查有没有要后置执行方法
-		if(method_exists($router,"after_".$dispaths->action)) {
+		if(empty($ispass)&&method_exists($router,"after_".$dispaths->action)) {
 		   $router->{"after_".$dispaths->action}();
 		}
-	}
-	//如果$viewmodel有值就使用$viewmodel中的值设置视图
-	if(false!==$viewmodel&&'ajax'!=$viewmodel)
-	{
-		 $view->display(R($dispaths->controller)->view($dispaths->action));
-	}
-	
+		//如果$viewmodel有值就使用$viewmodel中的值设置视图
+		if(empty($viewmodel))
+		{
+			$view->display(R($dispaths->controller)->view($dispaths->action));
+		}elseif($viewmodel!='ajax')
+		{ //自定义的视图
+		  $view->display($viewmodel);
+		}
+	}	
 }else{
   header("HTTP/1.1 404 Not Found");
 }

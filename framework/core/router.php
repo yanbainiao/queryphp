@@ -238,13 +238,13 @@ class Router {
                 }
                 reset($_SERVER);
             }
-			if(0 !== strpos($pathInfo,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME']))&&dirname($_SERVER['SCRIPT_NAME'])!='/')
+			if(0 !== strpos($path,$_SERVER['SCRIPT_NAME'])&&0 === strpos($_SERVER["REDIRECT_URL"],dirname($_SERVER['SCRIPT_NAME']))&&dirname($_SERVER['SCRIPT_NAME'])!='/')
 			{
 			$path = substr($_SERVER["REDIRECT_URL"], strlen(dirname($_SERVER['SCRIPT_NAME'])));
 			}
         }
 		    //是否带有静态文件结尾形式
-			if(isset($GLOBALS['config']['html'])&&$GLOBALS['config']['html']!='')
+			if(isset($GLOBALS['config']['html']))
 			if(substr($path,-strlen($GLOBALS['config']['html']))==$GLOBALS['config']['html'])
 			{
 			  $path=substr($path,0,-strlen($GLOBALS['config']['html']));

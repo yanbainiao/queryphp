@@ -1,8 +1,7 @@
 <?php
  class defaultRouter extends controller {
  	public function index() {
- 		echo "Hello world!</BR>";
-		echo __FILE__;
+ 		echo "<a href='/'>反回首页!</a>";
 		Return false;
  	}
  } 
